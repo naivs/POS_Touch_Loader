@@ -330,7 +330,7 @@ public class Emulator extends javax.swing.JFrame {
                             jPanel2.paint(img.getGraphics());
 
                             try {
-                                ImageIO.write(img, "gif", new File("res/pic/" + i + "TCH_X" + subgroups[sg].getIndex() + ".GIF"));
+                                ImageIO.write(img, "gif", new File("resources/pic/" + i + "TCH_X" + subgroups[sg].getIndex() + ".GIF"));
                             } catch (IOException ex) {
 
                             }
@@ -524,6 +524,18 @@ public class Emulator extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
+                
+                try {
+                    File f = new File("resources/");
+                    
+                    for(File out : Arrays.asList(f.listFiles())) {
+                        System.out.println(out.getName());
+                    }
+                    System.out.println("\n" + System.getProperty("user.dir") + "\n\n");
+                } catch (Exception e) {
+                    
+                }
+                
                 new Emulator().setVisible(true);
             }
         });

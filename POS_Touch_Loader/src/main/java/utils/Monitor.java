@@ -1,6 +1,7 @@
 package utils;
 
 import data.Product;
+import gui.Emulator;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -34,7 +35,7 @@ public class Monitor extends javax.swing.JPanel {
         super();
 
         try {
-            ground = ImageIO.read(getClass().getResourceAsStream("resources/ground.gif"));
+            ground = ImageIO.read(new File("resources/ground.gif"));
         } catch (IOException e) {
             System.out.println("ground image or cell image read failed... " + e.getMessage());
         }

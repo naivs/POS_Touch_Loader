@@ -12,6 +12,7 @@
     </properties>
     <name>POS Touch Loader</name>
     <description>Program for configure POSes with touch screen </description>
+    
     <dependencies>
         <dependency>
             <groupId>jcifs</groupId>
@@ -50,12 +51,6 @@
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml-schemas</artifactId>
             <version>3.16</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.xmlbeans</groupId>
-                    <artifactId>xmlbeans</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
     </dependencies>
 </project>

@@ -525,16 +525,16 @@ public class Emulator extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 
-                try {
-                    File f = new File("resources/");
+                //try {
+                //   File f = new File("resources/");
                     
-                    for(File out : Arrays.asList(f.listFiles())) {
-                        System.out.println(out.getName());
-                    }
-                    System.out.println("\n" + System.getProperty("user.dir") + "\n\n");
-                } catch (Exception e) {
+                //    for(File out : Arrays.asList(f.listFiles())) {
+                //       System.out.println(out.getName());
+                //   }
+                //  System.out.println("\n" + System.getProperty("user.dir") + "\n\n");
+                //} catch (Exception e) {
                     
-                }
+                //}
                 
                 new Emulator().setVisible(true);
             }

@@ -5,21 +5,25 @@ import excel.Parser;
 import io.ConfigurationWriter;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import javax.imageio.ImageIO;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import network.Authorization;
 import utils.IndexDispatcher;
 import utils.Monitor;
 
@@ -29,9 +33,8 @@ import utils.Monitor;
  */
 public class Emulator extends javax.swing.JFrame {
 
-    private TerminalGroup terminalGroup;
+    private final List<TerminalGroup> terminalGroups = new ArrayList<>();
     private final IndexDispatcher idisp = new IndexDispatcher();
-    private Parser parser;
 
     private final ButtonGroup dayButtons = new ButtonGroup();
     private final DefaultComboBoxModel comboBoxModel = new DefaultComboBoxModel();
@@ -71,8 +74,11 @@ public class Emulator extends javax.swing.JFrame {
         jButton1 = new javax.swing.JButton();
         jPanel2 = new Monitor();
         jLabel1 = new javax.swing.JLabel();
+        jTextField2 = new javax.swing.JTextField();
+        jTextField3 = new javax.swing.JTextField();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
+        jMenuItem2 = new javax.swing.JMenuItem();
         jMenuItem1 = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
         jRadioButtonMenuItem1 = new javax.swing.JRadioButtonMenuItem();
@@ -85,9 +91,9 @@ public class Emulator extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Emulator");
-        setMaximumSize(new java.awt.Dimension(800, 600));
-        setMinimumSize(new java.awt.Dimension(800, 600));
-        setSize(new java.awt.Dimension(800, 600));
+        setMinimumSize(new java.awt.Dimension(855, 500));
+        setPreferredSize(new java.awt.Dimension(855, 500));
+        setSize(new java.awt.Dimension(855, 500));
 
         jComboBox1.setModel(comboBoxModel);
         jComboBox1.setMinimumSize(new java.awt.Dimension(259, 25));
@@ -158,7 +164,23 @@ public class Emulator extends javax.swing.JFrame {
 
         jLabel1.setForeground(new java.awt.Color(204, 0, 0));
 
+        jTextField2.setBackground(new java.awt.Color(255, 51, 51));
+        jTextField2.setText("Кассовые группы созданы");
+        jTextField2.setFocusable(false);
+
+        jTextField3.setBackground(new java.awt.Color(255, 51, 51));
+        jTextField3.setText("Файлы загружены");
+        jTextField3.setFocusable(false);
+
         jMenu1.setText("Файл");
+
+        jMenuItem2.setText("Кассовые отделы");
+        jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem2ActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItem2);
 
         jMenuItem1.setText("Открыть файл .xlsx");
         jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
@@ -237,18 +259,25 @@ public class Emulator extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel1)
-                        .addGap(103, 103, 103))))
+                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jLabel1)
+                                .addGap(103, 103, 103))))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -260,7 +289,11 @@ public class Emulator extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel1))
                     .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(151, Short.MAX_VALUE))
         );
 
         pack();
@@ -280,7 +313,7 @@ public class Emulator extends javax.swing.JFrame {
             File file = new File(fileChooser.getSelectedFile().getAbsolutePath());
 
             try {
-                parser = new Parser(file);
+                Parser parser = new Parser(file);
 
                 // reading all products
                 ArrayList<String> terminals = new ArrayList();
@@ -324,7 +357,7 @@ public class Emulator extends javax.swing.JFrame {
 
                         // save subgroup picture
                         for (int sg = 0; sg < subgroups.length; sg++) {
-                            
+
                             ((Monitor) jPanel2).display(subgroups[sg].getProducts());
                             BufferedImage img = new BufferedImage(jPanel2.getWidth(), jPanel2.getHeight(), BufferedImage.TYPE_INT_ARGB);
                             jPanel2.paint(img.getGraphics());
@@ -465,7 +498,7 @@ public class Emulator extends javax.swing.JFrame {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
 
         if (!jTextField1.getText().trim().isEmpty()) {
-            
+
             String[] terminals = jTextField1.getText().trim().split(",");
             terminalGroup.addAllTerminals(terminals);
 
@@ -493,6 +526,21 @@ public class Emulator extends javax.swing.JFrame {
             jLabel1.setText("Введите номера касс");
         }
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
+        tgManager();
+    }//GEN-LAST:event_jMenuItem2ActionPerformed
+
+    private void tgManager() {
+        TGManager manager = new TGManager(this, true, (ArrayList) terminalGroups);
+        manager.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosed(java.awt.event.WindowEvent e) {
+                
+            }
+        });
+        manager.setVisible(true);
+    }
 
     /**
      * @param args the command line arguments
@@ -524,18 +572,16 @@ public class Emulator extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                
+
+                //Authorization.check_connection("10.61.0.4", Authorization.USERNAME, "r1001k");
                 //try {
                 //   File f = new File("resources/");
-                    
                 //    for(File out : Arrays.asList(f.listFiles())) {
                 //       System.out.println(out.getName());
                 //   }
                 //  System.out.println("\n" + System.getProperty("user.dir") + "\n\n");
                 //} catch (Exception e) {
-                    
                 //}
-                
                 new Emulator().setVisible(true);
             }
         });
@@ -550,6 +596,7 @@ public class Emulator extends javax.swing.JFrame {
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem1;
@@ -561,5 +608,7 @@ public class Emulator extends javax.swing.JFrame {
     private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem8;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextField jTextField1;
+    private javax.swing.JTextField jTextField2;
+    private javax.swing.JTextField jTextField3;
     // End of variables declaration//GEN-END:variables
 }

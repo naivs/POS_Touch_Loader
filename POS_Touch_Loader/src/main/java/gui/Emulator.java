@@ -1,29 +1,48 @@
+/*
+ * Copyright (C) 2017 Ivan Naumov
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package gui;
 
 import data.*;
 import excel.Parser;
+import io.ConfigurationReader;
 import io.ConfigurationWriter;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import javax.imageio.ImageIO;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
+import javax.swing.JButton;
 import javax.swing.JFileChooser;
+import javax.swing.JMenu;
+import javax.swing.JRadioButtonMenuItem;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.xml.transform.TransformerException;
 import network.Authorization;
+import org.xml.sax.SAXException;
 import utils.IndexDispatcher;
 import utils.Monitor;
 
@@ -33,28 +52,50 @@ import utils.Monitor;
  */
 public class Emulator extends javax.swing.JFrame {
 
-    private final List<TerminalGroup> terminalGroups = new ArrayList<>();
-    private final IndexDispatcher idisp = new IndexDispatcher();
-
-    private final ButtonGroup dayButtons = new ButtonGroup();
-    private final DefaultComboBoxModel comboBoxModel = new DefaultComboBoxModel();
-    private final DefaultListModel listModel = new DefaultListModel();
-
-    private int dayOfWeek = 0;
+    private JButton[] touch = new JButton[8];
+    private int level = 2;
+    private List<JMenu> groupsMenu = new ArrayList<>();
+    private List<JRadioButtonMenuItem> daysButtons = new ArrayList<>();
+    private final ButtonGroup dayButtonsGroup = new ButtonGroup();
+    
+    private List<TerminalGroup> terminalGroups;
+    private int selectedTermGroup;
+    private int selectedDay;
+    private int selectedGroup;
 
     /**
      * Creates new form Emulator
      */
     public Emulator() {
+        terminalGroups = new ArrayList<>();
+        try {
+            terminalGroups = new ConfigurationReader().read();
+        } catch (SAXException e) {
+            // empty or corrupted
+            System.err.println(e.getMessage() + "\nФайл: \"resources/configuration.xml\" пуст или поврежден. Будет создана новая конфигурация");
+            tgManager();
+        } catch (IOException e) {
+            // no file
+            System.err.println(e.getMessage());
+            try {
+                new File("resources/configuration.xml").createNewFile();
+            } catch (IOException ex) {
+                System.err.println("Неудается создать файл: \"resources/configuration.xml\"");
+            }
+        }
+        
         initComponents();
-
-        dayButtons.add(jRadioButtonMenuItem1);
-        dayButtons.add(jRadioButtonMenuItem2);
-        dayButtons.add(jRadioButtonMenuItem3);
-        dayButtons.add(jRadioButtonMenuItem4);
-        dayButtons.add(jRadioButtonMenuItem5);
-        dayButtons.add(jRadioButtonMenuItem7);
-        dayButtons.add(jRadioButtonMenuItem8);
+        
+        touch[0] = jButton1;
+        touch[1] = jButton2;
+        touch[2] = jButton3;
+        touch[3] = jButton4;
+        touch[4] = jButton5;
+        touch[5] = jButton6;
+        touch[6] = jButton7;
+        touch[7] = jButton8;
+        
+        update();
     }
 
     /**
@@ -66,56 +107,94 @@ public class Emulator extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jPanel1 = new javax.swing.JPanel();
-        jComboBox1 = new javax.swing.JComboBox();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jList1 = new javax.swing.JList();
-        jTextField1 = new javax.swing.JTextField();
-        jButton1 = new javax.swing.JButton();
-        jPanel2 = new Monitor();
         jLabel1 = new javax.swing.JLabel();
-        jTextField2 = new javax.swing.JTextField();
-        jTextField3 = new javax.swing.JTextField();
+        jPanel1 = new javax.swing.JPanel();
+        jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
+        jButton3 = new javax.swing.JButton();
+        jButton4 = new javax.swing.JButton();
+        jButton5 = new javax.swing.JButton();
+        jButton6 = new javax.swing.JButton();
+        jButton7 = new javax.swing.JButton();
+        jButton8 = new javax.swing.JButton();
+        jPanel3 = new javax.swing.JPanel();
+        jPanel2 = new Monitor();
+        jButton9 = new javax.swing.JButton();
+        jPanel4 = new javax.swing.JPanel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenuItem2 = new javax.swing.JMenuItem();
         jMenuItem1 = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
-        jRadioButtonMenuItem1 = new javax.swing.JRadioButtonMenuItem();
-        jRadioButtonMenuItem2 = new javax.swing.JRadioButtonMenuItem();
-        jRadioButtonMenuItem3 = new javax.swing.JRadioButtonMenuItem();
-        jRadioButtonMenuItem4 = new javax.swing.JRadioButtonMenuItem();
-        jRadioButtonMenuItem7 = new javax.swing.JRadioButtonMenuItem();
-        jRadioButtonMenuItem8 = new javax.swing.JRadioButtonMenuItem();
-        jRadioButtonMenuItem5 = new javax.swing.JRadioButtonMenuItem();
+        jMenu3 = new javax.swing.JMenu();
+        jMenuItem3 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Emulator");
-        setMinimumSize(new java.awt.Dimension(855, 500));
-        setPreferredSize(new java.awt.Dimension(855, 500));
-        setSize(new java.awt.Dimension(855, 500));
+        setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        setResizable(false);
+        setSize(new java.awt.Dimension(600, 500));
 
-        jComboBox1.setModel(comboBoxModel);
-        jComboBox1.setMinimumSize(new java.awt.Dimension(259, 25));
-        jComboBox1.setPreferredSize(new java.awt.Dimension(259, 25));
-        jComboBox1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jComboBox1ActionPerformed(evt);
-            }
-        });
+        jLabel1.setForeground(new java.awt.Color(204, 0, 0));
 
-        jList1.setModel(listModel);
-        jList1.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
-            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
-                jList1ValueChanged(evt);
-            }
-        });
-        jScrollPane1.setViewportView(jList1);
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Меню"));
 
-        jButton1.setText("upload");
+        jButton1.setBackground(new java.awt.Color(0, 102, 0));
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
+            }
+        });
+
+        jButton2.setBackground(new java.awt.Color(0, 102, 0));
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
+        jButton3.setBackground(new java.awt.Color(0, 102, 0));
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
+
+        jButton4.setBackground(new java.awt.Color(0, 102, 0));
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
+
+        jButton5.setBackground(new java.awt.Color(0, 102, 0));
+        jButton5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton5ActionPerformed(evt);
+            }
+        });
+
+        jButton6.setBackground(new java.awt.Color(0, 102, 0));
+        jButton6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton6ActionPerformed(evt);
+            }
+        });
+
+        jButton7.setBackground(new java.awt.Color(0, 102, 0));
+        jButton7.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton7ActionPerformed(evt);
+            }
+        });
+
+        jButton8.setBackground(new java.awt.Color(0, 102, 0));
+        jButton8.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton8ActionPerformed(evt);
             }
         });
 
@@ -126,53 +205,136 @@ public class Emulator extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1)
-                    .addComponent(jTextField1)
-                    .addComponent(jComboBox1, 0, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jButton1)
-                .addGap(83, 83, 83))
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addComponent(jButton7, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 170, Short.MAX_VALUE)
+                        .addComponent(jButton6, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButton5, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButton4, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButton3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButton2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButton8, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
+
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jButton2, jButton3, jButton4, jButton5, jButton6, jButton7});
+
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jButton1)
-                .addContainerGap())
+                .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton7, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton8, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
+        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Ассортимент"));
+        jPanel3.setToolTipText("");
+
+        jPanel2.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED));
         jPanel2.setPreferredSize(new java.awt.Dimension(555, 384));
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 555, Short.MAX_VALUE)
+            .addGap(0, 551, Short.MAX_VALUE)
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 384, Short.MAX_VALUE)
+            .addGap(0, 380, Short.MAX_VALUE)
         );
 
-        jLabel1.setForeground(new java.awt.Color(204, 0, 0));
+        jButton9.setBackground(new java.awt.Color(255, 51, 51));
+        jButton9.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        jButton9.setText("Назад");
+        jButton9.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton9ActionPerformed(evt);
+            }
+        });
 
-        jTextField2.setBackground(new java.awt.Color(255, 51, 51));
-        jTextField2.setText("Кассовые группы созданы");
-        jTextField2.setFocusable(false);
+        jPanel4.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
-        jTextField3.setBackground(new java.awt.Color(255, 51, 51));
-        jTextField3.setText("Файлы загружены");
-        jTextField3.setFocusable(false);
+        jLabel2.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        jLabel2.setPreferredSize(new java.awt.Dimension(23, 15));
 
-        jMenu1.setText("Файл");
+        jLabel3.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        jLabel3.setPreferredSize(new java.awt.Dimension(23, 15));
+
+        jLabel4.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        jLabel4.setPreferredSize(new java.awt.Dimension(23, 15));
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 353, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jPanel4Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel2, jLabel3, jLabel4});
+
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jPanel4Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jLabel2, jLabel3, jLabel4});
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jButton9, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jButton9, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jMenu1.setText("Главное меню");
 
         jMenuItem2.setText("Кассовые отделы");
         jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
@@ -182,7 +344,7 @@ public class Emulator extends javax.swing.JFrame {
         });
         jMenu1.add(jMenuItem2);
 
-        jMenuItem1.setText("Открыть файл .xlsx");
+        jMenuItem1.setText("Выгрузить на сервер...");
         jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuItem1ActionPerformed(evt);
@@ -192,66 +354,15 @@ public class Emulator extends javax.swing.JFrame {
 
         jMenuBar1.add(jMenu1);
 
-        jMenu2.setText("День недели");
-
-        jRadioButtonMenuItem1.setSelected(true);
-        jRadioButtonMenuItem1.setText("Понедельник");
-        jRadioButtonMenuItem1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButtonMenuItem1ActionPerformed(evt);
-            }
-        });
-        jMenu2.add(jRadioButtonMenuItem1);
-
-        jRadioButtonMenuItem2.setText("Вторник");
-        jRadioButtonMenuItem2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButtonMenuItem2ActionPerformed(evt);
-            }
-        });
-        jMenu2.add(jRadioButtonMenuItem2);
-
-        jRadioButtonMenuItem3.setText("Среда");
-        jRadioButtonMenuItem3.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButtonMenuItem3ActionPerformed(evt);
-            }
-        });
-        jMenu2.add(jRadioButtonMenuItem3);
-
-        jRadioButtonMenuItem4.setText("Четверг");
-        jRadioButtonMenuItem4.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButtonMenuItem4ActionPerformed(evt);
-            }
-        });
-        jMenu2.add(jRadioButtonMenuItem4);
-
-        jRadioButtonMenuItem7.setText("Пятница");
-        jRadioButtonMenuItem7.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButtonMenuItem7ActionPerformed(evt);
-            }
-        });
-        jMenu2.add(jRadioButtonMenuItem7);
-
-        jRadioButtonMenuItem8.setText("Суббота");
-        jRadioButtonMenuItem8.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButtonMenuItem8ActionPerformed(evt);
-            }
-        });
-        jMenu2.add(jRadioButtonMenuItem8);
-
-        jRadioButtonMenuItem5.setText("Воскресенье");
-        jRadioButtonMenuItem5.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButtonMenuItem5ActionPerformed(evt);
-            }
-        });
-        jMenu2.add(jRadioButtonMenuItem5);
-
+        jMenu2.setText("Кассовый отдел...");
         jMenuBar1.add(jMenu2);
+
+        jMenu3.setText("Справка");
+
+        jMenuItem3.setText("О программе");
+        jMenu3.add(jMenuItem3);
+
+        jMenuBar1.add(jMenu3);
 
         setJMenuBar(jMenuBar1);
 
@@ -260,226 +371,84 @@ public class Emulator extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jLabel1)
-                                .addGap(103, 103, 103))))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabel1)
+                .addGap(256, 256, 256))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel1))
-                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(151, Short.MAX_VALUE))
+                .addGap(291, 291, 291)
+                .addComponent(jLabel1))
+            .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
-        pack();
+        setSize(new java.awt.Dimension(816, 601));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
-
-        // choose file configuration
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setCurrentDirectory(new java.io.File("./"));
-        fileChooser.setFileFilter(new FileNameExtensionFilter("Файлы Microsoft Excel 2007*", "xlsx"));
-
-        int ret = fileChooser.showDialog(this, "Открыть файл Excel...");
-
-        if (ret == JFileChooser.APPROVE_OPTION) {
-            File file = new File(fileChooser.getSelectedFile().getAbsolutePath());
-
-            try {
-                Parser parser = new Parser(file);
-
-                // reading all products
-                ArrayList<String> terminals = new ArrayList();
-                terminals.addAll(Arrays.asList(jTextField1.getText().split(", ")));
-                terminalGroup = new TerminalGroup("default", terminals);
-
-                DayOfWeek[] days = terminalGroup.getDaysOfWeek();
-
-                for (int i = 0; i < days.length; i++) {
-
-                    // reading groups name. It same for any day.
-                    Group[] groups = new Group[8];
-
-                    int k = 0;
-                    for (String name : parser.getGroupsNames()) {
-                        groups[k] = new Group(name);
-                        k++;
-                    }
-
-                    for (int j = 0; j < groups.length; j++) {
-                        ArrayList<Product> products = new ArrayList();
-
-                        for (String name : parser.getProducts(i, j)) {
-                            products.add(new Product(name.split("::")[1], name.split("::")[0], "", Collections.EMPTY_LIST));
-                        }
-
-                        Subgroup[] subgroups;
-                        if (products.size() % 20 > 0) {
-                            subgroups = new Subgroup[(products.size() / 20) + 1];
-                        } else {
-                            subgroups = new Subgroup[products.size() / 20];
-                        }
-
-                        for (int s = 0; s < subgroups.length; s++) {
-                            subgroups[s] = new Subgroup(s + 1 + ") ", idisp.getNextFreeIndex(i), Collections.EMPTY_LIST);
-                        }
-
-                        for (int g = 0; g < products.size(); g++) {
-                            subgroups[g / 20].addProduct(products.get(g));
-                        }
-
-                        // save subgroup picture
-                        for (int sg = 0; sg < subgroups.length; sg++) {
-
-                            ((Monitor) jPanel2).display(subgroups[sg].getProducts());
-                            BufferedImage img = new BufferedImage(jPanel2.getWidth(), jPanel2.getHeight(), BufferedImage.TYPE_INT_ARGB);
-                            jPanel2.paint(img.getGraphics());
-
-                            try {
-                                ImageIO.write(img, "gif", new File("resources/pic/" + i + "TCH_X" + subgroups[sg].getIndex() + ".GIF"));
-                            } catch (IOException ex) {
-
+    private void update() {
+        jMenu2.removeAll();
+        for(int i = 0; i < terminalGroups.size(); i++) {
+            groupsMenu.add(new JMenu(terminalGroups.get(i).toString()));
+            jMenu2.add(groupsMenu.get(i));
+            
+            for(int j = 0; j < terminalGroups.get(i).getDaysOfWeek().length; j++) {
+                JRadioButtonMenuItem jrmi = new JRadioButtonMenuItem(terminalGroups.get(i).getDaysOfWeek()[j].toString());
+                daysButtons.add(jrmi);
+                groupsMenu.get(i).add(jrmi);
+                dayButtonsGroup.add(jrmi);
+                jrmi.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        int number = -1;
+                        for (int i = 0; i < daysButtons.size(); i++) {
+                            if (e.getSource().equals(daysButtons.get(i))) {
+                                number = i;
                             }
                         }
-                        // =====================
-
-                        for (Subgroup sgrp : subgroups) {
-                            groups[j].addSubgroup(sgrp);
-                        }
+                        selectedTermGroup = number / 7;
+                        selectedDay = number % 7;
+                        setButtonsLabels();
                     }
-
-                    for (Group grp : groups) {
-                        days[i].addGroup(grp);
-                    }
-                }
-
-                jRadioButtonMenuItem1.doClick();
-
-            } catch (FileNotFoundException ex) {
-                System.err.println("File not found");
-            } catch (IOException ex) {
-                System.err.println("Other IO Exception");
+                });
             }
-
-            //jRadioButtonMenuItem1.setSelected(true);
         }
+    }
+    
+    private void setButtonsLabels() {
+        if (level == 2) {
+            jLabel2.setText("Кассовый отдел: " + terminalGroups.get(selectedTermGroup).toString());
+            jLabel3.setText("День: " + terminalGroups.get(selectedTermGroup).getDaysOfWeek()[selectedDay].toString());
+            String[] groupNames = terminalGroups.get(selectedTermGroup).getDaysOfWeek()[selectedDay].getGroupsAsStringArray();
+            for (int i = 0; i < touch.length; i++) {
+                touch[i].setText("<html>" + groupNames[i].replaceAll("::", "<br>") + "</html>");
+            }
+        } else {
+            String[] subgroupNames = terminalGroups.get(selectedTermGroup).getDaysOfWeek()[selectedDay].getGroup(selectedGroup).getSubgroupsAsStringArray();
+            for (int i = 0; i < subgroupNames.length; i++) {
+                touch[i].setText(subgroupNames[i]);
+            }
+        }
+    }
+    
+    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
+        Uploader uploader = new Uploader(this, true, (ArrayList) terminalGroups);
+            uploader.addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowClosed(java.awt.event.WindowEvent e) {
+
+                }
+            });
+            uploader.setVisible(true);
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
-    private void jRadioButtonMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItem1ActionPerformed
-
-        dayOfWeek = 0;
-        changeDay();
-    }//GEN-LAST:event_jRadioButtonMenuItem1ActionPerformed
-
-    private void changeDay() {
-
-        for (String group : terminalGroup.getDaysOfWeek()[dayOfWeek].getGroupsAsStringArray()) {
-            comboBoxModel.addElement(group);
-        }
-
-        jComboBox1.setSelectedIndex(0);
-    }
-
-    private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
-
-        listModel.clear();
-
-        String[] sgNames = terminalGroup.getDaysOfWeek()[dayOfWeek].getGroup(jComboBox1.getSelectedIndex()).getSubgroupsAsStringArray();
-
-        for (String sgrp : sgNames) {
-            if (sgrp != null) {
-                listModel.addElement(sgrp);
-            }
-        }
-    }//GEN-LAST:event_jComboBox1ActionPerformed
-
-    private void jList1ValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_jList1ValueChanged
-
-        if (!evt.getValueIsAdjusting() && jList1.getSelectedIndex() != -1) {
-            int day = dayOfWeek;
-            int group = jComboBox1.getSelectedIndex();
-            int subgroup = jList1.getSelectedIndex();
-
-            Product[] products = terminalGroup.getDaysOfWeek()[day].getGroup(group).getSubgroup(subgroup).getProducts();
-            ((Monitor) jPanel2).display(products);
-
-            System.out.println("\n====================");
-
-            for (int i = 0; i < products.length; i++) {
-                if (products[i] != null) {
-                    System.out.println(i + 1 + ") " + products[i].getName() + " - " + products[i].getPlu());
-                }
-            }
-
-            System.out.println("====================");
-        }
-    }//GEN-LAST:event_jList1ValueChanged
-
-    private void jRadioButtonMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItem2ActionPerformed
-
-        dayOfWeek = 1;
-        changeDay();
-    }//GEN-LAST:event_jRadioButtonMenuItem2ActionPerformed
-
-    private void jRadioButtonMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItem3ActionPerformed
-
-        dayOfWeek = 2;
-        changeDay();
-    }//GEN-LAST:event_jRadioButtonMenuItem3ActionPerformed
-
-    private void jRadioButtonMenuItem4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItem4ActionPerformed
-
-        dayOfWeek = 3;
-        changeDay();
-    }//GEN-LAST:event_jRadioButtonMenuItem4ActionPerformed
-
-    private void jRadioButtonMenuItem7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItem7ActionPerformed
-
-        dayOfWeek = 4;
-        changeDay();
-    }//GEN-LAST:event_jRadioButtonMenuItem7ActionPerformed
-
-    private void jRadioButtonMenuItem8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItem8ActionPerformed
-
-        dayOfWeek = 5;
-        changeDay();
-    }//GEN-LAST:event_jRadioButtonMenuItem8ActionPerformed
-
-    private void jRadioButtonMenuItem5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItem5ActionPerformed
-
-        dayOfWeek = 6;
-        changeDay();
-    }//GEN-LAST:event_jRadioButtonMenuItem5ActionPerformed
-
     private void saveImage(Product[] products) {
-
         try {
             BufferedImage img = ImageIO.read(getClass().getResource("/resources/ground.gif"));
             Graphics2D graph = img.createGraphics();
@@ -495,48 +464,112 @@ public class Emulator extends javax.swing.JFrame {
         }
     }
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-
-        if (!jTextField1.getText().trim().isEmpty()) {
-
-            String[] terminals = jTextField1.getText().trim().split(",");
-            terminalGroup.addAllTerminals(terminals);
-
-            ConfigurationWriter cw = new ConfigurationWriter();
-            ArrayList<TerminalGroup> tg = new ArrayList();
-            tg.add(terminalGroup);
-
-//            try {
-//                cw.write(tg);
-//            } catch (TransformerException ex) {
-//                Logger.getLogger(Emulator.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-            Uploader uploader = new Uploader(this, true, tg);
-
-            uploader.addWindowListener(new java.awt.event.WindowAdapter() {
-
-                @Override
-                public void windowClosed(java.awt.event.WindowEvent e) {
-
-                }
-            });
-
-            uploader.setVisible(true);
-        } else {
-            jLabel1.setText("Введите номера касс");
-        }
-    }//GEN-LAST:event_jButton1ActionPerformed
-
     private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
         tgManager();
     }//GEN-LAST:event_jMenuItem2ActionPerformed
+
+    private void touchActionHub(int button) {
+        switch (button) {
+            case 1:
+                touchAction(button);
+                break;
+            case 2:
+                touchAction(button);
+                break;
+            case 3:
+                touchAction(button);
+                break;
+            case 4:
+                touchAction(button);
+                break;
+            case 5:
+                touchAction(button);
+                break;
+            case 6:
+                touchAction(button);
+                break;
+            case 7:
+                touchAction(button);
+                break;
+            case 8:
+                touchAction(button);
+                break;
+        }
+    }
+    
+    private void touchAction(int button) {
+        if (level == 2) {
+            System.out.println("Button GROUP " + button + " fired...");
+            level = 1;
+            selectedGroup = button-1;
+            setButtonsLabels();
+        } else if(level == 1) {
+            System.out.println("Button SUB-GROUP " + button + " fired...");
+            // -> generate picture
+            Product[] products = terminalGroups.get(selectedTermGroup).getDaysOfWeek()[selectedDay].getGroup(selectedGroup).getSubgroup(button-1).getProducts();
+            ((Monitor) jPanel2).display(products);
+
+            System.out.println("\n====================");
+
+            for (int i = 0; i < products.length; i++) {
+                if (products[i] != null) {
+                    System.out.println(i + 1 + ") " + products[i].getName() + " - " + products[i].getPlu());
+                }
+            }
+
+            System.out.println("====================");
+        }
+    }
+    
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        touchActionHub(1);
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        touchActionHub(2);
+    }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        touchActionHub(3);
+    }//GEN-LAST:event_jButton3ActionPerformed
+
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+        touchActionHub(4);
+    }//GEN-LAST:event_jButton4ActionPerformed
+
+    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
+        touchActionHub(5);
+    }//GEN-LAST:event_jButton5ActionPerformed
+
+    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
+        touchActionHub(6);
+    }//GEN-LAST:event_jButton6ActionPerformed
+
+    private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
+        touchActionHub(7);
+    }//GEN-LAST:event_jButton7ActionPerformed
+
+    private void jButton8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton8ActionPerformed
+        touchActionHub(8);
+    }//GEN-LAST:event_jButton8ActionPerformed
+
+    private void jButton9ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton9ActionPerformed
+        ((Monitor) jPanel2).clear();
+        level = 2;
+        setButtonsLabels();
+    }//GEN-LAST:event_jButton9ActionPerformed
 
     private void tgManager() {
         TGManager manager = new TGManager(this, true, (ArrayList) terminalGroups);
         manager.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosed(java.awt.event.WindowEvent e) {
-                
+                // configuration writing
+                try {
+                    new ConfigurationWriter().write(terminalGroups);
+                } catch (TransformerException ex) {
+                    System.err.println("TransformerException occured while configuration saving!");
+                }
             }
         });
         manager.setVisible(true);
@@ -589,26 +622,28 @@ public class Emulator extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
-    private javax.swing.JComboBox<String> jComboBox1;
+    private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
+    private javax.swing.JButton jButton4;
+    private javax.swing.JButton jButton5;
+    private javax.swing.JButton jButton6;
+    private javax.swing.JButton jButton7;
+    private javax.swing.JButton jButton8;
+    private javax.swing.JButton jButton9;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JList<String> jList1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
+    private javax.swing.JMenu jMenu3;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuItem jMenuItem2;
+    private javax.swing.JMenuItem jMenuItem3;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem1;
-    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem2;
-    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem3;
-    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem4;
-    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem5;
-    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem7;
-    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem8;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
-    private javax.swing.JTextField jTextField3;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
     // End of variables declaration//GEN-END:variables
 }

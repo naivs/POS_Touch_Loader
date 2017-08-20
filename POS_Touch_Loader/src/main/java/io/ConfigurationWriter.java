@@ -1,7 +1,7 @@
 package io;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -33,20 +33,14 @@ public class ConfigurationWriter {
         }
     }
 
-    public void write(ArrayList<data.TerminalGroup> terminalGroups) throws TransformerException {
+    public void write(List<data.TerminalGroup> terminalGroups) throws TransformerException {
 
         Element root = doc.createElement("Configuration");
         // terminalGroups
         for (int a = 0; a < terminalGroups.size(); a++) {
             Element termGrp = doc.createElement("TerminalGroup");
             termGrp.setAttribute("name", terminalGroups.get(a).toString());
-
-            String terminals = "";
-            for (String terminal : terminalGroups.get(a).getTerminals()) {
-                terminals += terminal + ":";
-            }
-            terminals = terminals.substring(0, terminals.length() - 1);
-            termGrp.setAttribute("terminals", terminals);
+            termGrp.setAttribute("terminals", terminalGroups.get(a).getTerminalsAsString());
 
             // daysOfWeek
             for (int b = 0; b < terminalGroups.get(a).getDaysOfWeek().length; b++) {
@@ -87,18 +81,14 @@ public class ConfigurationWriter {
                                         subgroup.appendChild(product);
                                     }
                                 }
-
                                 group.appendChild(subgroup);
                             }
                         }
-
                         dayOfWeek.appendChild(group);
                     }
                 }
-
                 termGrp.appendChild(dayOfWeek);
             }
-
             root.appendChild(termGrp);
         }
 
@@ -108,7 +98,7 @@ public class ConfigurationWriter {
         Transformer transformer = TransformerFactory.newInstance().newTransformer();
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
         DOMSource source = new DOMSource(doc);
-        StreamResult console = new StreamResult(new File("res/configuration.xml"));
+        StreamResult console = new StreamResult(new File("resources/configuration.xml"));
         transformer.transform(source, console);
 
         System.out.println("\nXML DOM Created Successfully..");

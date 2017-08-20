@@ -39,6 +39,12 @@ public class DayOfWeek {
         updateTime();
     }
     
+    public void deleteAllGroups() {
+        for (int i = 0; i < groups.length; i++) {
+            removeGroup(i);
+        }
+    }
+    
     public void setGroups(Group[] groups) {
         this.groups = groups;
     }

@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2017 Ivan
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package network;
 
 import java.io.File;
@@ -7,7 +23,6 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import jcifs.smb.NtlmAuthenticator;
 import jcifs.smb.NtlmPasswordAuthentication;
 import jcifs.smb.SmbAuthException;
 import jcifs.smb.SmbException;
@@ -17,29 +32,34 @@ import jcifs.smb.SmbFile;
  *
  * @author Ivan
  */
-public class SMBClient extends NtlmAuthenticator {
+public class SMBClient {
 
-    private String address;
-    private String username, password;
+    private String ip;
+    private SMBAuthentication smbAuth;
 
-    @Override
-    protected NtlmPasswordAuthentication getNtlmPasswordAuthentication() {
+    public String testConnection() {
 
-        //System.out.println(getRequestingException().getMessage() + " for " + getRequestingURL());
+        NtlmPasswordAuthentication auth = new NtlmPasswordAuthentication(smbAuth.getURL(), smbAuth.getUsername(), smbAuth.getPassword());
+        String message = "";
 
-            if (password.length() == 0) {
-                return null;
-            }
-            return new NtlmPasswordAuthentication(null, username, password);
+        try {
+            SmbFile file = new SmbFile("smb://" + url, auth);
+
+            message += file.exists() ? "ok" : "false";
+            message += file.canRead() ? "|ok" : "|false";
+            message += file.canWrite() ? "|ok" : "|false";
+
+        } catch (MalformedURLException | SmbException ex) {
+            System.err.println(ex.getMessage());
+        }
+
+        return message;
     }
 
-    public SMBClient(String address, String username, String password) {
+    public SMBClient(String ip, SMBAuthentication smbAuth) {
 
-        this.address = "smb://" + address + "/";
-        this.username = username;
-        this.password = password;
-
-        NtlmAuthenticator.setDefault(this);
+        this.ip = ip;
+        this.smbAuth = smbAuth;
     }
 
     public String listFiles() throws MalformedURLException, SmbAuthException, SmbException {

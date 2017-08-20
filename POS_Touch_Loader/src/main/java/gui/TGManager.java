@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Ivan
+ * Copyright (C) 2017 Ivan Naumov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,14 +16,22 @@
  */
 package gui;
 
+import data.DayOfWeek;
+import data.Group;
+import data.Product;
+import data.Subgroup;
 import data.TerminalGroup;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import excel.Parser;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
+import java.util.Collections;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import utils.IndexDispatcher;
 
 /**
  *
@@ -31,7 +39,11 @@ import java.util.List;
  */
 public class TGManager extends javax.swing.JDialog {
 
-    private String[] termGrpsData;
+    private final ArrayList<TerminalGroup> terminalGroups;
+    private String[] termGrpsNames;
+    
+    private final IndexDispatcher idisp = new IndexDispatcher();
+    //private final TerminalNumberDispatcher tndisp = new TerminalNumberDispatcher(terminalGroups);
 
     /**
      * Creates new form TGManager
@@ -42,36 +54,9 @@ public class TGManager extends javax.swing.JDialog {
      */
     public TGManager(java.awt.Frame parent, boolean modal, ArrayList<TerminalGroup> terminalGroups) {
         super(parent, modal);
+        this.terminalGroups = terminalGroups;
         initComponents();
-
-        // read TerminalGroups
-        termGrpsData = new String[7];
-        try {
-            ObjectInputStream ois = new ObjectInputStream(new FileInputStream("resources/termGrps.dat"));
-            termGrpsData = (String[]) ois.readObject();
-            jTextField1.setText(termGrpsData[0].split("||")[0]);
-            jTextField2.setText(termGrpsData[0].split("||")[1]);
-            jTextField4.setText(termGrpsData[1].split("||")[0]);
-            jTextField5.setText(termGrpsData[1].split("||")[1]);
-            jTextField7.setText(termGrpsData[2].split("||")[0]);
-            jTextField8.setText(termGrpsData[2].split("||")[1]);
-            jTextField10.setText(termGrpsData[3].split("||")[0]);
-            jTextField11.setText(termGrpsData[3].split("||")[1]);
-            jTextField13.setText(termGrpsData[4].split("||")[0]);
-            jTextField14.setText(termGrpsData[4].split("||")[1]);
-            jTextField16.setText(termGrpsData[5].split("||")[0]);
-            jTextField17.setText(termGrpsData[5].split("||")[1]);
-            jTextField19.setText(termGrpsData[6].split("||")[0]);
-            jTextField20.setText(termGrpsData[6].split("||")[1]);
-        } catch (IOException ex) {
-            System.err.println(ex.getMessage());
-        } catch (ClassNotFoundException ex) {
-            System.err.println(ex.getMessage());
-        }
-
-        for (int i = 0; i < terminalGroups.size(); i++) {
-            System.out.println(termGrpsData[i]);
-        }
+        update();
     }
 
     /**
@@ -113,15 +98,11 @@ public class TGManager extends javax.swing.JDialog {
         jTextField20 = new javax.swing.JTextField();
         jTextField21 = new javax.swing.JTextField();
         jCheckBox1 = new javax.swing.JCheckBox();
+        jLabel1 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(600, 314));
         setSize(new java.awt.Dimension(470, 314));
-        addWindowListener(new java.awt.event.WindowAdapter() {
-            public void windowClosed(java.awt.event.WindowEvent evt) {
-                formWindowClosed(evt);
-            }
-        });
 
         jButton1.setText("файл..");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
@@ -131,20 +112,56 @@ public class TGManager extends javax.swing.JDialog {
         });
 
         jButton2.setText("файл..");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
 
         jButton3.setText("файл..");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
 
         jButton4.setText("файл..");
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
 
         jButton5.setText("файл..");
+        jButton5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton5ActionPerformed(evt);
+            }
+        });
 
         jButton6.setText("файл..");
+        jButton6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton6ActionPerformed(evt);
+            }
+        });
 
         jButton7.setText("файл..");
+        jButton7.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton7ActionPerformed(evt);
+            }
+        });
 
         jTextField1.setEditable(false);
+        jTextField1.setToolTipText("");
         jTextField1.setFocusable(false);
         jTextField1.setPreferredSize(new java.awt.Dimension(150, 24));
+        jTextField1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTextField1MouseClicked(evt);
+            }
+        });
 
         jTextField2.setEditable(false);
         jTextField2.setFocusable(false);
@@ -157,6 +174,11 @@ public class TGManager extends javax.swing.JDialog {
         jTextField4.setEditable(false);
         jTextField4.setFocusable(false);
         jTextField4.setPreferredSize(new java.awt.Dimension(150, 24));
+        jTextField4.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTextField4MouseClicked(evt);
+            }
+        });
 
         jTextField5.setEditable(false);
         jTextField5.setFocusable(false);
@@ -330,16 +352,23 @@ public class TGManager extends javax.swing.JDialog {
                     .addComponent(jTextField17, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jTextField18, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton7)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jTextField19, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jTextField20, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jTextField21, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jTextField21, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jButton7))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jCheckBox1.setText("Разблокировать");
+        jCheckBox1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBox1ActionPerformed(evt);
+            }
+        });
+
+        jLabel1.setForeground(new java.awt.Color(255, 102, 102));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -351,7 +380,9 @@ public class TGManager extends javax.swing.JDialog {
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jCheckBox1)
-                        .addGap(0, 0, Short.MAX_VALUE))))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel1)
+                        .addContainerGap())))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -359,38 +390,291 @@ public class TGManager extends javax.swing.JDialog {
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jCheckBox1)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jCheckBox1)
+                    .addComponent(jLabel1))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
+
+        pack();
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
-
-        ObjectOutputStream oos = null;
-        try {
-            oos = new ObjectOutputStream(new FileOutputStream("resources/termGrps.dat"));
-            oos.writeObject(termGrpsData);
-            oos.flush();
-        } catch (IOException ex) {
-            System.err.println(ex.getMessage());
-        } finally {
-            try {
-                oos.close();
-            } catch (IOException ex) {
-                System.err.println(ex.getMessage());
+    private void update() {
+        termGrpsNames = new String[7];
+        Arrays.fill(termGrpsNames, "");
+        
+        jTextField1.setText("");
+        jTextField2.setText("");
+        jTextField4.setText("");
+        jTextField5.setText("");
+        jTextField7.setText("");
+        jTextField8.setText("");
+        jTextField10.setText("");
+        jTextField11.setText("");
+        jTextField13.setText("");
+        jTextField14.setText("");
+        jTextField16.setText("");
+        jTextField17.setText("");
+        jTextField19.setText("");
+        jTextField20.setText("");
+        
+        for (int i = 0; i < this.terminalGroups.size(); i++) {
+            termGrpsNames[i] = this.terminalGroups.get(i).toString();
+            
+            switch (i) {
+                case 0:
+                    jTextField1.setText(termGrpsNames[i]);
+                    jTextField2.setText(this.terminalGroups.get(i).getTerminalsAsString());
+                    break;
+                case 1:
+                    jTextField4.setText(termGrpsNames[i]);
+                    jTextField5.setText(this.terminalGroups.get(i).getTerminalsAsString());
+                    break;
+                case 2:
+                    jTextField7.setText(termGrpsNames[i]);
+                    jTextField8.setText(this.terminalGroups.get(i).getTerminalsAsString());
+                    break;
+                case 3:
+                    jTextField10.setText(termGrpsNames[i]);
+                    jTextField11.setText(this.terminalGroups.get(i).getTerminalsAsString());
+                    break;
+                case 4:
+                    jTextField13.setText(termGrpsNames[i]);
+                    jTextField14.setText(this.terminalGroups.get(i).getTerminalsAsString());
+                    break;
+                case 5:
+                    jTextField16.setText(termGrpsNames[i]);
+                    jTextField17.setText(this.terminalGroups.get(i).getTerminalsAsString());
+                    break;
+                case 6:
+                    jTextField19.setText(termGrpsNames[i]);
+                    jTextField20.setText(this.terminalGroups.get(i).getTerminalsAsString());
+                    break;
             }
         }
-    }//GEN-LAST:event_formWindowClosed
-
+    }
+    
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         if (jTextField1.getText().isEmpty() || jTextField2.getText().isEmpty()) {
-
+            jLabel1.setText("Отдел №1 не создан!");
         } else {
-            termGrpsData = new String[1];
-            termGrpsData[0] = jTextField1.getText() + "||" + jTextField2.getText();
+            jTextField3.setText(openExcelFile(0));
         }
     }//GEN-LAST:event_jButton1ActionPerformed
 
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        if (jTextField4.getText().isEmpty() || jTextField5.getText().isEmpty()) {
+            jLabel1.setText("Отдел №2 не создан!");
+        } else {
+            jTextField6.setText(openExcelFile(1));
+        }
+    }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        if (jTextField7.getText().isEmpty() || jTextField8.getText().isEmpty()) {
+            jLabel1.setText("Отдел №3 не создан!");
+        } else {
+            jTextField9.setText(openExcelFile(2));
+        }
+    }//GEN-LAST:event_jButton3ActionPerformed
+
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+        if (jTextField10.getText().isEmpty() || jTextField11.getText().isEmpty()) {
+            jLabel1.setText("Отдел №4 не создан!");
+        } else {
+            jTextField12.setText(openExcelFile(3));
+        }
+    }//GEN-LAST:event_jButton4ActionPerformed
+
+    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
+        if (jTextField13.getText().isEmpty() || jTextField14.getText().isEmpty()) {
+            jLabel1.setText("Отдел №5 не создан!");
+        } else {
+            jTextField15.setText(openExcelFile(4));
+        }
+    }//GEN-LAST:event_jButton5ActionPerformed
+
+    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
+        if (jTextField16.getText().isEmpty() || jTextField17.getText().isEmpty()) {
+            jLabel1.setText("Отдел №6 не создан!");
+        } else {
+            jTextField18.setText(openExcelFile(5));
+        }
+    }//GEN-LAST:event_jButton6ActionPerformed
+
+    private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
+        if (jTextField19.getText().isEmpty() || jTextField20.getText().isEmpty()) {
+            jLabel1.setText("Отдел №7 не создан!");
+        } else {
+            jTextField21.setText(openExcelFile(6));
+        }
+    }//GEN-LAST:event_jButton7ActionPerformed
+
+    private void jCheckBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBox1ActionPerformed
+        if(jCheckBox1.isSelected()) {
+            String password = JOptionPane.showInputDialog(this,  "Введите пароль:", "Разблокировка", JOptionPane.QUESTION_MESSAGE);
+            if(password != null && password.equals("1234")) {
+                enableEditable(true);
+            } else {
+                jCheckBox1.setSelected(false);
+                jLabel1.setText("Неверный пароль");
+            }
+        } else {
+            enableEditable(false);
+        }
+    }//GEN-LAST:event_jCheckBox1ActionPerformed
+
+    private void jTextField1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTextField1MouseClicked
+        if (jTextField1.isFocusable()) {
+            if (!jTextField1.getText().isEmpty()) {
+                deleteTerminalGroup(0);
+            } else {
+                addTerminalGroup();
+            }
+        }
+    }//GEN-LAST:event_jTextField1MouseClicked
+
+    private void jTextField4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTextField4MouseClicked
+        if (jTextField4.isFocusable()) {
+            if (!jTextField4.getText().isEmpty()) {
+                deleteTerminalGroup(1);
+            } else {
+                addTerminalGroup();
+            }
+        }
+    }//GEN-LAST:event_jTextField4MouseClicked
+
+    private void addTerminalGroup() {
+        String name = JOptionPane.showInputDialog(this, "Название:", "Название кассового отдела", JOptionPane.QUESTION_MESSAGE);
+        if (Arrays.binarySearch(termGrpsNames, name) >= 0) {
+            jLabel1.setText("Отдел с таким именем существует");
+        } else {
+            String terminals = AddingTerminals.showAddTerminalsDialog();
+            if(terminals.isEmpty()) {
+                jLabel1.setText("Нельзя создать отдел без касс");
+            } else {
+                terminalGroups.add(new TerminalGroup(name, terminals));
+                update();
+            }
+        }
+    }
+    
+    private void deleteTerminalGroup(int tGrp) {
+        int response = JOptionPane.showConfirmDialog(this, "Удалить этот кассовый отдел?", "Кассовый отдел", JOptionPane.OK_CANCEL_OPTION);
+        if (response == JOptionPane.OK_OPTION) {
+            terminalGroups.remove(tGrp);
+            update();
+        }
+    }
+    
+    private void enableEditable(boolean focusable) {
+        jTextField1.setFocusable(focusable);
+        jTextField2.setFocusable(focusable);
+        jTextField4.setFocusable(focusable);
+        jTextField5.setFocusable(focusable);
+        jTextField7.setFocusable(focusable);
+        jTextField8.setFocusable(focusable);
+        jTextField10.setFocusable(focusable);
+        jTextField11.setFocusable(focusable);
+        jTextField13.setFocusable(focusable);
+        jTextField14.setFocusable(focusable);
+        jTextField16.setFocusable(focusable);
+        jTextField17.setFocusable(focusable);
+        jTextField19.setFocusable(focusable);
+        jTextField20.setFocusable(focusable);
+    }
+    
+    private String openExcelFile(int tGrpNum) {     
+        // choose file configuration
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setCurrentDirectory(new java.io.File("./"));
+        fileChooser.setFileFilter(new FileNameExtensionFilter("Файлы Microsoft Excel 2007*", "xlsx"));
+
+        if (fileChooser.showDialog(this, "Открыть файл Excel...") == JFileChooser.APPROVE_OPTION) {
+            File file = new File(fileChooser.getSelectedFile().getAbsolutePath());
+            // -> need check repeats file
+            try {
+                Parser parser = new Parser(file);
+
+                // reading all products
+//                ArrayList<String> terminals = new ArrayList();
+//                terminals.addAll(Arrays.asList(termGrpsTerminals[tGrpNum].split("-")));
+//                terminalGroup = new TerminalGroup("default", terminals);
+
+                DayOfWeek[] days = terminalGroups.get(tGrpNum).getDaysOfWeek();
+
+                for (int i = 0; i < days.length; i++) {
+
+                    // groups name reading. It same for any day.
+                    Group[] groups = new Group[8];
+
+                    int k = 0;
+                    for (String name : parser.getGroupsNames()) {
+                        groups[k] = new Group(name);
+                        k++;
+                    }
+
+                    for (int j = 0; j < groups.length; j++) {
+                        ArrayList<Product> products = new ArrayList();
+
+                        for (String name : parser.getProducts(i, j)) {
+                            products.add(new Product(name.split("::")[1], name.split("::")[0], "", Collections.EMPTY_LIST));
+                        }
+
+                        Subgroup[] subgroups;
+                        if (products.size() % 20 > 0) {
+                            subgroups = new Subgroup[(products.size() / 20) + 1];
+                        } else {
+                            subgroups = new Subgroup[products.size() / 20];
+                        }
+
+                        for (int s = 0; s < subgroups.length; s++) {
+                            subgroups[s] = new Subgroup(String.valueOf(s + 1), idisp.getNextFreeIndex(i), Collections.EMPTY_LIST);
+                        }
+
+                        for (int g = 0; g < products.size(); g++) {
+                            subgroups[g / 20].addProduct(products.get(g));
+                        }
+
+//                        // subgroup picture saving
+//                        for (int sg = 0; sg < subgroups.length; sg++) {
+//
+//                            ((Monitor) jPanel2).display(subgroups[sg].getProducts());
+//                            BufferedImage img = new BufferedImage(jPanel2.getWidth(), jPanel2.getHeight(), BufferedImage.TYPE_INT_ARGB);
+//                            jPanel2.paint(img.getGraphics());
+//
+//                            try {
+//                                ImageIO.write(img, "gif", new File("resources/pic/" + i + "TCH_X" + subgroups[sg].getIndex() + ".GIF"));
+//                            } catch (IOException ex) {
+//
+//                            }
+//                        }
+                        // =====================
+
+                        for (Subgroup sgrp : subgroups) {
+                            groups[j].addSubgroup(sgrp);
+                        }
+                    }
+
+                    days[i].deleteAllGroups();
+                    for (Group grp : groups) {
+                        days[i].addGroup(grp);
+                    }
+                }
+
+                return file.getCanonicalPath();
+
+            } catch (FileNotFoundException ex) {
+                System.err.println("File not found");
+            } catch (IOException ex) {
+                System.err.println("Other IO Exception");
+            }
+        }
+
+        return "";
+    } 
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
@@ -400,6 +684,7 @@ public class TGManager extends javax.swing.JDialog {
     private javax.swing.JButton jButton6;
     private javax.swing.JButton jButton7;
     private javax.swing.JCheckBox jCheckBox1;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField10;

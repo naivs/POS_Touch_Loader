@@ -1,8 +1,5 @@
 package data;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 /**
  *
  * @author Ivan
@@ -10,7 +7,7 @@ import java.util.Arrays;
 public class TerminalGroup {
 
     private final String name;
-    private ArrayList<String> terminals;
+    private final String terminals;
     private DayOfWeek[] daysOfWeek;
     private boolean isRemoved;
 
@@ -19,9 +16,8 @@ public class TerminalGroup {
 //        terminals = new ArrayList();
 //    }
 
-    public TerminalGroup(String name, ArrayList<String> terminals) {
+    public TerminalGroup(String name, String terminals) {
         this.name = name;
-        this.terminals = new ArrayList();
         this.terminals = terminals;
         daysOfWeek = new DayOfWeek[7];
         
@@ -31,53 +27,16 @@ public class TerminalGroup {
         }
     }
 
-    public void addTerminal(String name) {
-        terminals.add(name);
-    }
-
-    public void addAllTerminals(String[] names) {
-        terminals.addAll(Arrays.asList(names));
-    }
-
-    public void removeTerminal(String name) {
-        terminals.remove(name);
-    }
-
-    public void removeAllTerminals(String[] names) {
-        terminals.removeAll(Arrays.asList(names));
-    }
-
     public void setDaysOfWeek(DayOfWeek[] daysOfWeek) {
         this.daysOfWeek = daysOfWeek;
     }
-    
-//    public void createDaysOfWeek() {
-//        daysOfWeek = {"Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"};
-//        
-//        for (String dayName : dayNames) {
-//            daysOfWeek.add(new DayOfWeek(dayName));
-//        }
-//    }
     
     public DayOfWeek[] getDaysOfWeek() {
         return daysOfWeek;
     }
     
-    public ArrayList<String> getTerminals() {
-        return terminals;
-    }
-    
     public String getTerminalsAsString() {
-        
-        String out = "";
-        
-        for(String terminal : terminals) {
-            out += "-" + terminal;
-        }
-        
-        out = out.substring(1);
-        
-        return out;
+        return terminals;
     }
     
 //    private boolean isConfigured() {

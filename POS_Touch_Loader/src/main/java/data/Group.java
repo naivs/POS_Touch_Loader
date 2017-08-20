@@ -159,11 +159,6 @@ public class Group {
 //        if(isDeleted) {
 //            return "[is deleted]";
 //        }
-        
-        if (name.split("::").length < 2) {
-            return name.split("::")[0];
-        } else {
-            return name.split("::")[0] + " " + name.split("::")[1];
-        }
+        return name;
     }
 }

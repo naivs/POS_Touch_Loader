@@ -4,9 +4,9 @@ import data.Group;
 import data.Product;
 import data.Subgroup;
 import data.TerminalGroup;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -25,22 +25,30 @@ public class ConfigurationReader {
     private DocumentBuilder documentBuilder;
     private Document doc;
 
-    public ConfigurationReader() {
+    public ConfigurationReader() throws SAXException, IOException {
         try {
             factory = DocumentBuilderFactory.newInstance();
             documentBuilder = factory.newDocumentBuilder();
-            doc = documentBuilder.parse("res/configuration.xml");
+            doc = documentBuilder.parse("resources/configuration.xml");
         } catch (ParserConfigurationException e) {
             System.err.println(e.getMessage());
-        } catch (SAXException e) {
-            System.err.println(e.getMessage());
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
         }
+//        catch (SAXException e) {
+//            // empty or corrupted
+//            System.err.println(e.getMessage());
+//            
+//        } catch (IOException e) {
+//            // no file
+//            System.err.println(e.getMessage());
+//            try {
+//                new File("resources/configuration.xml").createNewFile();
+//            } catch (IOException ex) {
+//               System.err.println("Неудается создать файл: \"resources/configuration.xml\""); 
+//            }
+//        }
     }
 
     public ArrayList<TerminalGroup> read() {
-
         ArrayList<TerminalGroup> terminalGroups = new ArrayList();
         NodeList termGrps = doc.getElementsByTagName("TerminalGroup");
 
@@ -48,9 +56,7 @@ public class ConfigurationReader {
 
             // terminalGroup
             Element elementA = (Element) termGrps.item(a);
-            ArrayList<String> terminals = new ArrayList();
-            terminals.addAll(Arrays.asList(elementA.getAttribute("terminals").split(":")));
-            terminalGroups.add(new TerminalGroup(elementA.getAttribute("name"), terminals));
+            terminalGroups.add(new TerminalGroup(elementA.getAttribute("name"), elementA.getAttribute("terminals")));
 
             // daysOfWeek
             NodeList dow = elementA.getElementsByTagName("DayOfWeek");
@@ -66,7 +72,6 @@ public class ConfigurationReader {
     }
 
     private Group[] readGroups(NodeList termGrps, int terminalGroup, int dayOfWeek) {
-        
         NodeList groupsList = ((Element) ((Element) termGrps.item(terminalGroup)).getElementsByTagName("DayOfWeek").item(dayOfWeek)).getElementsByTagName("Group");
 
         Group[] groups = new Group[8];
@@ -84,7 +89,6 @@ public class ConfigurationReader {
     }
     
     private Subgroup[] readSubgroups(NodeList groupsList, int group) {
-        
         NodeList subgroupsList = ((Element) groupsList.item(group)).getElementsByTagName("Subgroup");
         Subgroup[] subgroups = new Subgroup[8];
         
@@ -101,7 +105,6 @@ public class ConfigurationReader {
     }
     
     private Product[] readProducts(NodeList productList, int subgroup) {
-        
         NodeList productsList = ((Element) productList.item(subgroup)).getElementsByTagName("Product");
         Product[] products = new Product[20];
         

@@ -19,7 +19,6 @@ public class Parser {
     private Workbook wb;
 
     public Parser(File file) throws FileNotFoundException, IOException {
-
         wb = new XSSFWorkbook(new FileInputStream(file));
 
 //        for (String out : getProducts(5, 1)) {
@@ -29,15 +28,11 @@ public class Parser {
     }
 
     public String[] getGroupsNames() {
-
         String[] groupNames = new String[8];
-
         Sheet mySheet = wb.getSheetAt(0);
-
-        int k = 1;
+        int k = 2;
         for (int i = 0; i < groupNames.length; i++) {
-
-            groupNames[i] = mySheet.getRow(0).getCell(k).getStringCellValue();
+            groupNames[i] = mySheet.getRow(0).getCell(k).getStringCellValue() + "::" + mySheet.getRow(0).getCell(k + 5).getStringCellValue();
             k += 7;
         }
 
@@ -45,16 +40,11 @@ public class Parser {
     }
 
     public String[] getProducts(int day, int group) {
-
         List<String> products = new ArrayList<String>();
-
         Sheet mySheet = wb.getSheetAt(day);
-
         int k = 2;
         String plu;
-
         while (!(plu = String.valueOf(mySheet.getRow(k).getCell(group * 7 + 1 + 5).getNumericCellValue())).equals("0.0")) {
-
             String buf;
             buf = plu.substring(0, plu.length() - 2) + "::" + mySheet.getRow(k).getCell(group * 7 + 1 + 6).getStringCellValue();
             products.add(buf);
@@ -62,7 +52,6 @@ public class Parser {
         }
 
         String[] prod = new String[products.size()];
-
         for (int i = 0; i < prod.length; i++) {
             prod[i] = products.get(i);
         }

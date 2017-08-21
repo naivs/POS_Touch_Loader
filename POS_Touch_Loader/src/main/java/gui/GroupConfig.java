@@ -9,7 +9,6 @@ import javax.swing.DefaultListModel;
  * @author Ivan
  */
 public class GroupConfig extends javax.swing.JDialog {
-
     int day;
     utils.IndexDispatcher indexDispatcher;
 

@@ -16,11 +16,70 @@
  */
 package network;
 
+import gui.Emulator;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.net.UnknownHostException;
+
 /**
  *
  * @author Ivan
  */
-public class ServerCommunicatior {
+public class ServerCommunicatior extends Thread {
+    private boolean stoped;
+    private SMBAuthentication smbAuth;
+    private String loadTime;
+    
+    private Socket socket;
+    private PrintWriter out;
+    private BufferedReader in;
+    
+    @Override
+    public void run() {
+        try {
+            socket = new Socket(Emulator.SERVER_IP, Emulator.PORT);
+            out = new PrintWriter(socket.getOutputStream(), true);
+            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            // testing connection
+            String buf = in.readLine();
+            if (buf.equals("[helo]")) {
+                System.out.println(Emulator.SERVER_IP + ": connection established...");
+            } else {
+                System.out.println(Emulator.SERVER_IP + ": host unreachable.");
+                // sending query
+                System.out.println("getting data...");
+                out.write("[get]");
+                String[] response = in.readLine().split(" "); // [path] [username] [password] [loadTime]
+                smbAuth = new SMBAuthentication(response[0], response[1], response[2]);
+
+                while (!stoped) {
+                    out.print("[get]");
+                    loadTime = in.readLine().split(" ")[3];
+                }
+            }
+        } catch (UnknownHostException ex) {
+            System.err.println("Unknown host " + Emulator.SERVER_IP);
+        } catch (IOException ex) {
+            System.err.println("I/O Socket error.");
+        } finally {
+            try {
+                socket.close();
+            } catch (IOException ex) {
+                System.err.println("Unable to close socket.");
+            }
+        }
+    }
+    
+    public SMBAuthentication getSmbAuth() {
+        return smbAuth;
+    }
+    
+    public String getLoadTime() {
+        return loadTime;
+    }
     
     
 }

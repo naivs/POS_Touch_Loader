@@ -34,16 +34,16 @@ import jcifs.smb.SmbFile;
  */
 public class SMBClient {
 
-    private String ip;
-    private SMBAuthentication smbAuth;
+    private final SMBAuthentication smbAuth;
+    private static final String SV = "smb://";
 
     public String testConnection() {
 
-        NtlmPasswordAuthentication auth = new NtlmPasswordAuthentication(smbAuth.getURL(), smbAuth.getUsername(), smbAuth.getPassword());
+        NtlmPasswordAuthentication auth = new NtlmPasswordAuthentication(smbAuth.getUrl(), smbAuth.getUsername(), smbAuth.getPassword());
         String message = "";
 
         try {
-            SmbFile file = new SmbFile("smb://" + url, auth);
+            SmbFile file = new SmbFile(SV + smbAuth.getUrl(), auth);
 
             message += file.exists() ? "ok" : "false";
             message += file.canRead() ? "|ok" : "|false";
@@ -57,8 +57,6 @@ public class SMBClient {
     }
 
     public SMBClient(String ip, SMBAuthentication smbAuth) {
-
-        this.ip = ip;
         this.smbAuth = smbAuth;
     }
 

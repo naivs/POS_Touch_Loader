@@ -17,7 +17,6 @@
 package gui;
 
 import data.*;
-import excel.Parser;
 import io.ConfigurationReader;
 import io.ConfigurationWriter;
 import java.awt.Color;
@@ -28,22 +27,15 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
-import java.util.function.Consumer;
 import javax.imageio.ImageIO;
 import javax.swing.ButtonGroup;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JRadioButtonMenuItem;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.xml.transform.TransformerException;
-import network.Authorization;
 import org.xml.sax.SAXException;
-import utils.IndexDispatcher;
 import utils.Monitor;
 
 /**
@@ -51,7 +43,9 @@ import utils.Monitor;
  * @author Ivan
  */
 public class Emulator extends javax.swing.JFrame {
-
+    public static String SERVER_IP;
+    public static int PORT;
+    
     private JButton[] touch = new JButton[8];
     private int level = 2;
     private List<JMenu> groupsMenu = new ArrayList<>();
@@ -65,8 +59,12 @@ public class Emulator extends javax.swing.JFrame {
 
     /**
      * Creates new form Emulator
+     * @param ip
+     * @param port
      */
-    public Emulator() {
+    public Emulator(String ip, int port) {
+        SERVER_IP = ip;
+        PORT = port;
         terminalGroups = new ArrayList<>();
         try {
             terminalGroups = new ConfigurationReader().read();
@@ -579,6 +577,9 @@ public class Emulator extends javax.swing.JFrame {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
+        System.out.println(args.length);
+        System.out.println(Arrays.toString(args));
+        if(args.length != 2) System.out.println("Usage: Emulator [server ip] [port]");
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
@@ -604,8 +605,8 @@ public class Emulator extends javax.swing.JFrame {
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
             public void run() {
-
                 //Authorization.check_connection("10.61.0.4", Authorization.USERNAME, "r1001k");
                 //try {
                 //   File f = new File("resources/");
@@ -615,7 +616,7 @@ public class Emulator extends javax.swing.JFrame {
                 //  System.out.println("\n" + System.getProperty("user.dir") + "\n\n");
                 //} catch (Exception e) {
                 //}
-                new Emulator().setVisible(true);
+                new Emulator(args[0], Integer.parseInt(args[1])).setVisible(true);
             }
         });
     }

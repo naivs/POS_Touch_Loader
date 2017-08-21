@@ -22,11 +22,25 @@ package network;
  */
 public class SMBAuthentication {
     
-    private String url; // "touch_data" dir will be created there
-    private String username;
-    private String password;
+    private final String url; // "touch_data" dir will be created there
+    private final String username;
+    private final String password;
     
-    public SMBAuthentication() {
-        
+    SMBAuthentication(String url, String username, String password) {
+        this.url = url;
+        this.username = username;
+        this.password = password;
+    }
+
+    String getUrl() {
+        return url;
+    }
+
+    String getUsername() {
+        return username;
+    }
+
+    String getPassword() {
+        return password;
     }
 }

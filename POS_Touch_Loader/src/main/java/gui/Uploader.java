@@ -28,6 +28,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import models.UploaderTableModel;
 import network.SMBClient;
+import network.ServerCommunicatior;
 import utils.LoadAnalyzer;
 import utils.ParGenerator;
 import utils.RefGenerator;
@@ -53,6 +54,15 @@ public class Uploader extends javax.swing.JDialog {
         super(parent, modal);
         initComponents();
 
+        this.configuration = configuration;
+
+        String[] colNames = new String[configuration.size()];
+        for (int i = 0; i < colNames.length; i++) {
+            colNames[i] = configuration.get(i).toString();
+        }
+        la = new LoadAnalyzer(configuration);
+        jTable1.setModel(new UploaderTableModel(colNames, la.getDaysLoad()));
+        
         /*
         -> test connection to server demon
         -> get server parameters
@@ -63,17 +73,10 @@ public class Uploader extends javax.swing.JDialog {
         -> test SMB share available
         */
         
-        this.configuration = configuration;
-
-        String[] colNames = new String[configuration.size()];
-        for (int i = 0; i < colNames.length; i++) {
-            colNames[i] = configuration.get(i).toString();
-        }
-        la = new LoadAnalyzer(configuration);
-        jTable1.setModel(new UploaderTableModel(colNames, la.getDaysLoad()));
-        
-        // -> create server connection
-        smbClient = new SMBClient(address, username, password);
+        ServerCommunicatior communicator = new ServerCommunicatior();
+        communicator.start();
+        jLabel1.setText(communicator.getLoadTime());
+        smbClient = new SMBClient(Emulator.SERVER_IP, communicator.getSmbAuth());
     }
 
     /**
@@ -157,22 +160,18 @@ public class Uploader extends javax.swing.JDialog {
                             .addComponent(jLabel1)
                             .addComponent(jLabel2)
                             .addComponent(jLabel3))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel6)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jPasswordField1, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 130, Short.MAX_VALUE)
-                                .addComponent(jLabel6)
-                                .addGap(24, 24, 24)))
+                            .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jPasswordField1, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                             .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                    .addComponent(jScrollPane2)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 614, Short.MAX_VALUE)
                     .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addGap(80, 80, 80))
         );

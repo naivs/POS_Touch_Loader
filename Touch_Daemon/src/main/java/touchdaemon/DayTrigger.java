@@ -60,7 +60,6 @@ public class DayTrigger {
                 int dayOfWeek = 0;
                 // check config on day
                 switch (calendar.get(Calendar.DAY_OF_WEEK)) {
-
                     case Calendar.MONDAY:
                         dayOfWeek = 0;
                         break;

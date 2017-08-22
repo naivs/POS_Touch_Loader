@@ -29,20 +29,15 @@ import touchdaemon.TouchDaemon;
  *
  * @author ivan
  */
-public class Communicator extends Thread {
+public class Communicator {
     
     private ServerSocket socketIn;
-    private final int port;
     private final String response;
     private Connection connection;
     
     public Communicator(int port, String response) {
-        this.port = port;
         this.response = response;
-    }
-    
-    @Override
-    public void run() {
+        
         try {
             socketIn = new ServerSocket(port);
         } catch (IOException ex) {
@@ -51,16 +46,17 @@ public class Communicator extends Thread {
         
         while (true) {
             try {
-                if(connection.isAlive()) {
+                if (connection != null && connection.isAlive()) {
                     Socket client1 = socketIn.accept();
                     Connection connection1 = new Connection(client1, Connection.DENY_MODE);
                     connection1.start();
                     TouchDaemon.LOGGER.log(Level.INFO, "Client {0} tried to connect...", connection1.getIP());
+                } else {
+                    Socket client = socketIn.accept();
+                    connection = new Connection(client, Connection.ACCEPT_MODE);
+                    connection.start();
+                    TouchDaemon.LOGGER.log(Level.INFO, "Client {0} connected...", connection.getIP());
                 }
-                Socket client = socketIn.accept();
-                connection = new Connection(client, Connection.ACCEPT_MODE);
-                connection.start();
-                TouchDaemon.LOGGER.log(Level.INFO, "Client {0} connected...", connection.getIP());
             } catch (IOException ex) {
                 TouchDaemon.LOGGER.log(Level.WARNING, "Failure connection with client: " + connection.getIP(), ex);
             }
@@ -78,6 +74,7 @@ public class Communicator extends Thread {
         
         public Connection(Socket socket, int MODE) {
             this.socket = socket;
+            this.mode = MODE;
         }
         
         @Override
@@ -86,7 +83,7 @@ public class Communicator extends Thread {
                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 
-                if (mode == 1) {
+                if (mode == ACCEPT_MODE) {
                     out.println("[helo]");
 
                     String str;
@@ -101,6 +98,7 @@ public class Communicator extends Thread {
                     }
                 } else {
                     out.println("[bye]");
+                    close();
                 }
             } catch (IOException e) {
                 close();
@@ -109,8 +107,8 @@ public class Communicator extends Thread {
             }
         }
         
-        private void close() {
-                interrupt();
+        private void close() {   
+            interrupt();
         }
         
         public String getIP() {

@@ -33,8 +33,7 @@ import java.util.logging.Level;
  */
 public class ConfigReader {
 
-    private String username = "", password = "", ip = "", path = "";
-    private Date loadTime;
+    private String username = "", password = "", path = "", loadTime = "";
     private int port;
     private boolean parSettings, refSettings;
 
@@ -58,16 +57,8 @@ public class ConfigReader {
                             case "path":
                                 path = in.split("=")[1].trim();
                                 break;
-                            case "ip":
-                                ip = in.split("=")[1].trim();
-                                break;
                             case "load_time":
-                                SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
-                                try {
-                                    loadTime = df.parse(in.split("=")[1].trim());
-                                } catch (ParseException e) {
-                                    throw new IOException("Wrong Fire time parse error!");
-                                }
+                                loadTime = in.split("=")[1].trim();
                                 break;
                             case "par_backup":
                                 parSettings = Boolean.parseBoolean(in.split("=")[1].trim());
@@ -101,7 +92,6 @@ public class ConfigReader {
 
     public boolean check() {
         return !username.trim().isEmpty() && !password.trim().isEmpty()
-                && !ip.trim().isEmpty()
                 && loadTime != null;
     }
 
@@ -117,11 +107,7 @@ public class ConfigReader {
         return path;
     }
 
-    public String readIp() {
-        return ip;
-    }
-
-    public Date readLoadTime() {
+    public String readLoadTime() {
         return loadTime;
     }
 

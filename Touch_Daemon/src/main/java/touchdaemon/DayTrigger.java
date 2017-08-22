@@ -20,15 +20,14 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Level;
@@ -43,12 +42,12 @@ public class DayTrigger {
     private boolean parSettings;
     private boolean refSettings;
 
-    public DayTrigger(String path, Date firedTime, boolean parSettings, boolean refSettings) {
+    public DayTrigger(String path, String firedTime, boolean parSettings, boolean refSettings) {
         this.path = path;
         this.parSettings = parSettings;
         this.refSettings = refSettings;
 
-        SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss:SS");
+        SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
 
         while (true) {
             Date actualTime = new Date(System.currentTimeMillis());
@@ -234,35 +233,48 @@ public class DayTrigger {
     }
 
     private void injectToPar(File source, File dest) {
+        String srcData = "";
+        String destData = "";
+        
         BufferedReader reader = null;
-        BufferedReader reader1 = null;
         BufferedWriter writer = null;
 
-        ArrayList<String> upper = new ArrayList();
-        ArrayList<String> middle = new ArrayList();
-        ArrayList<String> lower = new ArrayList();
-
         try {
-            reader = new BufferedReader(new InputStreamReader(dest.getInputStream(), "Cp866"));
+            reader = new BufferedReader(new InputStreamReader(new FileInputStream(source), "Cp866"));
             String buf;
 
             while ((buf = reader.readLine()) != null) {
-                if (buf.startsWith("PD") || buf.startsWith("PRES")) {
-                    middle.add(buf);
-                } else if (middle.isEmpty()) {
-                    upper.add(buf);
-                } else {
-                    lower.add(buf);
-                }
+                srcData += buf;
             }
-
-            middle.clear();
-
-        } catch (RuntimeException e) {
-            TouchDaemon.LOGGER.log(Level.SEVERE, "REGPAR.DAT file is not compatible...", e.getMessage());
         } catch (IOException e) {
-            e.printStackTrace();
-            //System.exit(1);
+            TouchDaemon.LOGGER.log(Level.SEVERE, "Can't read data for inject...", e.getMessage());
+            return;
+        } finally {
+            try {
+                if (reader != null) {
+                    reader.close();
+                }
+            } catch (IOException e) {
+                TouchDaemon.LOGGER.log(Level.SEVERE, "Stream unable to close...", e.getMessage());
+            }
+        }
+        
+        try {
+            reader = new BufferedReader(new InputStreamReader(new FileInputStream(dest), "Cp866"));
+            String buf;
+
+            while ((buf = reader.readLine()).startsWith("PD")) {
+                destData += buf;
+            }
+            
+            destData += srcData;
+            
+            while ((buf = reader.readLine()) != null) {
+                destData += buf;
+            }
+        } catch (IOException e) {
+            TouchDaemon.LOGGER.log(Level.SEVERE, "Can't read REGPAR.DAT...", e.getMessage());
+            return;
         } finally {
             try {
                 if (reader != null) {
@@ -274,34 +286,12 @@ public class DayTrigger {
         }
 
         try {
-            reader1 = new BufferedReader(new InputStreamReader(new FileInputStream(source), "Cp866"));
-            String buf1;
-
-            while ((buf1 = reader1.readLine()) != null) {
-                middle.add(buf1);
-            }
-
-            writer = new BufferedWriter(new OutputStreamWriter(dest.getOutputStream(), "Cp866"));
-
-            for (String line : upper) {
-                writer.append(line + "\r\n");
-            }
-
-            for (String line : middle) {
-                writer.append(line + "\r\n");
-            }
-
-            for (String line : lower) {
-                writer.append(line + "\r\n");
-            }
+            writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(dest), "Cp866"));
+                writer.append(destData);
         } catch (IOException e) {
-            TouchDaemon.LOGGER.log(Level.SEVERE, "IO Error while injecting data to server REGPAR", e.getMessage());
+            TouchDaemon.LOGGER.log(Level.SEVERE, "IO Error while injecting data to server REGPAR.DAT...", e.getMessage());
         } finally {
             try {
-                if (reader1 != null) {
-                    reader1.close();
-                }
-
                 if (writer != null) {
                     writer.close();
                 }

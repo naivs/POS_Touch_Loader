@@ -64,23 +64,18 @@ public class TouchDaemon {
             System.exit(1);
         }
 
-        System.out.println("Daemon starting...");
-        // -> starting communicator
-        // -> starting trigger
-        String response = "[" + 
-                configReader.readIp() +
-                configReader.readPath() +
-                configReader.readUsername() +
-                configReader.readPassword() +
-                configReader.readLoadTime()
-                + "]";
-        Communicator communicator = new Communicator(configReader.readPort(), response);
-        communicator.start();
-        
-
-        DayTrigger trigger = new DayTrigger(configReader.readPath(), configReader.readLoadTime(), configReader.readParSettings(),
+        LOGGER.log(Level.INFO, "Daemon starting...");
+        String response = 
+                configReader.readPath() + " " +
+                configReader.readUsername() + " " +
+                configReader.readPassword() + " " +
+                configReader.readLoadTime();
+        new Communicator(configReader.readPort(), response);
+        //communicator.start();
+        LOGGER.log(Level.FINE, "communicator started!");
+        new DayTrigger(configReader.readPath(), configReader.readLoadTime(), configReader.readParSettings(),
         configReader.readRefSettings());
-        
+        LOGGER.log(Level.FINE, "trigger started!");
 //        try {
 //            smbClient.checkConnection();
 //            LOGGER.log(Level.FINEST, "Connetcion established.");

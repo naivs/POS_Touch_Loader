@@ -33,7 +33,7 @@ import java.util.logging.Level;
  */
 public class ConfigReader {
 
-    private String username = "", password = "", path = "", loadTime = "";
+    private String sharedPath = "", username = "", password = "", path = "", loadTime = "";
     private int port;
     private boolean parSettings, refSettings;
 
@@ -48,6 +48,9 @@ public class ConfigReader {
                 if (!in.startsWith("#") && !in.isEmpty()) {
                     if (in.split("=").length > 1) {
                         switch (in.split("=")[0].trim()) {
+                            case "shared_path":
+                                sharedPath = in.split("=")[1].trim();
+                                break;
                             case "username":
                                 username = in.split("=")[1].trim();
                                 break;
@@ -91,10 +94,14 @@ public class ConfigReader {
     }
 
     public boolean check() {
-        return !username.trim().isEmpty() && !password.trim().isEmpty()
+        return !sharePath.trim().isEmpty() && !username.trim().isEmpty() && !password.trim().isEmpty()
                 && loadTime != null;
     }
 
+    public String readSharePath() {
+        return sharePath;
+    }
+    
     public String readUsername() {
         return username;
     }

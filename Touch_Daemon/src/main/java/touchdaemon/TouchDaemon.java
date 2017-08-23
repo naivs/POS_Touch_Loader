@@ -66,7 +66,7 @@ public class TouchDaemon {
 
         LOGGER.log(Level.INFO, "Daemon starting...");
         String response = 
-                configReader.readPath() + " " +
+                configReader.readSharePath() + " " +
                 configReader.readUsername() + " " +
                 configReader.readPassword() + " " +
                 configReader.readLoadTime();

@@ -27,6 +27,7 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import models.UploaderTableModel;
+import network.SMBAuthentication;
 import network.SMBClient;
 import network.ServerCommunicatior;
 import utils.LoadAnalyzer;
@@ -75,8 +76,23 @@ public class Uploader extends javax.swing.JDialog {
         
         ServerCommunicatior communicator = new ServerCommunicatior();
         communicator.start();
+        try {
+            Thread.sleep(1000L);
+        } catch (InterruptedException ex) {
+            System.out.println("interrupted" + ex.getMessage());
+        }
+        SMBAuthentication in = communicator.getSmbAuth();
         jLabel1.setText(communicator.getLoadTime());
         smbClient = new SMBClient(Emulator.SERVER_IP, communicator.getSmbAuth());
+        System.out.println(smbClient.testConnection());
+        try {
+            System.out.println(smbClient.listFiles());
+            smbClient.createFolder("test/");
+            System.out.println("\n");
+            System.out.println(smbClient.listFiles());
+        } catch (Exception e) {
+            System.out.println("fuckfuckfuck");
+        }
     }
 
     /**

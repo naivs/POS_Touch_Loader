@@ -23,13 +23,14 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 
 /**
  *
  * @author Ivan
  */
 public class ServerCommunicatior extends Thread {
-    private boolean stoped;
+    //private boolean stoped;
     private SMBAuthentication smbAuth;
     private String loadTime;
     
@@ -49,17 +50,16 @@ public class ServerCommunicatior extends Thread {
                 System.out.println(Emulator.SERVER_IP + ": connection established...");
             } else {
                 System.out.println(Emulator.SERVER_IP + ": host unreachable.");
-                // sending query
-                System.out.println("getting data...");
-                out.write("[get]");
-                String[] response = in.readLine().split(" "); // [path] [username] [password] [loadTime]
-                smbAuth = new SMBAuthentication(response[0], response[1], response[2]);
-
-                while (!stoped) {
-                    out.print("[get]");
-                    loadTime = in.readLine().split(" ")[3];
-                }
             }
+            
+            // sending query
+            System.out.println("getting data...");
+            out.println("[get]");
+            String[] response = in.readLine().split(" "); // [path] [username] [password] [loadTime]
+            System.out.println(Arrays.toString(response));
+            smbAuth = new SMBAuthentication(response[0], response[1], response[2]);
+            loadTime = response[3];
+            out.println("[bye]");
         } catch (UnknownHostException ex) {
             System.err.println("Unknown host " + Emulator.SERVER_IP);
         } catch (IOException ex) {
@@ -80,6 +80,4 @@ public class ServerCommunicatior extends Thread {
     public String getLoadTime() {
         return loadTime;
     }
-    
-    
 }

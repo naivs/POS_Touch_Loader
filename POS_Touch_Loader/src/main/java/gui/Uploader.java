@@ -226,138 +226,138 @@ public class Uploader extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        char[] pass = jPasswordField1.getPassword();
-        smb = new SMBClient(jTextField1.getText(), jTextField2.getText(), new String(pass, 0, pass.length));
-
-        try {
-            smb.listFiles();
-            jLabel6.setForeground(Color.green);
-            jLabel6.setText("[OK]");
-        } catch (IOException e) {
-            jLabel6.setForeground(Color.red);
-            jLabel6.setText("[FALSE]");
-        }
+//        char[] pass = jPasswordField1.getPassword();
+//        smb = new SMBClient(jTextField1.getText(), jTextField2.getText(), new String(pass, 0, pass.length));
+//
+//        try {
+//            smb.listFiles();
+//            jLabel6.setForeground(Color.green);
+//            jLabel6.setText("[OK]");
+//        } catch (IOException e) {
+//            jLabel6.setForeground(Color.red);
+//            jLabel6.setText("[FALSE]");
+//        }
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // upload to server
-        smb.clearFolder();
-
-        for (int a = 0; a < 7; a++) {
-            if (la.dayIsLoad(a)) {
-
-                smb.createFolder("d_" + String.valueOf(a));
-                smb.createFolder("d_" + String.valueOf(a) + "/cafe");
-
-                // put images
-                File[] list = new File("res/pic").listFiles();
-
-                for (File file : list) {
-                    if (file.getName().startsWith(String.valueOf(a) + "TCH")) {
-                        try {
-                            smb.putImage("d_" + String.valueOf(a) + "/cafe", file);
-                        } catch (IOException e) {
-                            System.err.println("Can't upload file: " + file.getPath());
-                        }
-                    }
-                }
-
-                // put pluref
-                RefGenerator rgen = new RefGenerator(configuration, a);
-
-                BufferedWriter bw;
-                try {
-                    bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("ref.tmp"), "Cp866"));
-
-                    for (String line : rgen.getData()) {
-                        bw.append(line + "\r\n");
-                    }
-
-                    bw.flush();
-                    bw.close();
-
-                    File ref = new File("ref.tmp");
-                    smb.putFile("d_" + String.valueOf(a) + "/S_PLUREF.DAT", ref);
-
-                    ref.delete();
-
-                } catch (UnsupportedEncodingException e) {
-                    System.out.println(e.getMessage());
-                } catch (FileNotFoundException e) {
-                    System.out.println(e.getMessage());
-                } catch (IOException e) {
-                    System.out.println(e.getMessage());
-                }
-
-                for (int b = 0; b < configuration.size(); b++) {
-
-                    if (la.isLoad(b, a)) {
-                        //smb.createFolder("d_" + String.valueOf(a) + "/" + configuration.get(b).toString());
-
-                        // put pardat's
-                        ParGenerator pgen = new ParGenerator(configuration, a, b);
-
-                        BufferedWriter bw1;
-                        try {
-                            bw1 = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("par.tmp"), "Cp866"));
-
-                            for (String line : pgen.getData()) {
-                                bw1.append(line + "\r\n");
-                            }
-
-                            bw1.flush();
-                            bw1.close();
-
-                            File par = new File("par.tmp");
-                            smb.putFile("d_" + String.valueOf(a) + "/P_REGPAR.DAT" + configuration.get(b).getTerminalsAsString(), par);
-
-                            par.delete();
-
-                        } catch (UnsupportedEncodingException e) {
-                            System.out.println(e.getMessage());
-                        } catch (FileNotFoundException e) {
-                            System.out.println(e.getMessage());
-                        } catch (IOException e) {
-                            System.out.println(e.getMessage());
-                        }
-
-                    }
-                }
-
-            }
-        }
-
-//            //create termGroups
-//            if (la.isLoad(a)) {
-//                smb.createFolder(configuration.get(a).toString());
+//        // upload to server
+//        smb.clearFolder();
 //
-//                for (int b = 0; b < configuration.get(a).getDaysOfWeek().length; b++) {
+//        for (int a = 0; a < 7; a++) {
+//            if (la.dayIsLoad(a)) {
 //
-//                    //create dayOfWeeks
-//                    if (la.isLoad(a, b)) {
-//                        smb.createFolder(configuration.get(a).toString() + "/" + configuration.get(a).getDaysOfWeek()[b].toString());
+//                smb.createFolder("d_" + String.valueOf(a));
+//                smb.createFolder("d_" + String.valueOf(a) + "/cafe");
 //
-//                        // put pluref
-//                        // put par
-//                        
-//                        
-//                        smb.createFolder(configuration.get(a).toString() + "/" + configuration.get(a).getDaysOfWeek()[b].toString() + "/cafe");
-//                        // copy img to cafe
-//                        File cafe = new File("res/pic");
-//                        File[] list = cafe.listFiles();
+//                // put images
+//                File[] list = new File("res/pic").listFiles();
 //
-//                        for (int i = 0; i < list.length; i++) {
-//                            if (list[i].getName().startsWith(String.valueOf(b) + "TCH")) {
-//                                try {
-//                                    smb.putFile(configuration.get(a).toString() + "/" + configuration.get(a).getDaysOfWeek()[b].toString() + "/cafe", list[i]);
-//                                } catch (IOException e) {
-//                                    System.err.println("Can't upload file: " + list[i].getPath());
-//                                }
-//                            }
+//                for (File file : list) {
+//                    if (file.getName().startsWith(String.valueOf(a) + "TCH")) {
+//                        try {
+//                            smb.putImage("d_" + String.valueOf(a) + "/cafe", file);
+//                        } catch (IOException e) {
+//                            System.err.println("Can't upload file: " + file.getPath());
 //                        }
 //                    }
 //                }
+//
+//                // put pluref
+//                RefGenerator rgen = new RefGenerator(configuration, a);
+//
+//                BufferedWriter bw;
+//                try {
+//                    bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("ref.tmp"), "Cp866"));
+//
+//                    for (String line : rgen.getData()) {
+//                        bw.append(line + "\r\n");
+//                    }
+//
+//                    bw.flush();
+//                    bw.close();
+//
+//                    File ref = new File("ref.tmp");
+//                    smb.putFile("d_" + String.valueOf(a) + "/S_PLUREF.DAT", ref);
+//
+//                    ref.delete();
+//
+//                } catch (UnsupportedEncodingException e) {
+//                    System.out.println(e.getMessage());
+//                } catch (FileNotFoundException e) {
+//                    System.out.println(e.getMessage());
+//                } catch (IOException e) {
+//                    System.out.println(e.getMessage());
+//                }
+//
+//                for (int b = 0; b < configuration.size(); b++) {
+//
+//                    if (la.isLoad(b, a)) {
+//                        //smb.createFolder("d_" + String.valueOf(a) + "/" + configuration.get(b).toString());
+//
+//                        // put pardat's
+//                        ParGenerator pgen = new ParGenerator(configuration, a, b);
+//
+//                        BufferedWriter bw1;
+//                        try {
+//                            bw1 = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("par.tmp"), "Cp866"));
+//
+//                            for (String line : pgen.getData()) {
+//                                bw1.append(line + "\r\n");
+//                            }
+//
+//                            bw1.flush();
+//                            bw1.close();
+//
+//                            File par = new File("par.tmp");
+//                            smb.putFile("d_" + String.valueOf(a) + "/P_REGPAR.DAT" + configuration.get(b).getTerminalsAsString(), par);
+//
+//                            par.delete();
+//
+//                        } catch (UnsupportedEncodingException e) {
+//                            System.out.println(e.getMessage());
+//                        } catch (FileNotFoundException e) {
+//                            System.out.println(e.getMessage());
+//                        } catch (IOException e) {
+//                            System.out.println(e.getMessage());
+//                        }
+//
+//                    }
+//                }
+//
 //            }
+//        }
+//
+////            //create termGroups
+////            if (la.isLoad(a)) {
+////                smb.createFolder(configuration.get(a).toString());
+////
+////                for (int b = 0; b < configuration.get(a).getDaysOfWeek().length; b++) {
+////
+////                    //create dayOfWeeks
+////                    if (la.isLoad(a, b)) {
+////                        smb.createFolder(configuration.get(a).toString() + "/" + configuration.get(a).getDaysOfWeek()[b].toString());
+////
+////                        // put pluref
+////                        // put par
+////                        
+////                        
+////                        smb.createFolder(configuration.get(a).toString() + "/" + configuration.get(a).getDaysOfWeek()[b].toString() + "/cafe");
+////                        // copy img to cafe
+////                        File cafe = new File("res/pic");
+////                        File[] list = cafe.listFiles();
+////
+////                        for (int i = 0; i < list.length; i++) {
+////                            if (list[i].getName().startsWith(String.valueOf(b) + "TCH")) {
+////                                try {
+////                                    smb.putFile(configuration.get(a).toString() + "/" + configuration.get(a).getDaysOfWeek()[b].toString() + "/cafe", list[i]);
+////                                } catch (IOException e) {
+////                                    System.err.println("Can't upload file: " + list[i].getPath());
+////                                }
+////                            }
+////                        }
+////                    }
+////                }
+////            }
     }//GEN-LAST:event_jButton2ActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

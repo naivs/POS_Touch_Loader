@@ -220,15 +220,15 @@ public class Regular {
 
         DefaultListModel dlm = new DefaultListModel();
 
-        for (String terminal : terminalGroups.get(terminalGroup).getTerminals()) {
-            dlm.addElement(terminal);
-        }
+//        for (String terminal : terminalGroups.get(terminalGroup).getTerminals()) {
+//            dlm.addElement(terminal);
+//        }
 
         return dlm;
     }
 
     public void addTerminalsInTermGroup(int terminalGroup, String[] terminals) {
-        terminalGroups.get(terminalGroup).addAllTerminals(terminals);
+        //terminalGroups.get(terminalGroup).addAllTerminals(terminals);
     }
 
     public String getProductName(int product) {
@@ -280,7 +280,7 @@ public class Regular {
 
     public void addTerminalGroup(String name, ArrayList<String> terminals) {
 
-        terminalGroups.add(new TerminalGroup(name, terminals));
+        //terminalGroups.add(new TerminalGroup(name, terminals));
         //terminalGroups.get(terminalGroups.size() - 1).createDaysOfWeek();
         updateXml();
     }

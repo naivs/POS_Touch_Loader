@@ -85,55 +85,55 @@ public class SMBClient {
         }
     }
 
-    public void putImage(String smbPath, File image) throws IOException {
-        try {
-            System.out.println(smbPath);
-
-            SmbFile dir = new SmbFile(this.address + smbPath + "/" + image.getName().substring(1) + "/");
-            dir.createNewFile();
-
-            Path source = Paths.get(image.getPath());
-
-            OutputStream out = dir.getOutputStream();
-            Files.copy(source, out);
-
-        } catch (SmbException e) {
-            System.err.println("Can't create file " + image.getPath() + ". " + e.getMessage());
-        } catch (MalformedURLException e) {
-
-        }
-    }
-
-    public void putFile(String smbPath, File file) throws IOException {
-        try {
-            SmbFile dir = new SmbFile(this.address + smbPath + "/");
-            dir.createNewFile();
-            
-            Path source = Paths.get(file.getPath());
-
-            OutputStream out = dir.getOutputStream();
-            Files.copy(source, out);
-            
-        } catch (SmbException e) {
-            System.err.println("Can't create file " + smbPath + ". " + e.getMessage());
-        } catch (MalformedURLException e) {
-
-        }
-    }
-
-    public void clearFolder() {
-        try {
-            SmbFile[] files = new SmbFile(address).listFiles();
-
-            System.out.println(address);
-
-            for (int i = 0; i < files.length; i++) {
-                files[i].delete();
-            }
-        } catch (SmbException e) {
-            System.err.println("Can't clear. " + e.getMessage());
-        } catch (MalformedURLException e) {
-
-        }
-    }
+//    public void putImage(String smbPath, File image) throws IOException {
+//        try {
+//            System.out.println(smbPath);
+//
+//            SmbFile dir = new SmbFile(this.address + smbPath + "/" + image.getName().substring(1) + "/");
+//            dir.createNewFile();
+//
+//            Path source = Paths.get(image.getPath());
+//
+//            OutputStream out = dir.getOutputStream();
+//            Files.copy(source, out);
+//
+//        } catch (SmbException e) {
+//            System.err.println("Can't create file " + image.getPath() + ". " + e.getMessage());
+//        } catch (MalformedURLException e) {
+//
+//        }
+//    }
+//
+//    public void putFile(String smbPath, File file) throws IOException {
+//        try {
+//            SmbFile dir = new SmbFile(this.address + smbPath + "/");
+//            dir.createNewFile();
+//            
+//            Path source = Paths.get(file.getPath());
+//
+//            OutputStream out = dir.getOutputStream();
+//            Files.copy(source, out);
+//            
+//        } catch (SmbException e) {
+//            System.err.println("Can't create file " + smbPath + ". " + e.getMessage());
+//        } catch (MalformedURLException e) {
+//
+//        }
+//    }
+//
+//    public void clearFolder() {
+//        try {
+//            SmbFile[] files = new SmbFile(address).listFiles();
+//
+//            System.out.println(address);
+//
+//            for (int i = 0; i < files.length; i++) {
+//                files[i].delete();
+//            }
+//        } catch (SmbException e) {
+//            System.err.println("Can't clear. " + e.getMessage());
+//        } catch (MalformedURLException e) {
+//
+//        }
+//    }
 }

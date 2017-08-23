@@ -113,7 +113,7 @@ public class CatalogReader {
                 terms.add(((Element) terminals.item(j)).getAttribute("id"));
             }
             
-            terminalGroups.add(new TerminalGroup(terminalGroup.getAttribute("name"), terms));
+            //terminalGroups.add(new TerminalGroup(terminalGroup.getAttribute("name"), terms));
         }
         
         return terminalGroups;

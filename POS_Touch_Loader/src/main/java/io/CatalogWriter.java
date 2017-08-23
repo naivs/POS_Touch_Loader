@@ -43,11 +43,11 @@ public class CatalogWriter {
             Element termGroupElement = doc.createElement("TerminalGroup");
             termGroupElement.setAttribute("name", terminalGroup.toString());
             Element terminalsElement = doc.createElement("Terminals");
-            for(String terminal : terminalGroup.getTerminals()) {
-                Element term = doc.createElement("Terminal");
-                term.setAttribute("id", terminal);
-                terminalsElement.appendChild(term);
-            }
+//            for(String terminal : terminalGroup.getTerminals()) {
+//                Element term = doc.createElement("Terminal");
+//                term.setAttribute("id", terminal);
+//                terminalsElement.appendChild(term);
+//            }
             termGroupElement.appendChild(terminalsElement);
             rootTermGrp.appendChild(termGroupElement);
         }

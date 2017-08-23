@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import models.UploaderTableModel;
 import network.SMBAuthentication;
 import network.SMBClient;
-import network.ServerCommunicatior;
+import network.ServerCommunicator;
 import utils.LoadAnalyzer;
 import utils.ParGenerator;
 import utils.RefGenerator;
@@ -74,7 +74,7 @@ public class Uploader extends javax.swing.JDialog {
         -> test SMB share available
         */
         
-        ServerCommunicatior communicator = new ServerCommunicatior();
+        ServerCommunicator communicator = new ServerCommunicator();
         communicator.start();
         try {
             Thread.sleep(1000L);

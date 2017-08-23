@@ -2306,7 +2306,7 @@
 </DayOfWeek>
 </TerminalGroup>
 <TerminalGroup name="Пицца" terminals="031:033:034">
-<DayOfWeek modifiedDate="Sun Aug 20 15:06:59 MSK 2017" name="Понедельник">
+<DayOfWeek modifiedDate="" name="Понедельник">
 <Group creationDate="Sun Aug 20 15:06:59 MSK 2017" modifiedDate="Sun Aug 20 15:06:59 MSK 2017" name="ЗАВТРАКИ/БЛИНЫ::ВАРЕНИКИ/ПЕЛЬМЕНИ" number="0">
 <Subgroup creationDate="Sun Aug 20 15:06:59 MSK 2017" index="001" modifiedDate="Sun Aug 20 15:06:59 MSK 2017" name="1" number="0" picPath="">
 <Product creationDate="Sun Aug 20 15:06:59 MSK 2017" name="БЛИНЧИК С ФАРШЕМ В АССОРТИМЕНТЕ" number="0" picPath="" plu="983704"/>
@@ -2599,7 +2599,7 @@
 </Subgroup>
 </Group>
 </DayOfWeek>
-<DayOfWeek modifiedDate="Sun Aug 20 15:06:59 MSK 2017" name="Вторник">
+<DayOfWeek modifiedDate="" name="Вторник">
 <Group creationDate="Sun Aug 20 15:06:59 MSK 2017" modifiedDate="Sun Aug 20 15:06:59 MSK 2017" name="ЗАВТРАКИ/БЛИНЫ::ВАРЕНИКИ/ПЕЛЬМЕНИ" number="0">
 <Subgroup creationDate="Sun Aug 20 15:06:59 MSK 2017" index="001" modifiedDate="Sun Aug 20 15:06:59 MSK 2017" name="1" number="0" picPath="">
 <Product creationDate="Sun Aug 20 15:06:59 MSK 2017" name="БЛИНЧИК С ФАРШЕМ В АССОРТИМЕНТЕ" number="0" picPath="" plu="983704"/>
@@ -2915,7 +2915,7 @@
 </Subgroup>
 </Group>
 </DayOfWeek>
-<DayOfWeek modifiedDate="Sun Aug 20 15:06:59 MSK 2017" name="Среда">
+<DayOfWeek modifiedDate="" name="Среда">
 <Group creationDate="Sun Aug 20 15:06:59 MSK 2017" modifiedDate="Sun Aug 20 15:06:59 MSK 2017" name="ЗАВТРАКИ/БЛИНЫ::ВАРЕНИКИ/ПЕЛЬМЕНИ" number="0">
 <Subgroup creationDate="Sun Aug 20 15:06:59 MSK 2017" index="001" modifiedDate="Sun Aug 20 15:06:59 MSK 2017" name="1" number="0" picPath="">
 <Product creationDate="Sun Aug 20 15:06:59 MSK 2017" name="БЛИНЧИК С ФАРШЕМ В АССОРТИМЕНТЕ" number="0" picPath="" plu="983704"/>
@@ -3273,7 +3273,7 @@
 </Subgroup>
 </Group>
 </DayOfWeek>
-<DayOfWeek modifiedDate="Sun Aug 20 15:06:59 MSK 2017" name="Четверг">
+<DayOfWeek modifiedDate="" name="Четверг">
 <Group creationDate="Sun Aug 20 15:06:59 MSK 2017" modifiedDate="Sun Aug 20 15:06:59 MSK 2017" name="ЗАВТРАКИ/БЛИНЫ::ВАРЕНИКИ/ПЕЛЬМЕНИ" number="0">
 <Subgroup creationDate="Sun Aug 20 15:06:59 MSK 2017" index="001" modifiedDate="Sun Aug 20 15:06:59 MSK 2017" name="1" number="0" picPath="">
 <Product creationDate="Sun Aug 20 15:06:59 MSK 2017" name="БЛИНЧИК С ФАРШЕМ В АССОРТИМЕНТЕ" number="0" picPath="" plu="983704"/>
@@ -3642,7 +3642,7 @@
 </Subgroup>
 </Group>
 </DayOfWeek>
-<DayOfWeek modifiedDate="Sun Aug 20 15:06:59 MSK 2017" name="Пятница">
+<DayOfWeek modifiedDate="" name="Пятница">
 <Group creationDate="Sun Aug 20 15:06:59 MSK 2017" modifiedDate="Sun Aug 20 15:06:59 MSK 2017" name="ЗАВТРАКИ/БЛИНЫ::ВАРЕНИКИ/ПЕЛЬМЕНИ" number="0">
 <Subgroup creationDate="Sun Aug 20 15:06:59 MSK 2017" index="001" modifiedDate="Sun Aug 20 15:06:59 MSK 2017" name="1" number="0" picPath="">
 <Product creationDate="Sun Aug 20 15:06:59 MSK 2017" name="БЛИНЧИК С ФАРШЕМ В АССОРТИМЕНТЕ" number="0" picPath="" plu="983704"/>
@@ -3977,7 +3977,7 @@
 </Subgroup>
 </Group>
 </DayOfWeek>
-<DayOfWeek modifiedDate="Sun Aug 20 15:06:59 MSK 2017" name="Суббота">
+<DayOfWeek modifiedDate="" name="Суббота">
 <Group creationDate="Sun Aug 20 15:06:59 MSK 2017" modifiedDate="Sun Aug 20 15:06:59 MSK 2017" name="ЗАВТРАКИ/БЛИНЫ::ВАРЕНИКИ/ПЕЛЬМЕНИ" number="0">
 <Subgroup creationDate="Sun Aug 20 15:06:59 MSK 2017" index="001" modifiedDate="Sun Aug 20 15:06:59 MSK 2017" name="1" number="0" picPath="">
 <Product creationDate="Sun Aug 20 15:06:59 MSK 2017" name="БЛИНЧИК С ФАРШЕМ В АССОРТИМЕНТЕ" number="0" picPath="" plu="983704"/>
@@ -4287,7 +4287,7 @@
 </Subgroup>
 </Group>
 </DayOfWeek>
-<DayOfWeek modifiedDate="Sun Aug 20 15:06:59 MSK 2017" name="Воскресенье">
+<DayOfWeek modifiedDate="" name="Воскресенье">
 <Group creationDate="Sun Aug 20 15:06:59 MSK 2017" modifiedDate="Sun Aug 20 15:06:59 MSK 2017" name="ЗАВТРАКИ/БЛИНЫ::ВАРЕНИКИ/ПЕЛЬМЕНИ" number="0">
 <Subgroup creationDate="Sun Aug 20 15:06:59 MSK 2017" index="001" modifiedDate="Sun Aug 20 15:06:59 MSK 2017" name="1" number="0" picPath="">
 <Product creationDate="Sun Aug 20 15:06:59 MSK 2017" name="БЛИНЧИК С ФАРШЕМ В АССОРТИМЕНТЕ" number="0" picPath="" plu="983704"/>

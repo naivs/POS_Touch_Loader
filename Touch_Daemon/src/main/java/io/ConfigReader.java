@@ -22,9 +22,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.logging.Level;
 
 /**
@@ -33,7 +30,7 @@ import java.util.logging.Level;
  */
 public class ConfigReader {
 
-    private String sharedPath = "", username = "", password = "", path = "", loadTime = "";
+    private String sharePath = "", username = "", password = "", path = "", loadTime = "";
     private int port;
     private boolean parSettings, refSettings;
 
@@ -49,7 +46,7 @@ public class ConfigReader {
                     if (in.split("=").length > 1) {
                         switch (in.split("=")[0].trim()) {
                             case "shared_path":
-                                sharedPath = in.split("=")[1].trim();
+                                sharePath = in.split("=")[1].trim();
                                 break;
                             case "username":
                                 username = in.split("=")[1].trim();

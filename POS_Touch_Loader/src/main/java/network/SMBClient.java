@@ -61,17 +61,6 @@ public class SMBClient {
         this.smbAuth = smbAuth;
     }
 
-    public String listFiles() throws MalformedURLException, SmbAuthException, SmbException {
-        String out = "";
-        String[] files = share.list();
-
-        for (int i = 0; i < files.length; i++) {
-            out += files[i] + "\n";
-        }
-
-        return out;
-    }
-
     public void createFolder(String name) {
         try {
             SmbFile dir = new SmbFile(share, name);
@@ -84,8 +73,14 @@ public class SMBClient {
 
         }
     }
+    
+    public void putFile(File src, String dest) throws MalformedURLException, IOException {
+        SmbFile smbFile = new SmbFile(share, dest);
+        //smbFile.createNewFile();
+        Files.copy(src.toPath(), smbFile.getOutputStream());
+    }
 
-//    public void putImage(String smbPath, File image) throws IOException {
+    public void putImages(String smbPath, File image) throws IOException {
 //        try {
 //            System.out.println(smbPath);
 //
@@ -102,8 +97,8 @@ public class SMBClient {
 //        } catch (MalformedURLException e) {
 //
 //        }
-//    }
-//
+    }
+
 //    public void putFile(String smbPath, File file) throws IOException {
 //        try {
 //            SmbFile dir = new SmbFile(this.address + smbPath + "/");
@@ -120,20 +115,15 @@ public class SMBClient {
 //
 //        }
 //    }
-//
-//    public void clearFolder() {
-//        try {
-//            SmbFile[] files = new SmbFile(address).listFiles();
-//
-//            System.out.println(address);
-//
-//            for (int i = 0; i < files.length; i++) {
-//                files[i].delete();
-//            }
-//        } catch (SmbException e) {
-//            System.err.println("Can't clear. " + e.getMessage());
-//        } catch (MalformedURLException e) {
-//
-//        }
-//    }
+
+    public void clearShare() {
+        try {
+            SmbFile[] files = share.listFiles();
+            for (int i = 0; i < files.length; i++) {
+                files[i].delete();
+            }
+        } catch (SmbException e) {
+            System.err.println("Can't clear. " + e.getMessage());
+        }
+    }
 }

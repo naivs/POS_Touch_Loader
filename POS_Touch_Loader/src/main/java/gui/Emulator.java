@@ -20,6 +20,7 @@ import data.*;
 import io.ConfigurationReader;
 import io.ConfigurationWriter;
 import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -122,6 +123,7 @@ public class Emulator extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
+        jProgressBar1 = new javax.swing.JProgressBar();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenuItem2 = new javax.swing.JMenuItem();
@@ -311,13 +313,16 @@ public class Emulator extends javax.swing.JFrame {
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jButton9, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jProgressBar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton9, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -329,6 +334,8 @@ public class Emulator extends javax.swing.JFrame {
                     .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jProgressBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -440,27 +447,11 @@ public class Emulator extends javax.swing.JFrame {
             uploader.addWindowListener(new java.awt.event.WindowAdapter() {
                 @Override
                 public void windowClosed(java.awt.event.WindowEvent e) {
-
+                    
                 }
             });
             uploader.setVisible(true);
     }//GEN-LAST:event_jMenuItem1ActionPerformed
-
-    private void saveImage(Product[] products) {
-        try {
-            BufferedImage img = ImageIO.read(getClass().getResource("/resources/ground.gif"));
-            Graphics2D graph = img.createGraphics();
-            graph.setColor(Color.red);
-            graph.drawString("HELLO to MARS", 10, 10);
-            graph.drawLine(10, 10, 50, 50);
-            graph.dispose();
-
-            File out = new File("saved.GIF");
-            ImageIO.write(img, "gif", out);
-        } catch (IOException ex) {
-            System.err.println("Something wrong with ImageSaver...");
-        }
-    }
 
     private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
         tgManager();
@@ -568,6 +559,40 @@ public class Emulator extends javax.swing.JFrame {
                 } catch (TransformerException ex) {
                     System.err.println("TransformerException occured while configuration saving!");
                 }
+
+                File picFolder = new File("resources/pic");
+                picFolder.delete();
+                picFolder.mkdir();
+                
+                for (int a = 0; a < 7; a++) {
+                    for (int b = 0; b < terminalGroups.size(); b++) {
+                        if (terminalGroups.get(b).getDaysOfWeek()[a].getGroupCount() > 0) {
+                            // clear pic folder                            
+                            // creation day dirs
+                            // saving all images into it
+                            File anotherDay = new File("resources/pic/day" + a);
+                            anotherDay.mkdir();
+                            for (int c = 0; c < terminalGroups.get(b).getDaysOfWeek()[a].getGroupCount(); c++) {
+                                for (int d = 0; d < terminalGroups.get(b).getDaysOfWeek()[a].getGroup(c).getSubgroupCount(); d++) {
+                                    Product[] products = terminalGroups.get(b).getDaysOfWeek()[a].getGroup(c).getSubgroup(d).getProducts();
+                                    ((Monitor) jPanel2).display(products);
+
+                                    BufferedImage bi = new BufferedImage(jPanel2.getSize().width, jPanel2.getSize().height, BufferedImage.TYPE_INT_ARGB);
+                                    Graphics g = bi.createGraphics();
+                                    jPanel2.paint(g);
+                                    g.dispose();
+                                    try {
+                                        File pic = new File(anotherDay.getAbsolutePath() + "/TCH_X" + terminalGroups.get(b).getDaysOfWeek()[a].getGroup(c).getSubgroup(d).getIndex() + ".GIF");
+                                        ImageIO.write(bi, "GIF", pic);
+                                    } catch (IOException ex) {
+                                        System.out.println(ex.getMessage());
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    //jProgressBar1.setValue((100 / 7) * a);
+                }
             }
         });
         manager.setVisible(true);
@@ -606,15 +631,6 @@ public class Emulator extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
-                //Authorization.check_connection("10.61.0.4", Authorization.USERNAME, "r1001k");
-                //try {
-                //   File f = new File("resources/");
-                //    for(File out : Arrays.asList(f.listFiles())) {
-                //       System.out.println(out.getName());
-                //   }
-                //  System.out.println("\n" + System.getProperty("user.dir") + "\n\n");
-                //} catch (Exception e) {
-                //}
                 new Emulator(args[0], Integer.parseInt(args[1])).setVisible(true);
             }
         });
@@ -645,5 +661,6 @@ public class Emulator extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
+    private javax.swing.JProgressBar jProgressBar1;
     // End of variables declaration//GEN-END:variables
 }

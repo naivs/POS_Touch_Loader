@@ -1,6 +1,11 @@
 package utils;
 
 import data.Subgroup;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -83,5 +88,24 @@ public class RefGenerator {
 
     public ArrayList<String> getData() {
         return data;
+    }
+    
+    public File getFile() {
+        File tmp = null;
+        try {
+            tmp = File.createTempFile("~pr", ".tmp");
+        } catch (IOException ex) {
+
+        }
+
+        try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tmp), "cp866"))) {
+            for (String out : data) {
+                bw.write(out + "\r\n");
+            }
+            bw.flush();
+        } catch (IOException ex) {
+
+        }
+        return tmp;
     }
 }

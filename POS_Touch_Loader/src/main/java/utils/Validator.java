@@ -23,7 +23,7 @@ public class Validator {
 
         catalog = regular;
 
-        configurationReader = new ConfigurationReader();
+        //configurationReader = new ConfigurationReader();
         configuration = new ArrayList();
     }
 

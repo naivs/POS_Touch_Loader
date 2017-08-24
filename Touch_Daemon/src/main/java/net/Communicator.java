@@ -29,37 +29,39 @@ import touchdaemon.TouchDaemon;
  *
  * @author ivan
  */
-public class Communicator {
+public class Communicator extends Thread {
     
     private ServerSocket socketIn;
     private final String response;
     private Connection connection;
+    private boolean isWorking;
+    
+    public void run() {
+        while (isWorking) {
+            try {
+                if (connection == null) {
+                    Socket client = socketIn.accept();
+                    connection = new Connection(client, Connection.ACCEPT_MODE);
+                    connection.start();
+                    TouchDaemon.LOGGER.log(Level.INFO, "Client {0} connected...", connection.getIP());
+                }
+                if(!connection.isAlive()) {
+                    connection = null;
+                }
+            } catch (IOException ex) {
+                TouchDaemon.LOGGER.log(Level.WARNING, "Failure connection with client: " + connection.getIP(), ex);
+            }
+        }
+    }
     
     public Communicator(int port, String response) {
         this.response = response;
         
         try {
             socketIn = new ServerSocket(port);
+            isWorking = true;
         } catch (IOException ex) {
             TouchDaemon.LOGGER.log(Level.SEVERE, "Unable to server socket up!", ex);
-        }
-        
-        while (true) {
-            try {
-                if (connection != null && connection.isAlive()) {
-                    Socket client1 = socketIn.accept();
-                    Connection connection1 = new Connection(client1, Connection.DENY_MODE);
-                    connection1.start();
-                    TouchDaemon.LOGGER.log(Level.INFO, "Client {0} tried to connect...", connection1.getIP());
-                } else {
-                    Socket client = socketIn.accept();
-                    connection = new Connection(client, Connection.ACCEPT_MODE);
-                    connection.start();
-                    TouchDaemon.LOGGER.log(Level.INFO, "Client {0} connected...", connection.getIP());
-                }
-            } catch (IOException ex) {
-                TouchDaemon.LOGGER.log(Level.WARNING, "Failure connection with client: " + connection.getIP(), ex);
-            }
         }
     }
     
@@ -89,26 +91,22 @@ public class Communicator {
                     String str;
                     while (true) {
                         str = in.readLine();
-                        if (str.equals("[bye]")) {
-                            break;
-                        } else if(str.equals("[get]")) {
-                            // -> params sending
+                        if (str.equals("[get]")) {
                             out.println(response);
+                        } else if(str.equals("[bye]")) {
+                            out.println("[bye]");
                         }
                     }
-                } else {
-                    out.println("[bye]");
-                    close();
                 }
             } catch (IOException e) {
-                close();
+                    TouchDaemon.LOGGER.log(Level.SEVERE, "I/O error on client socket. " + getIP(), e);
             } finally {
-                close();
+                try {
+                    socket.close();
+                } catch (IOException ex) {
+                    TouchDaemon.LOGGER.log(Level.WARNING, "Unable to close client socket. " + getIP(), ex);
+                }
             }
-        }
-        
-        private void close() {   
-            interrupt();
         }
         
         public String getIP() {

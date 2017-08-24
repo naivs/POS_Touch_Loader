@@ -70,8 +70,8 @@ public class TouchDaemon {
                 configReader.readUsername() + " " +
                 configReader.readPassword() + " " +
                 configReader.readLoadTime();
-        new Communicator(configReader.readPort(), response);
-        //communicator.start();
+        Communicator communicator = new Communicator(configReader.readPort(), response);
+        communicator.start();
         LOGGER.log(Level.FINE, "communicator started!");
         new DayTrigger(configReader.readPath(), configReader.readLoadTime(), configReader.readParSettings(),
         configReader.readRefSettings());

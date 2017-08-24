@@ -42,6 +42,7 @@ public class Uploader extends javax.swing.JDialog {
 
     private final ArrayList<TerminalGroup> configuration;
     LoadAnalyzer la;
+    ServerCommunicator communicator;
     SMBClient smbClient;
 
     /**
@@ -74,13 +75,12 @@ public class Uploader extends javax.swing.JDialog {
         -> test SMB share available
         */
         
-        ServerCommunicator communicator = new ServerCommunicator();
-        communicator.start();
-        try {
-            Thread.sleep(1000L);
-        } catch (InterruptedException ex) {
-            System.out.println("interrupted" + ex.getMessage());
-        }
+        communicator = new ServerCommunicator();
+//        try {
+//            Thread.sleep(1000L);
+//        } catch (InterruptedException ex) {
+//            System.out.println("interrupted" + ex.getMessage());
+//        }
         SMBAuthentication in = communicator.getSmbAuth();
         jLabel1.setText(communicator.getLoadTime());
         smbClient = new SMBClient(Emulator.SERVER_IP, communicator.getSmbAuth());
@@ -121,6 +121,11 @@ public class Uploader extends javax.swing.JDialog {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Загрузка параметров на сервер");
         setResizable(false);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosed(java.awt.event.WindowEvent evt) {
+                formWindowClosed(evt);
+            }
+        });
 
         jLabel1.setText("Адрес:");
 
@@ -359,6 +364,10 @@ public class Uploader extends javax.swing.JDialog {
 ////                }
 ////            }
     }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
+        communicator.shutDown();
+    }//GEN-LAST:event_formWindowClosed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;

@@ -52,7 +52,7 @@ public class DayTrigger {
         while (true) {
             Date actualTime = new Date(System.currentTimeMillis());
 
-            if (df.format(actualTime).equals(df.format(firedTime))) {
+            if (df.format(actualTime).equals(firedTime)) {
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTime(actualTime);
 

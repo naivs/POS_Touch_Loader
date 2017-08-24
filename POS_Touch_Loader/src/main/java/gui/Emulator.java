@@ -577,7 +577,6 @@ public class Emulator extends javax.swing.JFrame {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        System.out.println(args.length);
         System.out.println(Arrays.toString(args));
         if(args.length != 2) System.out.println("Usage: Emulator [server ip] [port]");
         /* Set the Nimbus look and feel */

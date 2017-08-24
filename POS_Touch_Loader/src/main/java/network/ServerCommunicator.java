@@ -29,8 +29,7 @@ import java.util.Arrays;
  *
  * @author Ivan
  */
-public class ServerCommunicator extends Thread {
-    //private boolean stoped;
+public class ServerCommunicator {
     private SMBAuthentication smbAuth;
     private String loadTime;
     
@@ -38,8 +37,7 @@ public class ServerCommunicator extends Thread {
     private PrintWriter out;
     private BufferedReader in;
     
-    @Override
-    public void run() {
+    public ServerCommunicator() {
         try {
             socket = new Socket(Emulator.SERVER_IP, Emulator.PORT);
             out = new PrintWriter(socket.getOutputStream(), true);
@@ -51,7 +49,6 @@ public class ServerCommunicator extends Thread {
             } else {
                 System.out.println(Emulator.SERVER_IP + ": host unreachable.");
             }
-            
             // sending query
             System.out.println("getting data...");
             out.println("[get]");
@@ -59,17 +56,12 @@ public class ServerCommunicator extends Thread {
             System.out.println(Arrays.toString(response));
             smbAuth = new SMBAuthentication(response[0], response[1], response[2]);
             loadTime = response[3];
-            out.println("[bye]");
         } catch (UnknownHostException ex) {
             System.err.println("Unknown host " + Emulator.SERVER_IP);
+            shutDown();
         } catch (IOException ex) {
-            System.err.println("I/O Socket error.");
-        } finally {
-            try {
-                socket.close();
-            } catch (IOException ex) {
-                System.err.println("Unable to close socket.");
-            }
+            System.err.println("I/O Socket error. " + ex.getMessage());
+            shutDown();
         }
     }
     
@@ -79,5 +71,20 @@ public class ServerCommunicator extends Thread {
     
     public String getLoadTime() {
         return loadTime;
+    }
+    
+    public void shutDown() {
+        out.println("[bye]");
+
+        if (out != null) {
+            out.println("[bye]");
+        }
+        try {
+            if (socket != null) {
+                socket.close();
+            }
+        } catch (IOException e) {
+            System.err.println("Unable to close socket.");
+        }
     }
 }

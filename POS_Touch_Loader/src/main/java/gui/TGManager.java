@@ -629,8 +629,11 @@ public class TGManager extends javax.swing.JDialog {
                             subgroups = new Subgroup[products.size() / 20];
                         }
 
+                        String[] subgroupsNames = parser.getSubgroupNames(i, j);
+                        
                         for (int s = 0; s < subgroups.length; s++) {
-                            subgroups[s] = new Subgroup(String.valueOf(s + 1), idisp.getNextFreeIndex(i), Collections.EMPTY_LIST);
+                            //subgroups[s] = new Subgroup(String.valueOf(s + 1), idisp.getNextFreeIndex(i), Collections.EMPTY_LIST);
+                            subgroups[s] = new Subgroup(subgroupsNames[s], idisp.getNextFreeIndex(i), Collections.EMPTY_LIST);
                         }
 
                         for (int g = 0; g < products.size(); g++) {

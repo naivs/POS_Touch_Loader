@@ -14,7 +14,7 @@ public class IndexDispatcher {
     private final boolean[][] indexPool = new boolean[7][999];
     
     public int getNextFreeIndex(int day) {
-        for(int i = 0; i < indexPool[day].length; i++) {
+        for(int i = 310; i < indexPool[day].length; i++) {
             if(!indexPool[day][i]) {
                 indexPool[day][i] = true;
                 return i + 1;

@@ -84,11 +84,11 @@ public class ParGenerator {
                 index = group.getSubgroup(i).getIndex();
 
                 while (name1.length() < 12) {
-                    name1 = " " + name1;
+                    name1 += " ";
                 }
 
                 while (name2.length() < 18) {
-                    name2 = " " + name2;
+                    name2 += " ";
                 }
 
                 out[i] += "PD0" + (10 * (groupNumber + 1) + i) + ":LIST:" + name1 + "*" + index + ":" + name2;

@@ -1,7 +1,6 @@
 package utils;
 
 import data.Product;
-import gui.Emulator;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -22,7 +21,7 @@ public class Monitor extends javax.swing.JPanel {
 
     private Graphics graphic;
     private JLabel[] labels = new JLabel[20];
-    private Font textFont = new Font("Franklin Gothic Medium Cond Regular", Font.BOLD, 16);
+    private Font textFont = new Font("Franklin Gothic Medium Cond Regular", Font.BOLD, 14);
     private Font pluFont = new Font("Franklin Gothic Medium Cond Regular", Font.BOLD, 14);
 
     private String[] buttonsText = {"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""};
@@ -45,7 +44,6 @@ public class Monitor extends javax.swing.JPanel {
 
 // FUNCTIONS
     private void addLabels() {
-
         int w = 109;
         int h = 80;
 
@@ -55,7 +53,6 @@ public class Monitor extends javax.swing.JPanel {
 
         for (int i = 1; i < 384; i += plu_dy) {
             for (int j = 1; j < 555; j += plu_dx) {
-
                 labels[index] = new JLabel();
                 labels[index].setHorizontalTextPosition(JLabel.CENTER);
                 labels[index].setVerticalTextPosition(JLabel.CENTER);
@@ -66,14 +63,12 @@ public class Monitor extends javax.swing.JPanel {
                 labels[index].setFont(textFont);
                 labels[index].setForeground(Color.BLACK);
                 index++;
-
             }
         }
     }
 
     @Override
     protected void paintComponent(Graphics g) {
-
         graphic = g;
         super.paintComponent(graphic);
 
@@ -100,7 +95,6 @@ public class Monitor extends javax.swing.JPanel {
         }
 
         for (int i = 0; i < 20; i++) {
-
             labels[i].setText("<html>\n"
                     + "<head>\n"
                     + "<style>\n"

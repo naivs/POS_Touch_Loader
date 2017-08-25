@@ -24,7 +24,7 @@ public class Product implements Serializable {
 
     public Product(String name, String plu, String picturePath, List<String> accessibleSubgroups, String creationDate) {
         
-        this.name = name;
+        this.name = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
         this.plu = plu;
         this.picturePath = picturePath;
         this.accessibleSubgroups = accessibleSubgroups;

@@ -13,11 +13,11 @@ public class IndexDispatcher {
     // indexPool[dayOfWeek][index]
     private final boolean[][] indexPool = new boolean[7][999];
     
-    public int getNextFreeIndex(int day) {
-        for(int i = 310; i < indexPool[day].length; i++) {
+    public int getNextFreeIndex(int day, int start) {
+        for(int i = start; i < start + 100; i++) {
             if(!indexPool[day][i]) {
                 indexPool[day][i] = true;
-                return i + 1;
+                return i;
             }
         }
         

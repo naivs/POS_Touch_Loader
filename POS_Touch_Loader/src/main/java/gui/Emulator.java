@@ -19,13 +19,12 @@ package gui;
 import data.*;
 import io.ConfigurationReader;
 import io.ConfigurationWriter;
-import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,6 +33,7 @@ import javax.imageio.ImageIO;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JMenu;
+import javax.swing.JOptionPane;
 import javax.swing.JRadioButtonMenuItem;
 import javax.xml.transform.TransformerException;
 import org.xml.sax.SAXException;
@@ -72,15 +72,17 @@ public class Emulator extends javax.swing.JFrame {
         } catch (SAXException e) {
             // empty or corrupted
             System.err.println(e.getMessage() + "\nФайл: \"resources/configuration.xml\" пуст или поврежден. Будет создана новая конфигурация");
-            tgManager();
+            //tgManager();
+            openPosDepartmentManager();
         } catch (IOException e) {
             // no file
-            System.err.println(e.getMessage());
-            try {
-                new File("resources/configuration.xml").createNewFile();
-            } catch (IOException ex) {
-                System.err.println("Неудается создать файл: \"resources/configuration.xml\"");
-            }
+            System.err.println(e.getMessage() + "\nФайл: \"resources/configuration.xml\" не найден. Будет создана новая конфигурация");
+            openPosDepartmentManager();
+//            try {
+//                new File("resources/configuration.xml").createNewFile();
+//            } catch (IOException ex) {
+//                System.err.println("Неудается создать файл: \"resources/configuration.xml\"");
+//            }
         }
         
         initComponents();
@@ -143,6 +145,8 @@ public class Emulator extends javax.swing.JFrame {
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Меню"));
 
         jButton1.setBackground(new java.awt.Color(0, 102, 0));
+        jButton1.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        jButton1.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
@@ -150,6 +154,8 @@ public class Emulator extends javax.swing.JFrame {
         });
 
         jButton2.setBackground(new java.awt.Color(0, 102, 0));
+        jButton2.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        jButton2.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
         jButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton2ActionPerformed(evt);
@@ -157,6 +163,8 @@ public class Emulator extends javax.swing.JFrame {
         });
 
         jButton3.setBackground(new java.awt.Color(0, 102, 0));
+        jButton3.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        jButton3.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
         jButton3.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton3ActionPerformed(evt);
@@ -164,6 +172,8 @@ public class Emulator extends javax.swing.JFrame {
         });
 
         jButton4.setBackground(new java.awt.Color(0, 102, 0));
+        jButton4.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        jButton4.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
         jButton4.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton4ActionPerformed(evt);
@@ -171,6 +181,8 @@ public class Emulator extends javax.swing.JFrame {
         });
 
         jButton5.setBackground(new java.awt.Color(0, 102, 0));
+        jButton5.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        jButton5.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
         jButton5.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton5ActionPerformed(evt);
@@ -178,6 +190,8 @@ public class Emulator extends javax.swing.JFrame {
         });
 
         jButton6.setBackground(new java.awt.Color(0, 102, 0));
+        jButton6.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        jButton6.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
         jButton6.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton6ActionPerformed(evt);
@@ -185,6 +199,8 @@ public class Emulator extends javax.swing.JFrame {
         });
 
         jButton7.setBackground(new java.awt.Color(0, 102, 0));
+        jButton7.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        jButton7.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
         jButton7.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton7ActionPerformed(evt);
@@ -192,6 +208,8 @@ public class Emulator extends javax.swing.JFrame {
         });
 
         jButton8.setBackground(new java.awt.Color(0, 102, 0));
+        jButton8.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        jButton8.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
         jButton8.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton8ActionPerformed(evt);
@@ -206,18 +224,18 @@ public class Emulator extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(jButton7, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 170, Short.MAX_VALUE)
-                        .addComponent(jButton6, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButton5, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButton4, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButton3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButton2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButton8, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jButton7, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jButton6, javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jButton5, javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jButton4, javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jButton3, javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jButton2, javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jButton8, javax.swing.GroupLayout.Alignment.LEADING))
+                    .addComponent(jButton1))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jButton2, jButton3, jButton4, jButton5, jButton6, jButton7});
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jButton1, jButton2, jButton3, jButton4, jButton5, jButton6, jButton7, jButton8});
 
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -437,7 +455,7 @@ public class Emulator extends javax.swing.JFrame {
         } else {
             String[] subgroupNames = terminalGroups.get(selectedTermGroup).getDaysOfWeek()[selectedDay].getGroup(selectedGroup).getSubgroupsAsStringArray();
             for (int i = 0; i < subgroupNames.length; i++) {
-                touch[i].setText(subgroupNames[i]);
+                touch[i].setText("<html>" + subgroupNames[i].replaceAll("::", "<br>") + "</html>");
             }
         }
     }
@@ -454,7 +472,8 @@ public class Emulator extends javax.swing.JFrame {
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
     private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
-        tgManager();
+        //tgManager();
+        openPosDepartmentManager();
     }//GEN-LAST:event_jMenuItem2ActionPerformed
 
     private void touchActionHub(int button) {
@@ -548,12 +567,31 @@ public class Emulator extends javax.swing.JFrame {
         setButtonsLabels();
     }//GEN-LAST:event_jButton9ActionPerformed
 
-    private void tgManager() {
-        TGManager manager = new TGManager(this, true, (ArrayList) terminalGroups);
+    void delete(File f) throws IOException {
+        if (f.isDirectory()) {
+            for (File c : f.listFiles()) {
+                delete(c);
+            }
+        }
+        if (!f.delete()) {
+            throw new FileNotFoundException("Failed to delete file: " + f);
+        }
+    }
+    
+    private void openPosDepartmentManager() {
+        PosDepartmentManager manager = new PosDepartmentManager(this, true, (ArrayList) terminalGroups);
         manager.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosed(java.awt.event.WindowEvent e) {
                 // configuration writing
+                Thread t = new Thread() {
+                    @Override
+                    public void run() {
+                        JOptionPane.showMessageDialog(null, "", "Идет сохранение...", JOptionPane.PLAIN_MESSAGE);
+                    }
+                };
+                t.start();
+                
                 try {
                     new ConfigurationWriter().write(terminalGroups);
                 } catch (TransformerException ex) {
@@ -561,9 +599,13 @@ public class Emulator extends javax.swing.JFrame {
                 }
 
                 File picFolder = new File("resources/pic");
-                picFolder.delete();
+                try {
+                    delete(picFolder);
+                } catch (IOException ex) {
+                    System.out.println("IO Except " + ex.toString());
+                }
                 picFolder.mkdir();
-                
+
                 for (int a = 0; a < 7; a++) {
                     for (int b = 0; b < terminalGroups.size(); b++) {
                         if (terminalGroups.get(b).getDaysOfWeek()[a].getGroupCount() > 0) {
@@ -591,8 +633,8 @@ public class Emulator extends javax.swing.JFrame {
                             }
                         }
                     }
-                    //jProgressBar1.setValue((100 / 7) * a);
                 }
+                t.interrupt();
             }
         });
         manager.setVisible(true);
@@ -603,7 +645,9 @@ public class Emulator extends javax.swing.JFrame {
      */
     public static void main(String args[]) {
         System.out.println(Arrays.toString(args));
-        if(args.length != 2) System.out.println("Usage: Emulator [server ip] [port]");
+        if (args.length != 2) {
+            System.out.println("Usage: Emulator [server ip] [port]");
+        }
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.

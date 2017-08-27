@@ -16,15 +16,10 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  */
 public class Parser {
 
-    private Workbook wb;
+    private final Workbook wb;
 
     public Parser(File file) throws FileNotFoundException, IOException {
         wb = new XSSFWorkbook(new FileInputStream(file));
-
-//        for (String out : getProducts(5, 1)) {
-//
-//            System.out.println(out);
-//        }
     }
 
     public String[] getGroupsNames() {
@@ -32,7 +27,8 @@ public class Parser {
         Sheet mySheet = wb.getSheetAt(0);
         int k = 2;
         for (int i = 0; i < groupNames.length; i++) {
-            groupNames[i] = mySheet.getRow(0).getCell(k).getStringCellValue() + "::" + mySheet.getRow(0).getCell(k + 5).getStringCellValue();
+            groupNames[i] = mySheet.getRow(0).getCell(k).getStringCellValue().replace("\n", "").trim() 
+                    + "::" + mySheet.getRow(0).getCell(k + 5).getStringCellValue().replace("\n", "").trim();
             k += 7;
         }
 
@@ -44,7 +40,7 @@ public class Parser {
         Sheet mySheet = wb.getSheetAt(day);
         int k = 2;
         for(int i = 0; i < subgroupNames.length; i++) {
-            String buf = mySheet.getRow(k).getCell(group * 7 + 1).getStringCellValue();
+            String buf = mySheet.getRow(k).getCell(group * 7 + 1).getStringCellValue().replace("\n", "").trim();
             subgroupNames[i] =  buf.isEmpty() ? (i+1) + ":: " : buf + "::" + 
                     mySheet.getRow(k + 10).getCell(group * 7 + 1).getStringCellValue();
             k += 20;
@@ -60,7 +56,7 @@ public class Parser {
         
         for(int i = 2; i < 160; i++) {
             plu = String.valueOf(mySheet.getRow(i).getCell(group * 7 + 1 + 5).getNumericCellValue());
-            String buf = plu.equals("0.0") ? " :: " : plu.substring(0, plu.length() - 2) + "::" + mySheet.getRow(i).getCell(group * 7 + 1 + 6).getStringCellValue();
+            String buf = plu.equals("0.0") ? " :: " : plu.substring(0, plu.length() - 2) + "::" + mySheet.getRow(i).getCell(group * 7 + 1 + 6).getStringCellValue().replace("\n", "").trim();
             products.add(buf);
         }
         

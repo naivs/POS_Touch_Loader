@@ -4,7 +4,6 @@ import data.Group;
 import data.Product;
 import data.Subgroup;
 import data.TerminalGroup;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.xml.parsers.DocumentBuilder;
@@ -33,19 +32,6 @@ public class ConfigurationReader {
         } catch (ParserConfigurationException e) {
             System.err.println(e.getMessage());
         }
-//        catch (SAXException e) {
-//            // empty or corrupted
-//            System.err.println(e.getMessage());
-//            
-//        } catch (IOException e) {
-//            // no file
-//            System.err.println(e.getMessage());
-//            try {
-//                new File("resources/configuration.xml").createNewFile();
-//            } catch (IOException ex) {
-//               System.err.println("Неудается создать файл: \"resources/configuration.xml\""); 
-//            }
-//        }
     }
 
     public ArrayList<TerminalGroup> read() {
@@ -56,14 +42,14 @@ public class ConfigurationReader {
 
             // terminalGroup
             Element elementA = (Element) termGrps.item(a);
-            terminalGroups.add(new TerminalGroup(elementA.getAttribute("name"), elementA.getAttribute("terminals")));
+            terminalGroups.add(new TerminalGroup(elementA.getAttribute("name"), elementA.getAttribute("terminals"), elementA.getAttribute("startIndex")));
 
             // daysOfWeek
             NodeList dow = elementA.getElementsByTagName("DayOfWeek");
 
             // groups
             for (int b = 0; b < terminalGroups.get(a).getDaysOfWeek().length; b++) {
-                terminalGroups.get(a).getDaysOfWeek()[b].setGroups(readGroups(termGrps, a, b));
+                terminalGroups.get(a).getDaysOfWeek()[b].addAllGroups(readGroups(termGrps, a, b));
                 terminalGroups.get(a).getDaysOfWeek()[b].setModifiedDate(((Element) dow.item(b)).getAttribute("lastConfigured"));
             }
         }

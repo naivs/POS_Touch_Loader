@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2017 Ivan
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package utils;
 
 import data.Group;
@@ -7,7 +23,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  *
@@ -18,122 +33,66 @@ public class ParGenerator {
     private final ArrayList<String> data;
 
     public ParGenerator(ArrayList<data.TerminalGroup> configuration, int day, int termGroup) {
-
         data = new ArrayList();
-
-        Group[] groups = new Group[8];
-        //ArrayList<Subgroup> subgroups = new ArrayList();
-
-        for (int c = 0; c < 8; c++) {
-
-            groups[c] = configuration.get(termGroup).getDaysOfWeek()[day].getGroup(c);
-
-//                    for (int d = 0; d < 8; d++) {
-//                        if (configuration.get(b).getDaysOfWeek()[day].getGroup(c).getSubgroup(d) != null) {
-//
-//                            subgroups.add(configuration.get(b).getDaysOfWeek()[day].getGroup(c).getSubgroup(d));
-//                        }
-//                    }
+        
+        for (int a = 0; a < configuration.get(termGroup).getDaysOfWeek()[day].getGroupCount(); a++) {
+            generateSubgroupBlock(configuration.get(termGroup).getDaysOfWeek()[day].getGroup(a), a);
         }
 
-//        // sorting groups by number
-//        for(int i = 0; i < subgroups.size(); i++) {
-//            for(int j = subgroups.size() - 1; j > i; j--) {
-//                
-//                if(Integer.parseInt(subgroups.get(i).getIndex()) > Integer.parseInt(subgroups.get(j).getIndex())) {                   
-//                    Collections.swap(subgroups, i, j);
-//                }
-//            }
-//        }
-        // sorting subgroups by index
-//        for(int i = 0; i < subgroups.size(); i++) {
-//            for(int j = subgroups.size() - 1; j > i; j--) {
-//                
-//                if(Integer.parseInt(subgroups.get(i).getIndex()) > Integer.parseInt(subgroups.get(j).getIndex())) {                   
-//                    Collections.swap(subgroups, i, j);
-//                }
-//            }
-//        }
-        for (int i = 0; i < 8; i++) {
-            if(groups[i] != null)
-            data.addAll(Arrays.asList(generateSubgroupBlock(groups[i], i)));
-        }
-
-        data.addAll(Arrays.asList(generateGroupBlock(groups)));
+        generateGroupBlock(configuration.get(termGroup).getDaysOfWeek()[day].getGroupsAsStringArray());
     }
 
-    private String[] generateSubgroupBlock(Group group, int groupNumber) {
+    private void generateSubgroupBlock(Group group, int groupNumber) {
+        StringBuilder subgroupString;
 
-        String[] out = new String[8];
-        Arrays.fill(out, "");
-
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < group.getSubgroupCount(); i++) {
+            subgroupString = new StringBuilder("PD0__:LIST:            *___:                  ");
             String name1, name2, index;
 
-            if (group.getSubgroup(i) != null) {
-                String[] names = group.getSubgroup(i).getName().split("::");
-                
-                if(names.length == 1) {
-                    name1 = group.getSubgroup(i).getName().split("::")[0];
-                    name2 = "";
-                } else {
-                    name1 = group.getSubgroup(i).getName().split("::")[0];
-                    name2 = group.getSubgroup(i).getName().split("::")[1];
-                }
-                
-                index = group.getSubgroup(i).getIndex();
-
-                while (name1.length() < 12) {
-                    name1 += " ";
-                }
-
-                while (name2.length() < 18) {
-                    name2 += " ";
-                }
-
-                out[i] += "PD0" + (10 * (groupNumber + 1) + i) + ":LIST:" + name1 + "*" + index + ":" + name2;
+            String[] names = group.getSubgroup(i).getName().split("::");
+            if (names.length == 1) {
+                name1 = names[0];
+                name2 = "";
             } else {
-                out[i] += "PD0" + (10 * (groupNumber + 1) + i) + ":LIST:            *000:                  ";
+                name1 = names[0];
+                name2 = names[1];
             }
-        }
 
-        return out;
+            index = group.getSubgroup(i).getIndex();
+
+            subgroupString.replace(3, 4, String.valueOf(groupNumber + 1));
+            subgroupString.replace(4, 5, String.valueOf(i));
+            subgroupString.replace(11, 11 + name1.length(), name1);
+            subgroupString.replace(24, 27, index);
+            subgroupString.replace(28, 28 + name2.length(), name2);
+
+            data.add(subgroupString.toString());
+        }
     }
 
-    private String[] generateGroupBlock(Group[] groups) {
-
-        String[] out = new String[8];
-        Arrays.fill(out, "");
+    private void generateGroupBlock(String[] groups) {
+        StringBuilder groupString;
 
         for (int i = 0; i < groups.length; i++) {
+            groupString = new StringBuilder("PRES_:DYNA:              0_:                  ");
             String name1, name2;
 
-            if (groups[i] != null) {
-                String[] names = groups[i].getName().split("::");
-                
-                if(names.length == 1) {
-                    name1 = groups[i].getName().split("::")[0];
-                    name2 = "";
-                } else {
-                    name1 = groups[i].getName().split("::")[0];
-                    name2 = groups[i].getName().split("::")[1];
-                }
-
-                while (name1.length() < 14) {
-                    name1 = " " + name1;
-                }
-
-                while (name2.length() < 18) {
-                    name2 = " " + name2;
-                }
-
-                out[i] += "PRES" + (i + 1) + ":DYNA:" + name1 + "0" + (i + 1) + ":" + name2;
+            String[] names = groups[i].split("::");
+            if (names.length == 1) {
+                name1 = names[0];
+                name2 = "";
             } else {
-                out[i] += "PRES" + (i + 1) + ":DYNA:              0" + (i + 1) + ":                  ";
+                name1 = names[0];
+                name2 = names[1];
             }
+               
+            groupString.replace(4, 5, String.valueOf(i + 1));
+            groupString.replace(11, 11 + name1.length(), name1);
+            groupString.replace(26, 27, String.valueOf(i + 1));
+            groupString.replace(28, 28 + name2.length(), name2);
+            
+            data.add(groupString.toString());
         }
-
-        return out;
     }
 
     public ArrayList<String> getData() {

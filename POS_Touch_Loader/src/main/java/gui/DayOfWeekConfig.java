@@ -227,7 +227,7 @@ public class DayOfWeekConfig extends javax.swing.JDialog {
 
         if (selectedRow > 0) {
 
-            dayOfWeek.upGroup(selectedRow);
+            //dayOfWeek.upGroup(selectedRow);
             addedGroups.setModel(dayOfWeek.getGroupsAsTableModel());
 
             addedGroups.setRowSelectionInterval(selectedRow - 1, selectedRow - 1);
@@ -239,7 +239,7 @@ public class DayOfWeekConfig extends javax.swing.JDialog {
         int selectedRow = addedGroups.getSelectedRow();
 
         if (selectedRow < 7) {
-            dayOfWeek.downGroup(addedGroups.getSelectedRow());
+            //dayOfWeek.downGroup(addedGroups.getSelectedRow());
             addedGroups.setModel(dayOfWeek.getGroupsAsTableModel());
 
             addedGroups.setRowSelectionInterval(selectedRow + 1, selectedRow + 1);

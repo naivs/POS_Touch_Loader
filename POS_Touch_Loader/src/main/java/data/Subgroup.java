@@ -224,10 +224,6 @@ public class Subgroup {
     
     @Override
     public String toString() {
-        if (name.split("::").length < 2) {
-            return name.split("::")[0];
-        } else {
-            return name.split("::")[0] + " " + name.split("::")[1];
-        }
+        return name;
     }
 }

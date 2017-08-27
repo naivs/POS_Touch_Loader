@@ -1,5 +1,6 @@
 package io;
 
+import data.DayOfWeek;
 import java.io.File;
 import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
@@ -37,60 +38,58 @@ public class ConfigurationWriter {
 
         Element root = doc.createElement("Configuration");
         // terminalGroups
-        for (int a = 0; a < terminalGroups.size(); a++) {
+        terminalGroups.stream().map((termGroup) -> {
             Element termGrp = doc.createElement("TerminalGroup");
-            termGrp.setAttribute("name", terminalGroups.get(a).toString());
-            termGrp.setAttribute("terminals", terminalGroups.get(a).getTerminalsAsString());
-
+            termGrp.setAttribute("name", termGroup.toString());
+            termGrp.setAttribute("terminals", termGroup.getTerminalsAsString());
+            termGrp.setAttribute("startIndex", termGroup.getStartIndex());
             // daysOfWeek
-            for (int b = 0; b < terminalGroups.get(a).getDaysOfWeek().length; b++) {
-                Element dayOfWeek = doc.createElement("DayOfWeek");
-                dayOfWeek.setAttribute("name", terminalGroups.get(a).getDaysOfWeek()[b].toString());
-                dayOfWeek.setAttribute("modifiedDate", terminalGroups.get(a).getDaysOfWeek()[b].getModifiedDate());
-
+            for (DayOfWeek dayOfWeek : termGroup.getDaysOfWeek()) {
+                Element dayElement = doc.createElement("DayOfWeek");
+                dayElement.setAttribute("name", dayOfWeek.toString());
+                dayElement.setAttribute("modifiedDate", dayOfWeek.getModifiedDate());
                 // groups
                 for (int c = 0; c < 8; c++) {
-                    if (terminalGroups.get(a).getDaysOfWeek()[b].getGroup(c) != null) {
+                    if (dayOfWeek.getGroup(c) != null) {
                         Element group = doc.createElement("Group");
-                        group.setAttribute("name", terminalGroups.get(a).getDaysOfWeek()[b].getGroup(c).getName());
+                        group.setAttribute("name", dayOfWeek.getGroup(c).getName());
                         group.setAttribute("number", String.valueOf(c)); //terminalGroups.get(a).getDaysOfWeek()[b].getGroup(c).getNumber());
-                        group.setAttribute("creationDate", terminalGroups.get(a).getDaysOfWeek()[b].getGroup(c).getCreationDate());
-                        group.setAttribute("modifiedDate", terminalGroups.get(a).getDaysOfWeek()[b].getGroup(c).getModifiedDate());
-
+                        group.setAttribute("creationDate", dayOfWeek.getGroup(c).getCreationDate());
+                        group.setAttribute("modifiedDate", dayOfWeek.getGroup(c).getModifiedDate());
                         // subgroups
                         for (int d = 0; d < 8; d++) {
-                            if (terminalGroups.get(a).getDaysOfWeek()[b].getGroup(c).getSubgroup(d) != null) {
+                            if (dayOfWeek.getGroup(c).getSubgroup(d) != null) {
                                 Element subgroup = doc.createElement("Subgroup");
-                                subgroup.setAttribute("name", terminalGroups.get(a).getDaysOfWeek()[b].getGroup(c).getSubgroup(d).getName());
-                                subgroup.setAttribute("index", terminalGroups.get(a).getDaysOfWeek()[b].getGroup(c).getSubgroup(d).getIndex());
-                                subgroup.setAttribute("picPath", terminalGroups.get(a).getDaysOfWeek()[b].getGroup(c).getSubgroup(d).getPicturePath());
+                                subgroup.setAttribute("name", dayOfWeek.getGroup(c).getSubgroup(d).getName());
+                                subgroup.setAttribute("index", dayOfWeek.getGroup(c).getSubgroup(d).getIndex());
+                                subgroup.setAttribute("picPath", dayOfWeek.getGroup(c).getSubgroup(d).getPicturePath());
                                 subgroup.setAttribute("number", String.valueOf(d));//terminalGroups.get(a).getDaysOfWeek()[b].getGroup(c).getSubgroup(d).getNumber());
-                                subgroup.setAttribute("creationDate", terminalGroups.get(a).getDaysOfWeek()[b].getGroup(c).getSubgroup(d).getCreationDate());
-                                subgroup.setAttribute("modifiedDate", terminalGroups.get(a).getDaysOfWeek()[b].getGroup(c).getSubgroup(d).getModifiedDate());
-
+                                subgroup.setAttribute("creationDate", dayOfWeek.getGroup(c).getSubgroup(d).getCreationDate());
+                                subgroup.setAttribute("modifiedDate", dayOfWeek.getGroup(c).getSubgroup(d).getModifiedDate());
                                 // products
                                 for (int e = 0; e < 20; e++) {
-                                    if (terminalGroups.get(a).getDaysOfWeek()[b].getGroup(c).getSubgroup(d).getProduct(e) != null) {
+                                    if (dayOfWeek.getGroup(c).getSubgroup(d).getProduct(e) != null) {
                                         Element product = doc.createElement("Product");
-                                        product.setAttribute("name", terminalGroups.get(a).getDaysOfWeek()[b].getGroup(c).getSubgroup(d).getProduct(e).toString());
-                                        product.setAttribute("plu", terminalGroups.get(a).getDaysOfWeek()[b].getGroup(c).getSubgroup(d).getProduct(e).getPlu());
-                                        product.setAttribute("picPath", terminalGroups.get(a).getDaysOfWeek()[b].getGroup(c).getSubgroup(d).getProduct(e).getPicturePath());
+                                        product.setAttribute("name", dayOfWeek.getGroup(c).getSubgroup(d).getProduct(e).toString());
+                                        product.setAttribute("plu", dayOfWeek.getGroup(c).getSubgroup(d).getProduct(e).getPlu());
+                                        product.setAttribute("picPath", dayOfWeek.getGroup(c).getSubgroup(d).getProduct(e).getPicturePath());
                                         product.setAttribute("number", String.valueOf(e));//terminalGroups.get(a).getDaysOfWeek()[b].getGroup(c).getSubgroup(d).getProduct(e).getNumber());
-                                        product.setAttribute("creationDate", terminalGroups.get(a).getDaysOfWeek()[b].getGroup(c).getSubgroup(d).getProduct(e).getCreationDate());
-                                        
+                                        product.setAttribute("creationDate", dayOfWeek.getGroup(c).getSubgroup(d).getProduct(e).getCreationDate());
                                         subgroup.appendChild(product);
                                     }
                                 }
                                 group.appendChild(subgroup);
                             }
                         }
-                        dayOfWeek.appendChild(group);
+                        dayElement.appendChild(group);
                     }
                 }
-                termGrp.appendChild(dayOfWeek);
+                termGrp.appendChild(dayElement);
             }
+            return termGrp;
+        }).forEachOrdered((termGrp) -> {
             root.appendChild(termGrp);
-        }
+        });
 
         doc.appendChild(root);
 

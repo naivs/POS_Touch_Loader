@@ -143,7 +143,6 @@ public class AddingTerminals extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     public static String showAddTerminalsDialog() {
-        
         AddingTerminals at = new AddingTerminals(null, true);
         at.setVisible(true);
         

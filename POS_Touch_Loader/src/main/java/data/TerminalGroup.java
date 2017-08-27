@@ -9,16 +9,12 @@ public class TerminalGroup {
     private final String name;
     private final String terminals;
     private DayOfWeek[] daysOfWeek;
-    private boolean isRemoved;
+    private String startIndex;
 
-//    public TerminalGroup(String name) {
-//        this.name = name;
-//        terminals = new ArrayList();
-//    }
-
-    public TerminalGroup(String name, String terminals) {
+    public TerminalGroup(String name, String terminals, String startIndex) {
         this.name = name;
         this.terminals = terminals;
+        this.startIndex = startIndex;
         daysOfWeek = new DayOfWeek[7];
         
         String[] dNames = {"Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"};
@@ -37,6 +33,10 @@ public class TerminalGroup {
     
     public String getTerminalsAsString() {
         return terminals;
+    }
+    
+    public String getStartIndex() {
+        return startIndex;
     }
     
 //    private boolean isConfigured() {
@@ -84,23 +84,8 @@ public class TerminalGroup {
 //        return configuredData;
 //    }
     
-    public void setRemoved(boolean statement) {
-        isRemoved = statement;
-    }
-    
-    public boolean isRemoved() {
-        return isRemoved;
-    }
-    
     @Override
     public String toString() {
-        
-//        if(isRemoved) {
-//            return name + " [удалена]";
-//        } else if(isConfigured()) {
-//            return name + " [не настроена]";
-//        }
-        
         return name;
     }
 }

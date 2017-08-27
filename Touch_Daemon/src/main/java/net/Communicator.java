@@ -95,6 +95,8 @@ public class Communicator extends Thread {
                             out.println(response);
                         } else if(str.equals("[bye]")) {
                             out.println("[bye]");
+                            TouchDaemon.LOGGER.log(Level.INFO, "Client {0} disconnected...", getIP());
+                            return;
                         }
                     }
                 }

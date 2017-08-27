@@ -133,11 +133,13 @@ public class DayTrigger {
         
         // load PLUREF.DAT
         try {
-            Files.copy(new File(loadDay.getCanonicalPath() + "S_PLUREF.DAT").toPath(), new File(TouchDaemon.SERVER_PATH + "S_PLUREF.DAT").toPath(), StandardCopyOption.REPLACE_EXISTING);
-            Files.copy(new File(loadDay.getCanonicalPath() + "S_PLUREF.DAT").toPath(), new File(TouchDaemon.SERVER_PATH_LAN + "S_PLUREF.DAT").toPath(), StandardCopyOption.REPLACE_EXISTING);
-            Files.copy(new File(loadDay.getCanonicalPath() + "S_PLUREF.DAT").toPath(), new File(TouchDaemon.SERVER_PATH_LAN4SRV + "S_PLUREF.DAT").toPath(), StandardCopyOption.REPLACE_EXISTING);
+            File pluPef = new File(TouchDaemon.SERVER_PATH + "S_PLUREF.DAT");
+            injectToRef(new File(loadDay.getCanonicalPath() + "S_PLUREF.DAT"), pluPef);
+            //Files.copy(new File(loadDay.getCanonicalPath() + "S_PLUREF.DAT").toPath(), new File(TouchDaemon.SERVER_PATH + "S_PLUREF.DAT").toPath(), StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(pluPef.toPath(), new File(TouchDaemon.SERVER_PATH_LAN + "S_PLUREF.DAT").toPath(), StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(pluPef.toPath(), new File(TouchDaemon.SERVER_PATH_LAN4SRV + "S_PLUREF.DAT").toPath(), StandardCopyOption.REPLACE_EXISTING);
             if(refSettings) {
-                Files.copy(new File(loadDay.getCanonicalPath() + "S_PLUREF.DAT").toPath(), new File(TouchDaemon.HOC_PATH + "S_PLUREF.DAT").toPath(), StandardCopyOption.REPLACE_EXISTING);
+                Files.copy(pluPef.toPath(), new File(TouchDaemon.HOC_PATH + "S_PLUREF.DAT").toPath(), StandardCopyOption.REPLACE_EXISTING);
             }
         } catch (IOException ex) {
             TouchDaemon.LOGGER.log(Level.SEVERE, "Unable to copy PLUREF.DAT file... ", ex.getMessage());
@@ -158,69 +160,6 @@ public class DayTrigger {
         } catch (IOException ex) {
             TouchDaemon.LOGGER.log(Level.WARNING, "I/O Exception while writing files to " + TouchDaemon.HOC_PATH, ex.getMessage());
         }
-
-        
-        /*
-        for (int i = 0; i < localRegs.length; i++) {
-        String[] names = getRegParNames(localRegs[i].getName());
-        SmbFile[] pars = new SmbFile[names.length];
-        for (int j = 0; j < names.length; j++) {
-        pars[j] = smbClient.getFile(TouchDaemon.SERVER_PATH + names[j]);
-        //try {
-        //if(!pars[j].exists()) throw new SmbException(j, true);
-        // pars[j] may be null
-        injectToPar(pars[j], localRegs[i]);
-        try {
-        pars[j].copyTo(smbClient.getFile(TouchDaemon.SERVER_PATH_LAN + names[j]));
-        pars[j].copyTo(smbClient.getFile(TouchDaemon.SERVER_PATH_LAN4SRV + names[j]));
-        if (parSettings) {
-        pars[j].copyTo(smbClient.getFile(TouchDaemon.WEB_PATH + names[j]));
-        }
-        } catch (SmbException e) {
-        TouchDaemon.LOGGER.log(Level.WARNING, "File \"" + pars[j] + "\" is missing on the server.", e);
-        }
-        //                } catch (SmbException e) {
-        //                    System.err.println("File \"" + names[j] + "\" is missing on the server.");
-        //                }
-        }
-        }
-        // load images
-        String imagesPath = TouchDaemon.SERVER_PATH + "images/cafe/";
-        smbClient.clearFolder(imagesPath);
-        File[] images = new File(loadDay.getPath() + "/cafe").listFiles();
-        if (images != null) {
-        for (File file : images) {
-        try {
-        smbClient.putFile(imagesPath, file);
-        } catch (IOException e) {
-        TouchDaemon.LOGGER.log(Level.WARNING, "Can't upload file to server. ", e.getMessage());
-        }
-        }
-        }
-        // load pluref
-        try {
-        SmbFile targetRef = smbClient.getFile(TouchDaemon.SERVER_PATH + "S_PLUREF.DAT");
-        Path sourceRef = new File(loadDay.getPath() + "/S_PLUREF.DAT").toPath();
-        OutputStream refOut = targetRef.getOutputStream();
-        Files.copy(sourceRef, refOut);
-        targetRef.copyTo(smbClient.getFile(TouchDaemon.SERVER_PATH_LAN + "S_PLUREF.DAT"));
-        targetRef.copyTo(smbClient.getFile(TouchDaemon.SERVER_PATH_LAN4SRV + "S_PLUREF.DAT"));
-        if (parSettings) {
-        targetRef.copyTo(smbClient.getFile(TouchDaemon.WEB_PATH + "S_PLUREF.DAT"));
-        }
-        } catch (IOException e) {
-        TouchDaemon.LOGGER.log(Level.WARNING, "Can't upload S_PLUREF.DAT to server.", e.getMessage());
-        }
-        // creating ASRPARAM.CTL
-        if (parSettings || refSettings) {
-        SmbFile keyFile = smbClient.getFile(TouchDaemon.WEB_PATH + TouchDaemon.WEB_KEYFILE);
-        try {
-        keyFile.createNewFile();
-        } catch (SmbException e) {
-        TouchDaemon.LOGGER.log(Level.WARNING, "Can't create \"ASRPARAM.CTL\" file", e);
-        }
-        }
-         */
     }
 
     private String[] getRegParNames(String name) {
@@ -270,7 +209,8 @@ public class DayTrigger {
             destData += srcData;
             
             while ((buf = reader.readLine()) != null) {
-                destData += buf;
+                if(!buf.startsWith("PD") && !buf.startsWith("PRES"))
+                    destData += buf;
             }
         } catch (IOException e) {
             TouchDaemon.LOGGER.log(Level.SEVERE, "Can't read REGPAR.DAT...", e.getMessage());
@@ -290,6 +230,81 @@ public class DayTrigger {
                 writer.append(destData);
         } catch (IOException e) {
             TouchDaemon.LOGGER.log(Level.SEVERE, "IO Error while injecting data to server REGPAR.DAT...", e.getMessage());
+        } finally {
+            try {
+                if (writer != null) {
+                    writer.close();
+                }
+            } catch (IOException e) {
+                TouchDaemon.LOGGER.log(Level.SEVERE, "Stream unable to close...", e.getMessage());
+            }
+        }
+    }
+    
+    private void injectToRef(File source, File dest) {
+        String srcData = "";
+        String destData = "";
+        
+        BufferedReader reader = null;
+        BufferedWriter writer = null;
+        
+        String startIndex = null, endIndex = null;
+
+        try {
+            reader = new BufferedReader(new InputStreamReader(new FileInputStream(source), "Cp866"));
+            String buf;
+
+            int i = 0;
+            while ((buf = reader.readLine()) != null) {
+                srcData += buf;
+                if(i == 0) startIndex = buf.substring(1, 4);
+            }
+            endIndex = buf.substring(1, 4);
+        } catch (IOException e) {
+            TouchDaemon.LOGGER.log(Level.SEVERE, "Can't read data for inject...", e.getMessage());
+            return;
+        } finally {
+            try {
+                if (reader != null) {
+                    reader.close();
+                }
+            } catch (IOException e) {
+                TouchDaemon.LOGGER.log(Level.SEVERE, "Stream unable to close...", e.getMessage());
+            }
+        }
+        
+        try {
+            reader = new BufferedReader(new InputStreamReader(new FileInputStream(dest), "Cp866"));
+            String buf;
+
+            while (Integer.parseInt((buf = reader.readLine()).substring(1, 4)) < Integer.parseInt(startIndex)) {
+                destData += buf;
+            }
+            
+            destData += srcData;
+            
+            while ((buf = reader.readLine()) != null) {
+                if(Integer.parseInt(buf.substring(1, 4)) > Integer.parseInt(endIndex))
+                    destData += buf;
+            }
+        } catch (IOException e) {
+            TouchDaemon.LOGGER.log(Level.SEVERE, "Can't read PLUREF.DAT...", e.getMessage());
+            return;
+        } finally {
+            try {
+                if (reader != null) {
+                    reader.close();
+                }
+            } catch (IOException e) {
+                TouchDaemon.LOGGER.log(Level.SEVERE, "Stream unable to close...", e.getMessage());
+            }
+        }
+
+        try {
+            writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(dest), "Cp866"));
+                writer.append(destData);
+        } catch (IOException e) {
+            TouchDaemon.LOGGER.log(Level.SEVERE, "IO Error while injecting data to server PLUREF.DAT...", e.getMessage());
         } finally {
             try {
                 if (writer != null) {

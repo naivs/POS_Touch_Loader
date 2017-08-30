@@ -54,7 +54,7 @@ public class Parser {
         //int k = 2;
         String plu;
         
-        for(int i = 2; i < 160; i++) {
+        for(int i = 2; i < 162; i++) {
             plu = String.valueOf(mySheet.getRow(i).getCell(group * 7 + 1 + 5).getNumericCellValue());
             String buf = plu.equals("0.0") ? " :: " : plu.substring(0, plu.length() - 2) + "::" + mySheet.getRow(i).getCell(group * 7 + 1 + 6).getStringCellValue().replace("\n", "").trim();
             products.add(buf);

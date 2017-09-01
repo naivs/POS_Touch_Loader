@@ -201,7 +201,7 @@ public class Uploader extends javax.swing.JDialog {
 
                         String terminals = "";
                         for (String num : configuration.get(b).getTerminalsAsString().split(":")) {
-                            terminals += "_" + num;
+                            terminals += "-" + num;
                         }
                         smbClient.putFile(par, "day" + a + "/P_REGPAR.DAT" + terminals);
                     }

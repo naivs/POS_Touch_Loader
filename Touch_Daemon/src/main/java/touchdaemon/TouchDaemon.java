@@ -18,6 +18,7 @@ package touchdaemon;
 
 import io.ConfigReader;
 import java.io.IOException;
+import java.util.Timer;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
@@ -31,12 +32,12 @@ import net.Communicator;
  */
 public class TouchDaemon {
 
-    public static final String SERVER_PATH = "c$/Server/";
+    public static final String SERVER_PATH = "c:/Server/";
     public static final String SERVER_PATH_LAN =  SERVER_PATH + "lan/";
     public static final String SERVER_PATH_LAN4SRV =  SERVER_PATH + "lan4srv/";
-    public static final String IMAGES = SERVER_PATH + "cafe/";
-    public static final String WEB_PATH = "c$/web/mtxwm/gm/hoc/par/web/";
-    public static final String HOC_PATH = "c$/web/mtxwm/gm/hoc/par/";
+    public static final String IMAGES = SERVER_PATH + "images/cafe/";
+    public static final String WEB_PATH = "c:/web/mtxwm/gm/hoc/par/web/";
+    public static final String HOC_PATH = "c:/web/mtxwm/gm/hoc/par/";
     public static final String WEB_KEYFILE = "ASRPARAM.CTL";
 
     public static final Logger LOGGER = Logger.getLogger("touchdaemon");

@@ -27,9 +27,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Level;
 
 /**
@@ -38,27 +38,32 @@ import java.util.logging.Level;
  */
 public class DayTrigger {
 
+    private String firedTime;
     private String path;
     private boolean parSettings;
     private boolean refSettings;
+    
+    private Timer timer;
 
     public DayTrigger(String path, String firedTime, boolean parSettings, boolean refSettings) {
         this.path = path;
+        this.firedTime = firedTime;
         this.parSettings = parSettings;
         this.refSettings = refSettings;
-
-        SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
-
-        while (true) {
-            Date actualTime = new Date(System.currentTimeMillis());
-
-            if (df.format(actualTime).equals(firedTime)) {
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTime(actualTime);
-
-                int dayOfWeek = 0;
+        timer = new Timer(true);
+    }
+    
+    public void start() {
+        Calendar fire = Calendar.getInstance();
+        fire.set(Calendar.HOUR_OF_DAY, Integer.parseInt(firedTime.split(":")[0]));
+        fire.set(Calendar.MINUTE, Integer.parseInt(firedTime.split(":")[1]));
+        
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                int dayOfWeek;
                 // check config on day
-                switch (calendar.get(Calendar.DAY_OF_WEEK)) {
+                switch (fire.get(Calendar.DAY_OF_WEEK)) {
                     case Calendar.MONDAY:
                         dayOfWeek = 0;
                         break;
@@ -80,10 +85,11 @@ public class DayTrigger {
                     case Calendar.SUNDAY:
                         dayOfWeek = 6;
                         break;
+                    default:
+                        dayOfWeek = 0;
                 }
-
-                File day = new File(this.path + "/d_" + (dayOfWeek));
-
+                
+                File day = new File(path + "/day" + (dayOfWeek));
                 if (day.exists()) {
                     TouchDaemon.LOGGER.log(Level.INFO, "{0} exists. Loading...", day.getName());
                     loadToServer(day);
@@ -91,9 +97,9 @@ public class DayTrigger {
                     TouchDaemon.LOGGER.log(Level.INFO, "{0} not exists.", day.getName());
                 }
             }
-        }
+        }, fire.getTime(), 86_400_000L);
     }
-
+    
     private void loadToServer(File loadDay) {
         // load images
         try {
@@ -171,7 +177,7 @@ public class DayTrigger {
         return out;
     }
 
-    private void injectToPar(File source, File dest) {
+    public void injectToPar(File source, File dest) {
         String srcData = "";
         String destData = "";
         

@@ -22,6 +22,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Properties;
 import java.util.logging.Level;
 
 /**
@@ -35,55 +36,27 @@ public class ConfigReader {
     private boolean parSettings, refSettings;
 
     public ConfigReader() {
+        Properties properties = new Properties();
         BufferedReader reader = null;
 
         try {
             reader = new BufferedReader(new InputStreamReader(new FileInputStream("touchDaemon.conf")));
-            String in;
-
-            while ((in = reader.readLine()) != null) {
-                if (!in.startsWith("#") && !in.isEmpty()) {
-                    if (in.split("=").length > 1) {
-                        switch (in.split("=")[0].trim()) {
-                            case "share_path":
-                                sharePath = in.split("=")[1].trim();
-                                break;
-                            case "username":
-                                username = in.split("=")[1].trim();
-                                break;
-                            case "password":
-                                password = in.split("=")[1].trim();
-                                break;
-                            case "path":
-                                path = in.split("=")[1].trim();
-                                break;
-                            case "load_time":
-                                loadTime = in.split("=")[1].trim();
-                                break;
-                            case "par_backup":
-                                parSettings = Boolean.parseBoolean(in.split("=")[1].trim());
-                                break;
-                            case "ref_backup":
-                                refSettings = Boolean.parseBoolean(in.split("=")[1].trim());
-                                break;
-                            case "port":
-                                port = Integer.parseInt(in.split("=")[1].trim());
-                                break;
-                            default:
-                                break;
-                        }
-                    } else {
-                        throw new IOException("Wrong configs!");
-                    }
-                }
-            }
+            properties.load(reader);
+            sharePath = properties.getProperty("share_path");
+            username = properties.getProperty("username");
+            password = properties.getProperty("password");
+            path = properties.getProperty("path");
+            loadTime = properties.getProperty("load_time");
+            parSettings = properties.getProperty("par_backup").equals("true");
+            refSettings = properties.getProperty("ref_backup").equals("true");
+            port = Integer.parseInt(properties.getProperty("port"));
         } catch (FileNotFoundException e) {
             TouchDaemon.LOGGER.log(Level.SEVERE, "File touchDaemon.conf is not found!", e);
         } catch (IOException e) {
             TouchDaemon.LOGGER.log(Level.SEVERE, "Other IO Exception.", e);
         } finally {
             try {
-                reader.close();
+                if(reader != null) reader.close();
             } catch (IOException e) {
                 TouchDaemon.LOGGER.log(Level.SEVERE, "Can't close the stream!", e);
             }

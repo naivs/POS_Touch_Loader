@@ -18,7 +18,6 @@ package touchdaemon;
 
 import io.ConfigReader;
 import java.io.IOException;
-import java.util.Timer;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;

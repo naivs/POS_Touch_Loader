@@ -38,12 +38,12 @@ import java.util.logging.Level;
  */
 public class DayTrigger {
 
-    private String firedTime;
-    private String path;
-    private boolean parSettings;
-    private boolean refSettings;
+    private final String firedTime;
+    private final String path;
+    private final boolean parSettings;
+    private final boolean refSettings;
     
-    private Timer timer;
+    private final Timer timer;
 
     public DayTrigger(String path, String firedTime, boolean parSettings, boolean refSettings) {
         this.path = path;
@@ -54,7 +54,7 @@ public class DayTrigger {
     }
     
     public void start() {
-        Calendar fire = Calendar.getInstance();
+        final Calendar fire = Calendar.getInstance();
         fire.set(Calendar.HOUR_OF_DAY, Integer.parseInt(firedTime.split(":")[0]));
         fire.set(Calendar.MINUTE, Integer.parseInt(firedTime.split(":")[1]));
         
@@ -97,7 +97,7 @@ public class DayTrigger {
                     TouchDaemon.LOGGER.log(Level.INFO, "{0} not exists.", day.getName());
                 }
             }
-        }, fire.getTime(), 86_400_000L);
+        }, fire.getTime(), 86400000L);
     }
     
     private void loadToServer(File loadDay) {
@@ -189,7 +189,7 @@ public class DayTrigger {
             String buf;
 
             while ((buf = reader.readLine()) != null) {
-                srcData += buf;
+                srcData += buf + "\r\n";
             }
         } catch (IOException e) {
             TouchDaemon.LOGGER.log(Level.SEVERE, "Can't read data for inject...", e.getMessage());
@@ -208,15 +208,15 @@ public class DayTrigger {
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(dest), "Cp866"));
             String buf;
 
-            while ((buf = reader.readLine()).startsWith("PD")) {
-                destData += buf;
+            while (!(buf = reader.readLine()).startsWith("PD")) {
+                destData += buf + "\r\n";
             }
             
             destData += srcData;
             
             while ((buf = reader.readLine()) != null) {
                 if(!buf.startsWith("PD") && !buf.startsWith("PRES"))
-                    destData += buf;
+                    destData += buf + "\r\n";
             }
         } catch (IOException e) {
             TouchDaemon.LOGGER.log(Level.SEVERE, "Can't read REGPAR.DAT...", e.getMessage());

@@ -201,8 +201,9 @@ public class Uploader extends javax.swing.JDialog {
 
                         String terminals = "";
                         for (String num : configuration.get(b).getTerminalsAsString().split(":")) {
-                            terminals += "-" + num;
+                            terminals += num + "-";
                         }
+                        terminals = terminals.substring(0, terminals.length() - 1);
                         smbClient.putFile(par, "day" + a + "/P_REGPAR.DAT" + terminals);
                     }
                 } catch (MalformedURLException ex) {

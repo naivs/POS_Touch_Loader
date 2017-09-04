@@ -27,6 +27,7 @@ public class Injector {
     
     public static void main(String[] args) {
         DayTrigger dt = new DayTrigger("", "", true, true);
-        dt.injectToPar(new File("P_REGPAR.DAT141-142-143-144-145-146"), new File("P_141PAR.DAT"));
+        ///dt.injectToPar(new File("P_REGPAR.DAT141-142-143-144-145-146"), new File("P_141PAR.DAT"));
+        dt.injectToRef(new File("S_PLUREF_SRC.DAT"), new File("S_PLUREF.DAT"));
     }
 }

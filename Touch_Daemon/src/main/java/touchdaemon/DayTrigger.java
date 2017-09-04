@@ -27,6 +27,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -247,8 +248,8 @@ public class DayTrigger {
         }
     }
     
-    private void injectToRef(File source, File dest) {
-        String srcData = "";
+    public void injectToRef(File source, File dest) {
+        ArrayList<String> srcData = new ArrayList();
         String destData = "";
         
         BufferedReader reader = null;
@@ -259,13 +260,11 @@ public class DayTrigger {
         try {
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(source), "Cp866"));
             String buf;
-
-            int i = 0;
-            while ((buf = reader.readLine()) != null) {
-                srcData += buf;
-                if(i == 0) startIndex = buf.substring(1, 4);
+            while((buf = reader.readLine()) != null) {
+                srcData.add(buf);
             }
-            endIndex = buf.substring(1, 4);
+            startIndex = srcData.get(0).substring(1, 4);
+            endIndex = srcData.get(srcData.size() - 1).substring(1, 4);
         } catch (IOException e) {
             TouchDaemon.LOGGER.log(Level.SEVERE, "Can't read data for inject...", e.getMessage());
             return;
@@ -284,14 +283,16 @@ public class DayTrigger {
             String buf;
 
             while (Integer.parseInt((buf = reader.readLine()).substring(1, 4)) < Integer.parseInt(startIndex)) {
-                destData += buf;
+                destData += buf + "\r\n";
             }
             
-            destData += srcData;
+            for(String string : srcData) {
+                destData += string + "\r\n";
+            }
             
             while ((buf = reader.readLine()) != null) {
                 if(Integer.parseInt(buf.substring(1, 4)) > Integer.parseInt(endIndex))
-                    destData += buf;
+                    destData += buf + "\r\n";
             }
         } catch (IOException e) {
             TouchDaemon.LOGGER.log(Level.SEVERE, "Can't read PLUREF.DAT...", e.getMessage());

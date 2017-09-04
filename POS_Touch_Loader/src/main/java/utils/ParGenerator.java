@@ -78,12 +78,19 @@ public class ParGenerator {
             String name1, name2;
 
             String[] names = groups[i].split("::");
-            if (names.length == 1) {
-                name1 = names[0];
-                name2 = "";
-            } else {
-                name1 = names[0];
-                name2 = names[1];
+            switch (names.length) {
+                case 0:
+                    name1 = "";
+                    name2 = "";
+                    break;
+                case 1:
+                    name1 = names[0];
+                    name2 = "";
+                    break;
+                default:
+                    name1 = names[0];
+                    name2 = names[1];
+                    break;
             }
                
             groupString.replace(4, 5, String.valueOf(i + 1));

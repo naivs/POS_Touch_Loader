@@ -141,7 +141,7 @@ public class DayTrigger {
         // load PLUREF.DAT
         try {
             File pluPef = new File(TouchDaemon.SERVER_PATH + "S_PLUREF.DAT");
-            injectToRef(new File(loadDay.getCanonicalPath() + "S_PLUREF.DAT"), pluPef);
+            injectToRef(new File(loadDay.getCanonicalPath() + "/S_PLUREF.DAT"), pluPef);
             //Files.copy(new File(loadDay.getCanonicalPath() + "S_PLUREF.DAT").toPath(), new File(TouchDaemon.SERVER_PATH + "S_PLUREF.DAT").toPath(), StandardCopyOption.REPLACE_EXISTING);
             Files.copy(pluPef.toPath(), new File(TouchDaemon.SERVER_PATH_LAN + "S_PLUREF.DAT").toPath(), StandardCopyOption.REPLACE_EXISTING);
             Files.copy(pluPef.toPath(), new File(TouchDaemon.SERVER_PATH_LAN4SRV + "S_PLUREF.DAT").toPath(), StandardCopyOption.REPLACE_EXISTING);

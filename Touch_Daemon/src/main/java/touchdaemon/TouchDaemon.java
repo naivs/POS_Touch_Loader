@@ -73,8 +73,9 @@ public class TouchDaemon {
         Communicator communicator = new Communicator(configReader.readPort(), response);
         communicator.start();
         LOGGER.log(Level.FINE, "communicator started!");
-        new DayTrigger(configReader.readPath(), configReader.readLoadTime(), configReader.readParSettings(),
+        DayTrigger dayTrigger = new DayTrigger(configReader.readPath(), configReader.readLoadTime(), configReader.readParSettings(),
         configReader.readRefSettings());
+        dayTrigger.start();
         LOGGER.log(Level.FINE, "trigger started!");
 //        try {
 //            smbClient.checkConnection();

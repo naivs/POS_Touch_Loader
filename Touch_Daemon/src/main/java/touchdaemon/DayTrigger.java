@@ -23,10 +23,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Timer;
@@ -66,25 +66,25 @@ public class DayTrigger {
                 // check config on day
                 switch (fire.get(Calendar.DAY_OF_WEEK)) {
                     case Calendar.MONDAY:
-                        dayOfWeek = 0;
-                        break;
-                    case Calendar.TUESDAY:
                         dayOfWeek = 1;
                         break;
-                    case Calendar.WEDNESDAY:
+                    case Calendar.TUESDAY:
                         dayOfWeek = 2;
                         break;
-                    case Calendar.THURSDAY:
+                    case Calendar.WEDNESDAY:
                         dayOfWeek = 3;
                         break;
-                    case Calendar.FRIDAY:
+                    case Calendar.THURSDAY:
                         dayOfWeek = 4;
                         break;
-                    case Calendar.SATURDAY:
+                    case Calendar.FRIDAY:
                         dayOfWeek = 5;
                         break;
-                    case Calendar.SUNDAY:
+                    case Calendar.SATURDAY:
                         dayOfWeek = 6;
+                        break;
+                    case Calendar.SUNDAY:
+                        dayOfWeek = 0;
                         break;
                     default:
                         dayOfWeek = 0;
@@ -101,12 +101,33 @@ public class DayTrigger {
         }, fire.getTime(), 86400000L);
     }
     
+    private void copyFile(File source, File dest) throws IOException {
+        InputStream input = null;
+        OutputStream output = null;
+        try {
+            input = new FileInputStream(source);
+            output = new FileOutputStream(dest);
+            byte[] buf = new byte[1024];
+            int bytesRead;
+
+            while ((bytesRead = input.read(buf)) > 0) {
+                output.write(buf, 0, bytesRead);
+            }
+        } finally {
+            if (input != null && output != null) {
+                input.close();
+                output.close();
+            }
+        }
+    }
+    
     private void loadToServer(File loadDay) {
         // load images
         try {
             File[] images = new File(loadDay.getCanonicalPath() + "/cafe/").listFiles();
             for(File image : images) {
-                Files.copy(image.toPath(), new File(TouchDaemon.IMAGES + image.getName()).toPath(), StandardCopyOption.REPLACE_EXISTING);
+                //Files.copy(image.toPath(), new File(TouchDaemon.IMAGES + image.getName()).toPath(), StandardCopyOption.REPLACE_EXISTING);
+                copyFile(image, new File(TouchDaemon.IMAGES + image.getName()));
             }
         } catch (IOException ex) {
             TouchDaemon.LOGGER.log(Level.SEVERE, "Unable to copy any of ../cafe/image file... ", ex.getMessage());
@@ -127,10 +148,13 @@ public class DayTrigger {
                 File dest = new File(TouchDaemon.SERVER_PATH + name);
                 injectToPar(src, dest);
                 try {
-                    Files.copy(dest.toPath(), new File(TouchDaemon.SERVER_PATH_LAN + dest.getName()).toPath(), StandardCopyOption.REPLACE_EXISTING);
-                    Files.copy(dest.toPath(), new File(TouchDaemon.SERVER_PATH_LAN4SRV + dest.getName()).toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    //Files.copy(dest.toPath(), new File(TouchDaemon.SERVER_PATH_LAN + dest.getName()).toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    //Files.copy(dest.toPath(), new File(TouchDaemon.SERVER_PATH_LAN4SRV + dest.getName()).toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    copyFile(dest, new File(TouchDaemon.SERVER_PATH_LAN + dest.getName()));
+                    copyFile(dest, new File(TouchDaemon.SERVER_PATH_LAN4SRV + dest.getName()));
                     if(parSettings) {
-                        Files.copy(dest.toPath(), new File(TouchDaemon.HOC_PATH + dest.getName()).toPath(), StandardCopyOption.REPLACE_EXISTING);
+                        //Files.copy(dest.toPath(), new File(TouchDaemon.HOC_PATH + dest.getName()).toPath(), StandardCopyOption.REPLACE_EXISTING);
+                        copyFile(dest, new File(TouchDaemon.HOC_PATH + dest.getName()));
                     }
                 } catch (IOException ex) {
                     TouchDaemon.LOGGER.log(Level.SEVERE, "Unable to copy REGPAR.DAT file... ", ex.getMessage());
@@ -142,11 +166,13 @@ public class DayTrigger {
         try {
             File pluPef = new File(TouchDaemon.SERVER_PATH + "S_PLUREF.DAT");
             injectToRef(new File(loadDay.getCanonicalPath() + "/S_PLUREF.DAT"), pluPef);
-            //Files.copy(new File(loadDay.getCanonicalPath() + "S_PLUREF.DAT").toPath(), new File(TouchDaemon.SERVER_PATH + "S_PLUREF.DAT").toPath(), StandardCopyOption.REPLACE_EXISTING);
-            Files.copy(pluPef.toPath(), new File(TouchDaemon.SERVER_PATH_LAN + "S_PLUREF.DAT").toPath(), StandardCopyOption.REPLACE_EXISTING);
-            Files.copy(pluPef.toPath(), new File(TouchDaemon.SERVER_PATH_LAN4SRV + "S_PLUREF.DAT").toPath(), StandardCopyOption.REPLACE_EXISTING);
+            //Files.copy(pluPef.toPath(), new File(TouchDaemon.SERVER_PATH_LAN + "S_PLUREF.DAT").toPath(), StandardCopyOption.REPLACE_EXISTING);
+            //Files.copy(pluPef.toPath(), new File(TouchDaemon.SERVER_PATH_LAN4SRV + "S_PLUREF.DAT").toPath(), StandardCopyOption.REPLACE_EXISTING);
+            copyFile(pluPef, new File(TouchDaemon.SERVER_PATH_LAN + "S_PLUREF.DAT"));
+            copyFile(pluPef, new File(TouchDaemon.SERVER_PATH_LAN4SRV + "S_PLUREF.DAT"));
             if(refSettings) {
-                Files.copy(pluPef.toPath(), new File(TouchDaemon.HOC_PATH + "S_PLUREF.DAT").toPath(), StandardCopyOption.REPLACE_EXISTING);
+                //Files.copy(pluPef.toPath(), new File(TouchDaemon.HOC_PATH + "S_PLUREF.DAT").toPath(), StandardCopyOption.REPLACE_EXISTING);
+                copyFile(pluPef, new File(TouchDaemon.HOC_PATH + "S_PLUREF.DAT"));
             }
         } catch (IOException ex) {
             TouchDaemon.LOGGER.log(Level.SEVERE, "Unable to copy PLUREF.DAT file... ", ex.getMessage());

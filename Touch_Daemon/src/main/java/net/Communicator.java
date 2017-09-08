@@ -24,6 +24,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.logging.Level;
 import touchdaemon.TouchDaemon;
+import static touchdaemon.TouchDaemon.LOGGER;
 
 /**
  *
@@ -37,6 +38,7 @@ public class Communicator extends Thread {
     private boolean isWorking;
     
     public void run() {
+        LOGGER.log(Level.INFO, "communicator started!\nlistening for port: " + socketIn.getLocalPort());
         while (isWorking) {
             try {
                 if (connection == null) {

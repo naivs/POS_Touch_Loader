@@ -32,6 +32,7 @@ import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
+import static touchdaemon.TouchDaemon.LOGGER;
 
 /**
  *
@@ -94,11 +95,14 @@ public class DayTrigger {
                 if (day.exists()) {
                     TouchDaemon.LOGGER.log(Level.INFO, "{0} exists. Loading...", day.getName());
                     loadToServer(day);
+                    TouchDaemon.LOGGER.log(Level.INFO, "Day {0} uploaded.", day.getName());
                 } else {
                     TouchDaemon.LOGGER.log(Level.INFO, "{0} not exists.", day.getName());
                 }
+                TouchDaemon.LOGGER.log(Level.INFO, "Waiting for the next upload...\n");
             }
         }, fire.getTime(), 86400000L);
+        LOGGER.log(Level.INFO, "trigger started!\nUpload time: {0}", firedTime);
     }
     
     private void copyFile(File source, File dest) throws IOException {

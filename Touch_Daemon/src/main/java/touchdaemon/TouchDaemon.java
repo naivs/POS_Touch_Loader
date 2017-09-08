@@ -18,11 +18,13 @@ package touchdaemon;
 
 import io.ConfigReader;
 import java.io.IOException;
+import java.util.Date;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
+import java.util.logging.Formatter;
 import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 import net.Communicator;
 
 /**
@@ -30,30 +32,50 @@ import net.Communicator;
  * @author Ivan
  */
 public class TouchDaemon {
-
+    
     public static final String SERVER_PATH = "c:/Server/";
-    public static final String SERVER_PATH_LAN =  SERVER_PATH + "lan/";
-    public static final String SERVER_PATH_LAN4SRV =  SERVER_PATH + "lan4srv/";
+    public static final String SERVER_PATH_LAN = SERVER_PATH + "lan/";
+    public static final String SERVER_PATH_LAN4SRV = SERVER_PATH + "lan4srv/";
     public static final String IMAGES = SERVER_PATH + "images/cafe/";
     public static final String WEB_PATH = "c:/web/mtxwm/gm/hoc/par/web/";
     public static final String HOC_PATH = "c:/web/mtxwm/gm/hoc/par/";
     public static final String WEB_KEYFILE = "ASRPARAM.CTL";
-
-    public static final Logger LOGGER = Logger.getLogger("touchdaemon");
-
+    
+    public static final Logger LOGGER = Logger.getAnonymousLogger().getParent();
+    
     public TouchDaemon() {
+        LOGGER.removeHandler(LOGGER.getHandlers()[0]);
+        
+        Formatter formatter = new Formatter() {
+            public String format(LogRecord arg0) {
+                StringBuilder b = new StringBuilder();
+                b.append(new Date());
+                b.append(" ");
+                b.append(arg0.getSourceClassName());
+                b.append(" ");
+                b.append(arg0.getSourceMethodName());
+                b.append(" ");
+                b.append(arg0.getLevel());
+                b.append(" ");
+                b.append(arg0.getMessage());
+                b.append(System.getProperty("line.separator"));
+                return b.toString();
+            }
+        };
+        
         ConsoleHandler ch = new ConsoleHandler();
+        ch.setLevel(Level.ALL);
+        ch.setFormatter(formatter);
         LOGGER.addHandler(ch);
-
+        
         try {
             FileHandler fh = new FileHandler("touchdaemon.log");
+            fh.setFormatter(formatter);
             fh.setLevel(Level.ALL);
-            fh.setFormatter(new SimpleFormatter());
             LOGGER.addHandler(fh);
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "logging problem!", e);
         }
-        LOGGER.setLevel(Level.ALL);
 
         // load settings
         ConfigReader configReader = new ConfigReader();
@@ -63,30 +85,23 @@ public class TouchDaemon {
             LOGGER.log(Level.SEVERE, "config read fail!");
             System.exit(1);
         }
-
-        LOGGER.log(Level.INFO, "Daemon starting...");
-        String response = 
-                configReader.readSharePath() + " " +
-                configReader.readUsername() + " " +
-                configReader.readPassword() + " " +
-                configReader.readLoadTime();
+        
+        LOGGER.log(Level.INFO, "starting daemon...");
+        String response
+                = configReader.readSharePath() + " "
+                + configReader.readUsername() + " "
+                + configReader.readPassword() + " "
+                + configReader.readLoadTime();
+        LOGGER.log(Level.INFO, "communicator starting...");
         Communicator communicator = new Communicator(configReader.readPort(), response);
         communicator.start();
-        LOGGER.log(Level.FINE, "communicator started!");
+        LOGGER.log(Level.INFO, "trigger starting...");
         DayTrigger dayTrigger = new DayTrigger(configReader.readPath(), configReader.readLoadTime(), configReader.readParSettings(),
-        configReader.readRefSettings());
+                configReader.readRefSettings());
         dayTrigger.start();
-        LOGGER.log(Level.FINE, "trigger started!");
-//        try {
-//            smbClient.checkConnection();
-//            LOGGER.log(Level.FINEST, "Connetcion established.");
-//        } catch (MalformedURLException e) {
-//            LOGGER.log(Level.SEVERE, "Bad Network name.", e);
-//        } catch (SmbException e) {
-//            LOGGER.log(Level.SEVERE, "Unable connect to share.", e);
-//        }
+        LOGGER.log(Level.INFO, "Daemon started!\n**************************\n");
     }
-
+    
     public static void main(String[] args) {
         TouchDaemon daemon = new TouchDaemon();
     }

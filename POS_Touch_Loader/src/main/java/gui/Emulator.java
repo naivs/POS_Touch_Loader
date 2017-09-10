@@ -71,7 +71,6 @@ public class Emulator extends javax.swing.JFrame {
         } catch (SAXException e) {
             // empty or corrupted
             System.err.println(e.getMessage() + "\nФайл: \"resources/configuration.xml\" пуст или поврежден. Будет создана новая конфигурация");
-            //tgManager();
             openPosDepartmentManager();
         } catch (IOException e) {
             // no file

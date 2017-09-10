@@ -66,7 +66,6 @@ public class Parser {
     public String[] getProducts(int day, int group) {
         List<String> products = new ArrayList<>();
         Sheet mySheet = wb.getSheetAt(day);
-        //int k = 2;
         String plu;
         
         for(int i = 2; i < 162; i++) {
@@ -74,13 +73,6 @@ public class Parser {
             String buf = plu.equals("0.0") ? " :: " : plu.substring(0, plu.length() - 2) + "::" + mySheet.getRow(i).getCell(group * 4 + 2 + 1).getStringCellValue().replace("\n", "").trim();
             products.add(buf);
         }
-        
-//        while (!(plu = String.valueOf(mySheet.getRow(k).getCell(group * 7 + 1 + 5).getNumericCellValue())).equals("0.0")) {
-//            String buf;
-//            buf = plu.substring(0, plu.length() - 2) + "::" + mySheet.getRow(k).getCell(group * 7 + 1 + 6).getStringCellValue();
-//            products.add(buf);
-//            k++;
-//        }
 
         String[] prod = new String[products.size()];
         for (int i = 0; i < prod.length; i++) {

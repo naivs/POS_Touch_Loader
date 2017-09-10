@@ -436,7 +436,7 @@ public class PosDepartmentManager extends javax.swing.JDialog {
     }//GEN-LAST:event_boxTerminalsMouseClicked
 
     private void btnEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditActionPerformed
-        if(autorization()) return;
+        //if(autorization()) return;
     }//GEN-LAST:event_btnEditActionPerformed
 
     private void clear() {

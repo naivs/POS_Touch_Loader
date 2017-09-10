@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Ivan
+ * Copyright (C) 2017 Ivan Naumov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,9 +61,10 @@ public class DayOfWeek {
     }
 
     public String[] getGroupsAsStringArray() {
-        String[] grp = new String[groups.size()];
-
-        for (int i = 0; i < grp.length; i++) {
+        String[] grp = new String[8];
+        Arrays.fill(grp, "");
+        
+        for (int i = 0; i < groups.size(); i++) {
                 grp[i] = groups.get(i).toString();
         }
         return grp;

@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2017 Ivan Naumov
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package io;
 
 import data.Group;
@@ -39,7 +55,6 @@ public class ConfigurationReader {
         NodeList termGrps = doc.getElementsByTagName("TerminalGroup");
 
         for (int a = 0; a < termGrps.getLength(); a++) {
-
             // terminalGroup
             Element elementA = (Element) termGrps.item(a);
             terminalGroups.add(new TerminalGroup(elementA.getAttribute("name"), elementA.getAttribute("terminals"), elementA.getAttribute("startIndex")));
@@ -60,14 +75,13 @@ public class ConfigurationReader {
     private Group[] readGroups(NodeList termGrps, int terminalGroup, int dayOfWeek) {
         NodeList groupsList = ((Element) ((Element) termGrps.item(terminalGroup)).getElementsByTagName("DayOfWeek").item(dayOfWeek)).getElementsByTagName("Group");
 
-        Group[] groups = new Group[8];
+        Group[] groups = new Group[groupsList.getLength()];
         
         for(int i = 0; i < groupsList.getLength(); i++) {
             Element grp = (Element) groupsList.item(i);
             Group group = new Group(grp.getAttribute("name"), grp.getAttribute("creationDate"), grp.getAttribute("modifiedDate"));
             //group.setNumber(Integer.parseInt(grp.getAttribute("number")));
             group.setSubgroups(readSubgroups(groupsList, i));
-            
             groups[Integer.parseInt(grp.getAttribute("number"))] = group;
         }
 
@@ -76,14 +90,13 @@ public class ConfigurationReader {
     
     private Subgroup[] readSubgroups(NodeList groupsList, int group) {
         NodeList subgroupsList = ((Element) groupsList.item(group)).getElementsByTagName("Subgroup");
-        Subgroup[] subgroups = new Subgroup[8];
+        Subgroup[] subgroups = new Subgroup[subgroupsList.getLength()];
         
         for(int i = 0; i < subgroupsList.getLength(); i++) {
             Element sgrp = (Element) subgroupsList.item(i);
             Subgroup subgroup = new Subgroup(sgrp.getAttribute("name"), Integer.parseInt(sgrp.getAttribute("index")), null, sgrp.getAttribute("creationDate"), sgrp.getAttribute("modifiedDate"));
             subgroup.setPicturePath(sgrp.getAttribute("picPath"));
             subgroup.setProducts(readProducts(subgroupsList, i));
-            
             subgroups[Integer.parseInt(sgrp.getAttribute("number"))] = subgroup; //subgroup.getNumber()) - 1] = subgroup;
         }
         
@@ -92,13 +105,12 @@ public class ConfigurationReader {
     
     private Product[] readProducts(NodeList productList, int subgroup) {
         NodeList productsList = ((Element) productList.item(subgroup)).getElementsByTagName("Product");
-        Product[] products = new Product[20];
+        Product[] products = new Product[productsList.getLength()];
         
         for(int i = 0; i < productsList.getLength(); i++) {
             Element prod = (Element) productsList.item(i);
             Product product = new Product(prod.getAttribute("name"), prod.getAttribute("plu"), prod.getAttribute("picPath"), null, prod.getAttribute("creationDate"));
             //product.setNumber(Integer.parseInt(prod.getAttribute("number")));
-            
             products[Integer.parseInt(prod.getAttribute("number"))] = product;
         }
         

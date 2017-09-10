@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2017 Ivan Naumov
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package io;
 
 import data.DayOfWeek;
@@ -35,7 +51,6 @@ public class ConfigurationWriter {
     }
 
     public void write(List<data.TerminalGroup> terminalGroups) throws TransformerException {
-
         Element root = doc.createElement("Configuration");
         // terminalGroups
         terminalGroups.stream().map((termGroup) -> {
@@ -49,16 +64,14 @@ public class ConfigurationWriter {
                 dayElement.setAttribute("name", dayOfWeek.toString());
                 dayElement.setAttribute("modifiedDate", dayOfWeek.getModifiedDate());
                 // groups
-                for (int c = 0; c < 8; c++) {
-                    if (dayOfWeek.getGroup(c) != null) {
+                for (int c = 0; c < dayOfWeek.getGroupCount(); c++) {
                         Element group = doc.createElement("Group");
                         group.setAttribute("name", dayOfWeek.getGroup(c).getName());
                         group.setAttribute("number", String.valueOf(c)); //terminalGroups.get(a).getDaysOfWeek()[b].getGroup(c).getNumber());
                         group.setAttribute("creationDate", dayOfWeek.getGroup(c).getCreationDate());
                         group.setAttribute("modifiedDate", dayOfWeek.getGroup(c).getModifiedDate());
                         // subgroups
-                        for (int d = 0; d < 8; d++) {
-                            if (dayOfWeek.getGroup(c).getSubgroup(d) != null) {
+                        for (int d = 0; d < dayOfWeek.getGroup(c).getSubgroupCount(); d++) {
                                 Element subgroup = doc.createElement("Subgroup");
                                 subgroup.setAttribute("name", dayOfWeek.getGroup(c).getSubgroup(d).getName());
                                 subgroup.setAttribute("index", dayOfWeek.getGroup(c).getSubgroup(d).getIndex());
@@ -67,8 +80,7 @@ public class ConfigurationWriter {
                                 subgroup.setAttribute("creationDate", dayOfWeek.getGroup(c).getSubgroup(d).getCreationDate());
                                 subgroup.setAttribute("modifiedDate", dayOfWeek.getGroup(c).getSubgroup(d).getModifiedDate());
                                 // products
-                                for (int e = 0; e < 20; e++) {
-                                    if (dayOfWeek.getGroup(c).getSubgroup(d).getProduct(e) != null) {
+                                for (int e = 0; e < dayOfWeek.getGroup(c).getSubgroup(d).getProductCount(); e++) {
                                         Element product = doc.createElement("Product");
                                         product.setAttribute("name", dayOfWeek.getGroup(c).getSubgroup(d).getProduct(e).toString());
                                         product.setAttribute("plu", dayOfWeek.getGroup(c).getSubgroup(d).getProduct(e).getPlu());
@@ -76,13 +88,10 @@ public class ConfigurationWriter {
                                         product.setAttribute("number", String.valueOf(e));//terminalGroups.get(a).getDaysOfWeek()[b].getGroup(c).getSubgroup(d).getProduct(e).getNumber());
                                         product.setAttribute("creationDate", dayOfWeek.getGroup(c).getSubgroup(d).getProduct(e).getCreationDate());
                                         subgroup.appendChild(product);
-                                    }
                                 }
                                 group.appendChild(subgroup);
-                            }
                         }
                         dayElement.appendChild(group);
-                    }
                 }
                 termGrp.appendChild(dayElement);
             }

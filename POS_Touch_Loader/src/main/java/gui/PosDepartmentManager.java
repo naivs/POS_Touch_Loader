@@ -26,7 +26,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
@@ -48,6 +47,12 @@ public class PosDepartmentManager extends javax.swing.JDialog {
     private static final int NORMAL = 1;
     private static final int ADD = 2;
     private static final int EDIT = 3;
+    
+    public static final int NO_CHANGES = 0;
+    public static final int DEPARTMENTS_CHANGED = 1;
+    public static final int CONTENT_CHANGED = 2;
+    
+    private int isModified;
     
     /**
      * Creates new form NewDept
@@ -294,6 +299,10 @@ public class PosDepartmentManager extends javax.swing.JDialog {
         }
     }
     
+    public int isModified() {
+        return isModified;
+    }
+    
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
         if(autorization()) turnState(ADD);
     }//GEN-LAST:event_btnAddActionPerformed
@@ -378,6 +387,7 @@ public class PosDepartmentManager extends javax.swing.JDialog {
             } catch (IOException ex) {
                 System.err.println("Other IO Exception");
             }
+            isModified = CONTENT_CHANGED;
         }
     }//GEN-LAST:event_btnFileActionPerformed
 
@@ -402,6 +412,7 @@ public class PosDepartmentManager extends javax.swing.JDialog {
             configuration.add(tGrp);
             listModel.addElement(tGrp);
             turnState(NORMAL);
+            isModified = isModified == 0 ? DEPARTMENTS_CHANGED : CONTENT_CHANGED;
         }
     }//GEN-LAST:event_btnOkActionPerformed
 

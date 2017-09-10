@@ -21,7 +21,6 @@ import io.ConfigurationReader;
 import io.ConfigurationWriter;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -78,11 +77,6 @@ public class Emulator extends javax.swing.JFrame {
             // no file
             System.err.println(e.getMessage() + "\nФайл: \"resources/configuration.xml\" не найден. Будет создана новая конфигурация");
             openPosDepartmentManager();
-//            try {
-//                new File("resources/configuration.xml").createNewFile();
-//            } catch (IOException ex) {
-//                System.err.println("Неудается создать файл: \"resources/configuration.xml\"");
-//            }
         }
         
         initComponents();
@@ -421,25 +415,22 @@ public class Emulator extends javax.swing.JFrame {
             groupsMenu.add(new JMenu(terminalGroups.get(i).toString()));
             jMenu2.add(groupsMenu.get(i));
             
-            for(int j = 0; j < terminalGroups.get(i).getDaysOfWeek().length; j++) {
-                JRadioButtonMenuItem jrmi = new JRadioButtonMenuItem(terminalGroups.get(i).getDaysOfWeek()[j].toString());
+            for (DayOfWeek daysOfWeek : terminalGroups.get(i).getDaysOfWeek()) {
+                JRadioButtonMenuItem jrmi = new JRadioButtonMenuItem(daysOfWeek.toString());
                 daysButtons.add(jrmi);
                 groupsMenu.get(i).add(jrmi);
                 dayButtonsGroup.add(jrmi);
-                jrmi.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        int number = -1;
-                        for (int i = 0; i < daysButtons.size(); i++) {
-                            if (e.getSource().equals(daysButtons.get(i))) {
-                                number = i;
-                            }
+                jrmi.addActionListener((ActionEvent e) -> {
+                    int number = -1;
+                    for (int i1 = 0; i1 < daysButtons.size(); i1++) {
+                        if (e.getSource().equals(daysButtons.get(i1))) {
+                            number = i1;
                         }
-                        selectedTermGroup = number / 7;
-                        selectedDay = number % 7;
-                        setButtonsLabels();
-                        lockButtons(true);
                     }
+                    selectedTermGroup = number / 7;
+                    selectedDay = number % 7;
+                    setButtonsLabels();
+                    lockButtons(true);
                 });
             }
         }
@@ -591,58 +582,66 @@ public class Emulator extends javax.swing.JFrame {
         manager.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosed(java.awt.event.WindowEvent e) {
-                // configuration writing
-                Thread t = new Thread() {
-                    @Override
-                    public void run() {
-                        JOptionPane.showMessageDialog(null, "", "Идет сохранение...", JOptionPane.PLAIN_MESSAGE);
+                if (manager.isModified() == PosDepartmentManager.CONTENT_CHANGED) {
+                    // configuration writing
+                    Thread t = new Thread() {
+                        @Override
+                        public void run() {
+                            JOptionPane.showMessageDialog(null, "", "Идет сохранение...", JOptionPane.PLAIN_MESSAGE);
+                        }
+                    };
+                    t.start();
+
+                    try {
+                        new ConfigurationWriter().write(terminalGroups);
+                    } catch (TransformerException ex) {
+                        System.err.println("TransformerException occured while configuration saving!");
                     }
-                };
-                t.start();
-                
-                try {
-                    new ConfigurationWriter().write(terminalGroups);
-                } catch (TransformerException ex) {
-                    System.err.println("TransformerException occured while configuration saving!");
-                }
 
-                File picFolder = new File("resources/pic");
-                try {
-                    delete(picFolder);
-                } catch (IOException ex) {
-                    System.out.println("IO Except " + ex.toString());
-                }
-                picFolder.mkdir();
+                    File picFolder = new File("resources/pic");
+                    try {
+                        delete(picFolder);
+                    } catch (IOException ex) {
+                        System.out.println("IO Except " + ex.toString());
+                    }
+                    picFolder.mkdir();
 
-                for (int a = 0; a < 7; a++) {
-                    for (int b = 0; b < terminalGroups.size(); b++) {
-                        if (terminalGroups.get(b).getDaysOfWeek()[a].getGroupCount() > 0) {
-                            // clear pic folder                            
-                            // creation day dirs
-                            // saving all images into it
-                            File anotherDay = new File("resources/pic/day" + a);
-                            anotherDay.mkdir();
-                            for (int c = 0; c < terminalGroups.get(b).getDaysOfWeek()[a].getGroupCount(); c++) {
-                                for (int d = 0; d < terminalGroups.get(b).getDaysOfWeek()[a].getGroup(c).getSubgroupCount(); d++) {
-                                    Product[] products = terminalGroups.get(b).getDaysOfWeek()[a].getGroup(c).getSubgroup(d).getProducts();
-                                    ((Monitor) jPanel2).display(products);
+                    for (int a = 0; a < 7; a++) {
+                        for (int b = 0; b < terminalGroups.size(); b++) {
+                            if (terminalGroups.get(b).getDaysOfWeek()[a].getGroupCount() > 0) {
+                                // clear pic folder                            
+                                // creation day dirs
+                                // saving all images into it
+                                File anotherDay = new File("resources/pic/day" + a);
+                                anotherDay.mkdir();
+                                for (int c = 0; c < terminalGroups.get(b).getDaysOfWeek()[a].getGroupCount(); c++) {
+                                    for (int d = 0; d < terminalGroups.get(b).getDaysOfWeek()[a].getGroup(c).getSubgroupCount(); d++) {
+                                        Product[] products = terminalGroups.get(b).getDaysOfWeek()[a].getGroup(c).getSubgroup(d).getProducts();
+                                        ((Monitor) jPanel2).display(products);
 
-                                    BufferedImage bi = new BufferedImage(jPanel2.getSize().width, jPanel2.getSize().height, BufferedImage.TYPE_INT_ARGB);
-                                    Graphics g = bi.createGraphics();
-                                    jPanel2.paint(g);
-                                    g.dispose();
-                                    try {
-                                        File pic = new File(anotherDay.getAbsolutePath() + "/TCH_X" + terminalGroups.get(b).getDaysOfWeek()[a].getGroup(c).getSubgroup(d).getIndex() + ".GIF");
-                                        ImageIO.write(bi, "GIF", pic);
-                                    } catch (IOException ex) {
-                                        System.out.println(ex.getMessage());
+                                        BufferedImage bi = new BufferedImage(jPanel2.getSize().width, jPanel2.getSize().height, BufferedImage.TYPE_INT_ARGB);
+                                        Graphics g = bi.createGraphics();
+                                        jPanel2.paint(g);
+                                        g.dispose();
+                                        try {
+                                            File pic = new File(anotherDay.getAbsolutePath() + "/TCH_X" + terminalGroups.get(b).getDaysOfWeek()[a].getGroup(c).getSubgroup(d).getIndex() + ".GIF");
+                                            ImageIO.write(bi, "GIF", pic);
+                                        } catch (IOException ex) {
+                                            System.out.println(ex.getMessage());
+                                        }
                                     }
                                 }
                             }
                         }
                     }
+                    t.interrupt();
+                } else if(manager.isModified() == PosDepartmentManager.DEPARTMENTS_CHANGED) {
+                    try {
+                        new ConfigurationWriter().write(terminalGroups);
+                    } catch (TransformerException ex) {
+                        System.err.println("TransformerException occured while configuration saving!");
+                    }
                 }
-                t.interrupt();
             }
         });
         manager.setVisible(true);
@@ -668,23 +667,16 @@ public class Emulator extends javax.swing.JFrame {
                     break;
                 }
             }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(Emulator.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(Emulator.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(Emulator.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(Emulator.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
+        
+        //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                new Emulator(args[0], Integer.parseInt(args[1])).setVisible(true);
-            }
+        java.awt.EventQueue.invokeLater(() -> {
+            new Emulator(args[0], Integer.parseInt(args[1])).setVisible(true);
         });
     }
 

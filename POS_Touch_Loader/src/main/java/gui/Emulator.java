@@ -22,12 +22,16 @@ import io.ConfigurationWriter;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 import javax.imageio.ImageIO;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -59,12 +63,8 @@ public class Emulator extends javax.swing.JFrame {
 
     /**
      * Creates new form Emulator
-     * @param ip
-     * @param port
      */
-    public Emulator(String ip, int port) {
-        SERVER_IP = ip;
-        PORT = port;
+    public Emulator() {
         terminalGroups = new ArrayList<>();
         try {
             terminalGroups = new ConfigurationReader().read();
@@ -117,7 +117,6 @@ public class Emulator extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
-        jProgressBar1 = new javax.swing.JProgressBar();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         menuDepartments = new javax.swing.JMenuItem();
@@ -135,6 +134,7 @@ public class Emulator extends javax.swing.JFrame {
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Меню"));
 
         jButton1.setBackground(new java.awt.Color(0, 102, 0));
+        jButton1.setFocusable(false);
         jButton1.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jButton1.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
         jButton1.addActionListener(new java.awt.event.ActionListener() {
@@ -144,6 +144,7 @@ public class Emulator extends javax.swing.JFrame {
         });
 
         jButton2.setBackground(new java.awt.Color(0, 102, 0));
+        jButton2.setFocusable(false);
         jButton2.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jButton2.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
         jButton2.addActionListener(new java.awt.event.ActionListener() {
@@ -153,6 +154,7 @@ public class Emulator extends javax.swing.JFrame {
         });
 
         jButton3.setBackground(new java.awt.Color(0, 102, 0));
+        jButton3.setFocusable(false);
         jButton3.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jButton3.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
         jButton3.addActionListener(new java.awt.event.ActionListener() {
@@ -162,6 +164,7 @@ public class Emulator extends javax.swing.JFrame {
         });
 
         jButton4.setBackground(new java.awt.Color(0, 102, 0));
+        jButton4.setFocusable(false);
         jButton4.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jButton4.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
         jButton4.addActionListener(new java.awt.event.ActionListener() {
@@ -171,6 +174,7 @@ public class Emulator extends javax.swing.JFrame {
         });
 
         jButton5.setBackground(new java.awt.Color(0, 102, 0));
+        jButton5.setFocusable(false);
         jButton5.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jButton5.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
         jButton5.addActionListener(new java.awt.event.ActionListener() {
@@ -180,6 +184,7 @@ public class Emulator extends javax.swing.JFrame {
         });
 
         jButton6.setBackground(new java.awt.Color(0, 102, 0));
+        jButton6.setFocusable(false);
         jButton6.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jButton6.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
         jButton6.addActionListener(new java.awt.event.ActionListener() {
@@ -189,6 +194,7 @@ public class Emulator extends javax.swing.JFrame {
         });
 
         jButton7.setBackground(new java.awt.Color(0, 102, 0));
+        jButton7.setFocusable(false);
         jButton7.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jButton7.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
         jButton7.addActionListener(new java.awt.event.ActionListener() {
@@ -198,6 +204,7 @@ public class Emulator extends javax.swing.JFrame {
         });
 
         jButton8.setBackground(new java.awt.Color(0, 102, 0));
+        jButton8.setFocusable(false);
         jButton8.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jButton8.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
         jButton8.addActionListener(new java.awt.event.ActionListener() {
@@ -245,7 +252,7 @@ public class Emulator extends javax.swing.JFrame {
                 .addComponent(jButton7, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton8, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(13, Short.MAX_VALUE))
+                .addContainerGap(25, Short.MAX_VALUE))
         );
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Ассортимент"));
@@ -268,6 +275,7 @@ public class Emulator extends javax.swing.JFrame {
         jButton9.setBackground(new java.awt.Color(255, 51, 51));
         jButton9.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         jButton9.setText("Назад");
+        jButton9.setFocusable(false);
         jButton9.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton9ActionPerformed(evt);
@@ -321,7 +329,6 @@ public class Emulator extends javax.swing.JFrame {
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jProgressBar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -341,9 +348,7 @@ public class Emulator extends javax.swing.JFrame {
                     .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jProgressBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(80, Short.MAX_VALUE))
         );
 
         jMenu1.setText("Главное меню");
@@ -420,7 +425,9 @@ public class Emulator extends javax.swing.JFrame {
                     }
                     selectedTermGroup = number / 7;
                     selectedDay = number % 7;
+                    level = 2;
                     setButtonsLabels();
+                    ((Monitor) jPanel2).clear();
                     lockButtons(false);
                 });
             }
@@ -592,8 +599,8 @@ public class Emulator extends javax.swing.JFrame {
                     }
                     picFolder.mkdir();
 
-                    for (int a = 0; a < 7; a++) {
-                        for (int b = 0; b < terminalGroups.size(); b++) {
+                    for (int b = 0; b < terminalGroups.size(); b++) {
+                        for (int a = 0; a < terminalGroups.get(b).getDaysOfWeek().length; a++) {
                             if (terminalGroups.get(b).getDaysOfWeek()[a].getGroupCount() > 0) {
                                 // clear pic folder                            
                                 // creation day dirs
@@ -637,10 +644,6 @@ public class Emulator extends javax.swing.JFrame {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        System.out.println(Arrays.toString(args));
-        if (args.length != 2) {
-            System.out.println("Usage: Emulator [server ip] [port]");
-        }
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
@@ -660,9 +663,33 @@ public class Emulator extends javax.swing.JFrame {
         
         //</editor-fold>
 
+        Properties properties = new Properties();
+        BufferedReader reader = null;
+
+        try {
+            reader = new BufferedReader(new InputStreamReader(new FileInputStream("touchLoader.conf")));
+            properties.load(reader);
+            SERVER_IP = properties.getProperty("serverIP");
+            PORT = Integer.parseInt(properties.getProperty("port"));
+            System.out.println("Server IP: " + SERVER_IP + ":" + PORT);
+        } catch (FileNotFoundException e) {
+            System.err.println("File touchDaemon.conf is not found! " + e.getMessage());
+            System.exit(1);
+        } catch (IOException e) {
+            System.err.println("Other IO Exception." + e.getMessage());
+            System.exit(1);
+        } finally {
+            try {
+                if(reader != null) reader.close();
+            } catch (IOException e) {
+                System.err.println("Can't close the stream!" + e.getMessage());
+                System.exit(1);
+            }
+        }
+        
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(() -> {
-            new Emulator(args[0], Integer.parseInt(args[1])).setVisible(true);
+            new Emulator().setVisible(true);
         });
     }
 
@@ -687,7 +714,6 @@ public class Emulator extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
-    private javax.swing.JProgressBar jProgressBar1;
     private javax.swing.JMenuItem menuAbout;
     private javax.swing.JMenuItem menuDepartments;
     private javax.swing.JMenuItem menuUpload;

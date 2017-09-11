@@ -57,11 +57,9 @@ public class ConfigurationReader {
         for (int a = 0; a < termGrps.getLength(); a++) {
             // terminalGroup
             Element elementA = (Element) termGrps.item(a);
-            terminalGroups.add(new TerminalGroup(elementA.getAttribute("name"), elementA.getAttribute("terminals"), elementA.getAttribute("startIndex")));
-
+            terminalGroups.add(new TerminalGroup(Integer.parseInt(elementA.getAttribute("type")), elementA.getAttribute("name"), elementA.getAttribute("terminals"), elementA.getAttribute("startIndex")));
             // daysOfWeek
             NodeList dow = elementA.getElementsByTagName("DayOfWeek");
-
             // groups
             for (int b = 0; b < terminalGroups.get(a).getDaysOfWeek().length; b++) {
                 terminalGroups.get(a).getDaysOfWeek()[b].addAllGroups(readGroups(termGrps, a, b));

@@ -101,7 +101,6 @@ public class Emulator extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jLabel1 = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
@@ -121,19 +120,17 @@ public class Emulator extends javax.swing.JFrame {
         jProgressBar1 = new javax.swing.JProgressBar();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
-        jMenuItem2 = new javax.swing.JMenuItem();
-        jMenuItem1 = new javax.swing.JMenuItem();
+        menuDepartments = new javax.swing.JMenuItem();
+        menuUpload = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
         jMenu3 = new javax.swing.JMenu();
-        jMenuItem3 = new javax.swing.JMenuItem();
+        menuAbout = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Emulator");
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         setResizable(false);
         setSize(new java.awt.Dimension(600, 500));
-
-        jLabel1.setForeground(new java.awt.Color(204, 0, 0));
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Меню"));
 
@@ -351,21 +348,21 @@ public class Emulator extends javax.swing.JFrame {
 
         jMenu1.setText("Главное меню");
 
-        jMenuItem2.setText("Кассовые отделы");
-        jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
+        menuDepartments.setText("Кассовые отделы");
+        menuDepartments.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItem2ActionPerformed(evt);
+                menuDepartmentsActionPerformed(evt);
             }
         });
-        jMenu1.add(jMenuItem2);
+        jMenu1.add(menuDepartments);
 
-        jMenuItem1.setText("Выгрузить на сервер...");
-        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+        menuUpload.setText("Выгрузить на сервер...");
+        menuUpload.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItem1ActionPerformed(evt);
+                menuUploadActionPerformed(evt);
             }
         });
-        jMenu1.add(jMenuItem1);
+        jMenu1.add(menuUpload);
 
         jMenuBar1.add(jMenu1);
 
@@ -374,8 +371,8 @@ public class Emulator extends javax.swing.JFrame {
 
         jMenu3.setText("Справка");
 
-        jMenuItem3.setText("О программе");
-        jMenu3.add(jMenuItem3);
+        menuAbout.setText("О программе");
+        jMenu3.add(menuAbout);
 
         jMenuBar1.add(jMenu3);
 
@@ -390,15 +387,10 @@ public class Emulator extends javax.swing.JFrame {
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jLabel1)
                 .addGap(256, 256, 256))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(291, 291, 291)
-                .addComponent(jLabel1))
             .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
@@ -408,7 +400,7 @@ public class Emulator extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void update() {
-        lockButtons(false);
+        lockButtons(true);
         jMenu2.removeAll();
         for(int i = 0; i < terminalGroups.size(); i++) {
             groupsMenu.add(new JMenu(terminalGroups.get(i).toString()));
@@ -421,15 +413,15 @@ public class Emulator extends javax.swing.JFrame {
                 dayButtonsGroup.add(jrmi);
                 jrmi.addActionListener((ActionEvent e) -> {
                     int number = -1;
-                    for (int i1 = 0; i1 < daysButtons.size(); i1++) {
-                        if (e.getSource().equals(daysButtons.get(i1))) {
-                            number = i1;
+                    for (int j = 0; j < daysButtons.size(); j++) {
+                        if (e.getSource().equals(daysButtons.get(j))) {
+                            number = j;
                         }
                     }
                     selectedTermGroup = number / 7;
                     selectedDay = number % 7;
                     setButtonsLabels();
-                    lockButtons(true);
+                    lockButtons(false);
                 });
             }
         }
@@ -437,9 +429,9 @@ public class Emulator extends javax.swing.JFrame {
     
     private void lockButtons(boolean isLock) {
         for(JButton btn : touch) {
-            btn.setEnabled(isLock);
+            btn.setEnabled(!isLock);
         }
-        jButton9.setEnabled(isLock);
+        jButton9.setEnabled(!isLock);
     }
     
     private void setButtonsLabels() {
@@ -458,7 +450,7 @@ public class Emulator extends javax.swing.JFrame {
         }
     }
     
-    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
+    private void menuUploadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuUploadActionPerformed
         Uploader uploader = new Uploader(this, true, (ArrayList) terminalGroups);
             uploader.addWindowListener(new java.awt.event.WindowAdapter() {
                 @Override
@@ -467,12 +459,11 @@ public class Emulator extends javax.swing.JFrame {
                 }
             });
             uploader.setVisible(true);
-    }//GEN-LAST:event_jMenuItem1ActionPerformed
+    }//GEN-LAST:event_menuUploadActionPerformed
 
-    private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
-        //tgManager();
+    private void menuDepartmentsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuDepartmentsActionPerformed
         openPosDepartmentManager();
-    }//GEN-LAST:event_jMenuItem2ActionPerformed
+    }//GEN-LAST:event_menuDepartmentsActionPerformed
 
     private void touchActionHub(int button) {
         switch (button) {
@@ -511,18 +502,15 @@ public class Emulator extends javax.swing.JFrame {
             setButtonsLabels();
         } else if(level == 1) {
             System.out.println("Button SUB-GROUP " + button + " fired...");
-            // -> generate picture
             Product[] products = terminalGroups.get(selectedTermGroup).getDaysOfWeek()[selectedDay].getGroup(selectedGroup).getSubgroup(button-1).getProducts();
             ((Monitor) jPanel2).display(products);
 
             System.out.println("\n====================");
-
             for (int i = 0; i < products.length; i++) {
                 if (products[i] != null) {
                     System.out.println(i + 1 + ") " + products[i].getName() + " - " + products[i].getPlu());
                 }
             }
-
             System.out.println("====================");
         }
     }
@@ -582,7 +570,6 @@ public class Emulator extends javax.swing.JFrame {
             @Override
             public void windowClosed(java.awt.event.WindowEvent e) {
                 if (manager.isModified() == PosDepartmentManager.CONTENT_CHANGED) {
-                    // configuration writing
                     Thread t = new Thread() {
                         @Override
                         public void run() {
@@ -590,11 +577,11 @@ public class Emulator extends javax.swing.JFrame {
                         }
                     };
                     t.start();
-
+                    // configuration writing
                     try {
                         new ConfigurationWriter().write(terminalGroups);
                     } catch (TransformerException ex) {
-                        System.err.println("TransformerException occured while configuration saving!");
+                        System.err.println("TransformerException occured while configuration saving! " + ex.getMessage());
                     }
 
                     File picFolder = new File("resources/pic");
@@ -689,7 +676,6 @@ public class Emulator extends javax.swing.JFrame {
     private javax.swing.JButton jButton7;
     private javax.swing.JButton jButton8;
     private javax.swing.JButton jButton9;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -697,13 +683,13 @@ public class Emulator extends javax.swing.JFrame {
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenu jMenu3;
     private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JMenuItem jMenuItem1;
-    private javax.swing.JMenuItem jMenuItem2;
-    private javax.swing.JMenuItem jMenuItem3;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JProgressBar jProgressBar1;
+    private javax.swing.JMenuItem menuAbout;
+    private javax.swing.JMenuItem menuDepartments;
+    private javax.swing.JMenuItem menuUpload;
     // End of variables declaration//GEN-END:variables
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Ivan
+ * Copyright (C) 2017 Ivan Naumov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,14 +18,10 @@ package network;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import jcifs.smb.NtlmPasswordAuthentication;
-import jcifs.smb.SmbAuthException;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 
@@ -76,7 +72,6 @@ public class SMBClient {
     
     public void putFile(File src, String dest) throws MalformedURLException, IOException {
         SmbFile smbFile = new SmbFile(share, dest);
-        //smbFile.createNewFile();
         Files.copy(src.toPath(), smbFile.getOutputStream());
     }
 
@@ -119,8 +114,8 @@ public class SMBClient {
     public void clearShare() {
         try {
             SmbFile[] files = share.listFiles();
-            for (int i = 0; i < files.length; i++) {
-                files[i].delete();
+            for (SmbFile file : files) {
+                file.delete();
             }
         } catch (SmbException e) {
             System.err.println("Can't clear. " + e.getMessage());

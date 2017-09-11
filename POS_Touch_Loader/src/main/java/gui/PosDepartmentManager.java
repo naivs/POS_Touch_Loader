@@ -78,6 +78,7 @@ public class PosDepartmentManager extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        buttonGroup1 = new javax.swing.ButtonGroup();
         jScrollPane1 = new javax.swing.JScrollPane();
         jList1 = new javax.swing.JList<>();
         btnAdd = new javax.swing.JButton();
@@ -95,6 +96,8 @@ public class PosDepartmentManager extends javax.swing.JDialog {
         boxFile = new javax.swing.JTextField();
         btnFile = new javax.swing.JButton();
         jLabel5 = new javax.swing.JLabel();
+        jRadioButton1 = new javax.swing.JRadioButton();
+        jRadioButton2 = new javax.swing.JRadioButton();
         btnEdit = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -184,6 +187,17 @@ public class PosDepartmentManager extends javax.swing.JDialog {
 
         jLabel5.setForeground(new java.awt.Color(255, 0, 0));
 
+        buttonGroup1.add(jRadioButton1);
+        jRadioButton1.setSelected(true);
+        jRadioButton1.setText("Один ассортимент");
+        jRadioButton1.setEnabled(false);
+        jRadioButton1.setFocusable(false);
+
+        buttonGroup1.add(jRadioButton2);
+        jRadioButton2.setText("По дням недели");
+        jRadioButton2.setEnabled(false);
+        jRadioButton2.setFocusable(false);
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -192,25 +206,28 @@ public class PosDepartmentManager extends javax.swing.JDialog {
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(boxName, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 280, Short.MAX_VALUE)
-                        .addComponent(jLabel1)
-                        .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel2)
-                        .addComponent(jLabel3)
-                        .addComponent(boxTerminals, javax.swing.GroupLayout.Alignment.TRAILING)
-                        .addComponent(jLabel4))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(boxFile, javax.swing.GroupLayout.PREFERRED_SIZE, 253, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnFile, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                                .addComponent(btnOk)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnCancel))
-                            .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.TRAILING))))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(boxName, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 280, Short.MAX_VALUE)
+                            .addComponent(jLabel1)
+                            .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel3)
+                            .addComponent(boxTerminals, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel4))
+                        .addGroup(jPanel1Layout.createSequentialGroup()
+                            .addComponent(boxFile, javax.swing.GroupLayout.PREFERRED_SIZE, 253, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(btnFile, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                            .addComponent(jRadioButton2)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                                    .addComponent(btnOk)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(btnCancel))
+                                .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.TRAILING))))
+                    .addComponent(jRadioButton1))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -234,13 +251,21 @@ public class PosDepartmentManager extends javax.swing.JDialog {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(boxFile, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnFile))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 41, Short.MAX_VALUE)
-                .addComponent(jLabel5)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnCancel)
-                    .addComponent(btnOk))
-                .addContainerGap())
+                .addComponent(jRadioButton1)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 7, Short.MAX_VALUE)
+                        .addComponent(jLabel5)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(btnCancel)
+                            .addComponent(btnOk))
+                        .addContainerGap())
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jRadioButton2)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
 
         btnEdit.setText("/");
@@ -319,19 +344,13 @@ public class PosDepartmentManager extends javax.swing.JDialog {
 
         if (fileChooser.showDialog(this, "Открыть файл Excel...") == JFileChooser.APPROVE_OPTION) {
             File file = new File(fileChooser.getSelectedFile().getAbsolutePath());
-            // -> need check repeats file
             try {
                 Parser parser = new Parser(file);
 
                 // reading all products
-//                ArrayList<String> terminals = new ArrayList();
-//                terminals.addAll(Arrays.asList(termGrpsTerminals[tGrpNum].split("-")));
-//                terminalGroup = new TerminalGroup("default", terminals);
-
                 DayOfWeek[] days = configuration.get(jList1.getSelectedIndex()).getDaysOfWeek();
 
                 for (int i = 0; i < days.length; i++) {
-
                     // groups name reading. It same for any day.
                     Group[] groups = new Group[8];
 
@@ -399,6 +418,12 @@ public class PosDepartmentManager extends javax.swing.JDialog {
             boxTerminals.setText(tGrp.getTerminalsAsString());
             jComboBox1.setSelectedItem(tGrp.getStartIndex());
             btnFile.setEnabled(true);
+            
+            if(tGrp.getType() == TerminalGroup.TYPE_ALWAYS) {
+                jRadioButton1.setSelected(true);
+            } else {
+                jRadioButton2.setSelected(true);
+            }
         }
     }//GEN-LAST:event_jList1ValueChanged
 
@@ -408,7 +433,8 @@ public class PosDepartmentManager extends javax.swing.JDialog {
         } else if (boxName.getText().isEmpty() || boxTerminals.getText().isEmpty() || jComboBox1.getSelectedIndex() == 0) {
             jLabel5.setText("Заполните все поля");
         } else {
-            TerminalGroup tGrp = new TerminalGroup(boxName.getText(), boxTerminals.getText(), jComboBox1.getSelectedItem().toString());
+            int tGroupType = jRadioButton1.isSelected() ? TerminalGroup.TYPE_ALWAYS : TerminalGroup.TYPE_DAYS;
+            TerminalGroup tGrp = new TerminalGroup(tGroupType, boxName.getText(), boxTerminals.getText(), jComboBox1.getSelectedItem().toString());
             configuration.add(tGrp);
             listModel.addElement(tGrp);
             turnState(NORMAL);
@@ -466,6 +492,9 @@ public class PosDepartmentManager extends javax.swing.JDialog {
                 boxTerminals.setFocusable(false);
                 
                 jComboBox1.setEnabled(false);
+                
+                jRadioButton1.setEnabled(false);
+                jRadioButton2.setEnabled(false);
                 break;
                 
             case ADD:
@@ -484,6 +513,9 @@ public class PosDepartmentManager extends javax.swing.JDialog {
                 boxTerminals.setFocusable(true);
                 
                 jComboBox1.setEnabled(true);
+                
+                jRadioButton1.setEnabled(true);
+                jRadioButton2.setEnabled(true);
                 break;
                 
             case EDIT:
@@ -505,6 +537,7 @@ public class PosDepartmentManager extends javax.swing.JDialog {
     private javax.swing.JButton btnEdit;
     private javax.swing.JButton btnFile;
     private javax.swing.JButton btnOk;
+    private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -513,6 +546,8 @@ public class PosDepartmentManager extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JList<String> jList1;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JRadioButton jRadioButton1;
+    private javax.swing.JRadioButton jRadioButton2;
     private javax.swing.JScrollPane jScrollPane1;
     // End of variables declaration//GEN-END:variables
 }

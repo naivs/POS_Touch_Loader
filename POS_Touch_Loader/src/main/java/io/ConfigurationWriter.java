@@ -55,6 +55,7 @@ public class ConfigurationWriter {
         // terminalGroups
         terminalGroups.stream().map((termGroup) -> {
             Element termGrp = doc.createElement("TerminalGroup");
+            termGrp.setAttribute("type", String.valueOf(termGroup.getType()));
             termGrp.setAttribute("name", termGroup.toString());
             termGrp.setAttribute("terminals", termGroup.getTerminalsAsString());
             termGrp.setAttribute("startIndex", termGroup.getStartIndex());

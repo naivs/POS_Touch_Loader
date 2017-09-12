@@ -60,13 +60,14 @@ public class SMBClient {
     public void createFolder(String name) {
         try {
             SmbFile dir = new SmbFile(share, name);
-            dir.mkdir();
+            if(!dir.exists())
+                dir.mkdir();
         } catch (UnknownHostException ex) {
             System.err.println("UnknownHostException. File: " + name + ". " + ex.getMessage());
         } catch (SmbException e) {
             System.err.println("Can't create directory " + name + ". " + e.getMessage());
         } catch (MalformedURLException e) {
-
+            System.err.println("MalformedURLException. " + name + ". " + e.getMessage());
         }
     }
     
@@ -74,42 +75,6 @@ public class SMBClient {
         SmbFile smbFile = new SmbFile(share, dest);
         Files.copy(src.toPath(), smbFile.getOutputStream());
     }
-
-    public void putImages(String smbPath, File image) throws IOException {
-//        try {
-//            System.out.println(smbPath);
-//
-//            SmbFile dir = new SmbFile(this.address + smbPath + "/" + image.getName().substring(1) + "/");
-//            dir.createNewFile();
-//
-//            Path source = Paths.get(image.getPath());
-//
-//            OutputStream out = dir.getOutputStream();
-//            Files.copy(source, out);
-//
-//        } catch (SmbException e) {
-//            System.err.println("Can't create file " + image.getPath() + ". " + e.getMessage());
-//        } catch (MalformedURLException e) {
-//
-//        }
-    }
-
-//    public void putFile(String smbPath, File file) throws IOException {
-//        try {
-//            SmbFile dir = new SmbFile(this.address + smbPath + "/");
-//            dir.createNewFile();
-//            
-//            Path source = Paths.get(file.getPath());
-//
-//            OutputStream out = dir.getOutputStream();
-//            Files.copy(source, out);
-//            
-//        } catch (SmbException e) {
-//            System.err.println("Can't create file " + smbPath + ". " + e.getMessage());
-//        } catch (MalformedURLException e) {
-//
-//        }
-//    }
 
     public void clearShare() {
         try {

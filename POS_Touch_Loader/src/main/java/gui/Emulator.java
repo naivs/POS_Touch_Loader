@@ -28,8 +28,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import javax.imageio.ImageIO;
@@ -41,6 +44,8 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.xml.transform.TransformerException;
 import org.xml.sax.SAXException;
 import utils.Monitor;
+import utils.ParGenerator;
+import utils.RefGenerator;
 
 /**
  *
@@ -591,7 +596,8 @@ public class Emulator extends javax.swing.JFrame {
                         System.err.println("TransformerException occured while configuration saving! " + ex.getMessage());
                     }
 
-                    File picFolder = new File("resources/pic");
+                    // -> to make recursivelly deleting vvv
+                    File picFolder = new File("resources/data");
                     try {
                         delete(picFolder);
                     } catch (IOException ex) {
@@ -599,36 +605,63 @@ public class Emulator extends javax.swing.JFrame {
                     }
                     picFolder.mkdir();
 
-                    for (int b = 0; b < terminalGroups.size(); b++) {
-                        for (int a = 0; a < terminalGroups.get(b).getDaysOfWeek().length; a++) {
-                            if (terminalGroups.get(b).getDaysOfWeek()[a].getGroupCount() > 0) {
-                                // clear pic folder                            
-                                // creation day dirs
-                                // saving all images into it
-                                File anotherDay = new File("resources/pic/day" + a);
-                                anotherDay.mkdir();
-                                for (int c = 0; c < terminalGroups.get(b).getDaysOfWeek()[a].getGroupCount(); c++) {
-                                    for (int d = 0; d < terminalGroups.get(b).getDaysOfWeek()[a].getGroup(c).getSubgroupCount(); d++) {
-                                        Product[] products = terminalGroups.get(b).getDaysOfWeek()[a].getGroup(c).getSubgroup(d).getProducts();
-                                        ((Monitor) jPanel2).display(products);
+                    for (int tGroup = 0; tGroup < terminalGroups.size(); tGroup++) {
+                        for (int day = 0; day < terminalGroups.get(tGroup).getDaysOfWeek().length; day++) {
+                            // clear pic folder                            
+                            // creation day dirs
+                            // saving all into it
+                            File anotherDay;
+                            if (terminalGroups.get(tGroup).getType() == TerminalGroup.TYPE_ALWAYS) {
+                                Calendar cal = Calendar.getInstance();
+                                cal.setTime(new Date());
+                                anotherDay = new File(picFolder.getPath() + "/day" + (cal.get(Calendar.DAY_OF_WEEK) - 1));
+                            } else {
+                                anotherDay = new File(picFolder.getPath() + "/day" + day);
+                            }
+                            anotherDay.mkdir();
 
-                                        BufferedImage bi = new BufferedImage(jPanel2.getSize().width, jPanel2.getSize().height, BufferedImage.TYPE_INT_ARGB);
-                                        Graphics g = bi.createGraphics();
-                                        jPanel2.paint(g);
-                                        g.dispose();
-                                        try {
-                                            File pic = new File(anotherDay.getAbsolutePath() + "/TCH_X" + terminalGroups.get(b).getDaysOfWeek()[a].getGroup(c).getSubgroup(d).getIndex() + ".GIF");
-                                            ImageIO.write(bi, "GIF", pic);
-                                        } catch (IOException ex) {
-                                            System.out.println(ex.getMessage());
-                                        }
+                            // saving .dat files
+                            ParGenerator pgen = new ParGenerator((ArrayList) terminalGroups, day, tGroup);
+                            File regpar = pgen.getFile();
+
+                            RefGenerator rgen = new RefGenerator((ArrayList) terminalGroups, day, tGroup);
+                            File pluref = rgen.getFile();
+
+                            String terminals = "";
+                            for (String num : terminalGroups.get(tGroup).getTerminalsAsString().split(":")) {
+                                terminals += num + "-";
+                            }
+                            terminals = terminals.substring(0, terminals.length() - 1);
+                            try {
+                                Files.copy(regpar.toPath(), new File(anotherDay.getPath() + "/P_REGPAR.DAT" + terminals).toPath(), StandardCopyOption.REPLACE_EXISTING);
+                                Files.copy(pluref.toPath(), new File(anotherDay.getPath() + "/S_PLUREF.DAT" + terminals).toPath(), StandardCopyOption.REPLACE_EXISTING);
+                            } catch (IOException ex) {
+                                System.err.println("IOException: " + ex.getMessage());
+                            }
+
+                            // saving images
+                            File cafe = new File(anotherDay.getPath() + "/cafe");
+                            cafe.mkdir();
+                            for (int c = 0; c < terminalGroups.get(tGroup).getDaysOfWeek()[day].getGroupCount(); c++) {
+                                for (int d = 0; d < terminalGroups.get(tGroup).getDaysOfWeek()[day].getGroup(c).getSubgroupCount(); d++) {
+                                    Product[] products = terminalGroups.get(tGroup).getDaysOfWeek()[day].getGroup(c).getSubgroup(d).getProducts();
+                                    ((Monitor) jPanel2).display(products);
+                                    BufferedImage bi = new BufferedImage(jPanel2.getSize().width, jPanel2.getSize().height, BufferedImage.TYPE_INT_ARGB);
+                                    Graphics g = bi.createGraphics();
+                                    jPanel2.paint(g);
+                                    g.dispose();
+                                    try {
+                                        File pic = new File(anotherDay.getAbsolutePath() + "/" + cafe.getName() + "/TCH_X" + terminalGroups.get(tGroup).getDaysOfWeek()[day].getGroup(c).getSubgroup(d).getIndex() + ".GIF");
+                                        ImageIO.write(bi, "GIF", pic);
+                                    } catch (IOException ex) {
+                                        System.out.println(ex.getMessage());
                                     }
                                 }
                             }
                         }
                     }
                     t.interrupt();
-                } else if(manager.isModified() == PosDepartmentManager.DEPARTMENTS_CHANGED) {
+                } else if (manager.isModified() == PosDepartmentManager.DEPARTMENTS_CHANGED) {
                     try {
                         new ConfigurationWriter().write(terminalGroups);
                     } catch (TransformerException ex) {

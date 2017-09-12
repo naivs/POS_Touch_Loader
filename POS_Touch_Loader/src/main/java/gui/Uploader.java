@@ -22,12 +22,9 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import models.UploaderTableModel;
-import network.SMBAuthentication;
 import network.SMBClient;
 import network.ServerCommunicator;
 import utils.LoadAnalyzer;
-import utils.ParGenerator;
-import utils.RefGenerator;
 
 /**
  *
@@ -36,9 +33,9 @@ import utils.RefGenerator;
 public class Uploader extends javax.swing.JDialog {
 
     private final ArrayList<TerminalGroup> configuration;
-    LoadAnalyzer la;
-    ServerCommunicator communicator;
-    SMBClient smbClient;
+    private LoadAnalyzer la;
+    private ServerCommunicator communicator;
+    private SMBClient smbClient;
 
     /**
      * Creates new form Uploader
@@ -71,7 +68,6 @@ public class Uploader extends javax.swing.JDialog {
         */
         
         communicator = new ServerCommunicator();
-        SMBAuthentication in = communicator.getSmbAuth();
         jLabel1.setText(communicator.getLoadTime());
         smbClient = new SMBClient(Emulator.SERVER_IP, communicator.getSmbAuth());
         System.out.println(smbClient.testConnection());
@@ -87,7 +83,7 @@ public class Uploader extends javax.swing.JDialog {
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
-        jButton2 = new javax.swing.JButton();
+        btnUpload = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
         jScrollPane3 = new javax.swing.JScrollPane();
@@ -105,10 +101,10 @@ public class Uploader extends javax.swing.JDialog {
 
         jLabel1.setText("Адрес:");
 
-        jButton2.setText("Выгрузить");
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        btnUpload.setText("Выгрузить");
+        btnUpload.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                btnUploadActionPerformed(evt);
             }
         });
 
@@ -144,7 +140,7 @@ public class Uploader extends javax.swing.JDialog {
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(btnUpload, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 528, Short.MAX_VALUE)
@@ -159,7 +155,7 @@ public class Uploader extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton2)
+                    .addComponent(btnUpload)
                     .addComponent(jLabel1))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
@@ -169,42 +165,33 @@ public class Uploader extends javax.swing.JDialog {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 61, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+    private void btnUploadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUploadActionPerformed
         // upload to server
         smbClient.clearShare();
 
-        for (int a = 0; a < 7; a++) {
-            if (la.dayIsLoad(a)) {
-                // -> create day folder
-                smbClient.createFolder("day" + a + "/");
-                // -> create cafe folder
-                smbClient.createFolder("day" + a + "/cafe/");
-                // -> copy images
+        for(int tGroupNum = 0; tGroupNum < configuration.size(); tGroupNum++) {
+            for (int dayNum = 0; dayNum < configuration.get(tGroupNum).getDaysOfWeek().length; dayNum++) {
                 try {
-                    for (File img : new File("resources/pic/day" + a).listFiles()) {
-                        smbClient.putFile(img, "day" + a + "/cafe/" + img.getName());
+                    // create day folder
+                    smbClient.createFolder("day" + dayNum + "/");
+                    // create cafe folder
+                    smbClient.createFolder("day" + dayNum + "/cafe/");
+                    // copy .dat files
+                    File datFiles = new File("resources/data/day" + dayNum);
+                    for (File f : datFiles.listFiles((File directory, String fileName) -> fileName.contains(".DAT"))) {
+                        smbClient.putFile(f, "day" + dayNum + "/" + f.getName());
                     }
-                    // copying PLUREF.DAT
-                    File ref = new RefGenerator(configuration, a).getFile();
-                    smbClient.putFile(ref, "day" + a + "/S_PLUREF.DAT");
-
-                    for (int b = 0; b < configuration.size(); b++) {
-                        File par = new ParGenerator(configuration, a, b).getFile();
-
-                        String terminals = "";
-                        for (String num : configuration.get(b).getTerminalsAsString().split(":")) {
-                            terminals += num + "-";
-                        }
-                        terminals = terminals.substring(0, terminals.length() - 1);
-                        smbClient.putFile(par, "day" + a + "/P_REGPAR.DAT" + terminals);
+                    // copy images
+                    for (File img : new File("resources/data/day" + dayNum + "/cafe").listFiles()) {
+                        smbClient.putFile(img, "day" + dayNum + "/cafe/" + img.getName());
                     }
                 } catch (MalformedURLException ex) {
                     System.err.println("Wrong destenation URL. " + ex.getMessage());
@@ -213,14 +200,14 @@ public class Uploader extends javax.swing.JDialog {
                 }
             }
         }
-    }//GEN-LAST:event_jButton2ActionPerformed
+    }//GEN-LAST:event_btnUploadActionPerformed
 
     private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
         communicator.shutDown();
     }//GEN-LAST:event_formWindowClosed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton2;
+    private javax.swing.JButton btnUpload;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JScrollPane jScrollPane2;

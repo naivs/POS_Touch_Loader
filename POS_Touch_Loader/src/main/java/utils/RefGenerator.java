@@ -34,23 +34,21 @@ public class RefGenerator {
 
     private final ArrayList<String> data;
 
-    public RefGenerator(ArrayList<data.TerminalGroup> configuration, int day) {
+    public RefGenerator(ArrayList<data.TerminalGroup> configuration, int day, int termGroup) {
 
         data = new ArrayList();
 
         // getting all subgroups per day
         ArrayList<Subgroup> subgroups = new ArrayList();
 
-        for (int b = 0; b < configuration.size(); b++) {
-            for (int c = 0; c < configuration.get(b).getDaysOfWeek()[day].getGroupCount(); c++) {
-                //if (configuration.get(b).getDaysOfWeek()[day].getGroup(c) != null) {
-                    for (int d = 0; d < configuration.get(b).getDaysOfWeek()[day].getGroup(c).getSubgroupCount(); d++) {
-                        //if (configuration.get(b).getDaysOfWeek()[day].getGroup(c).getSubgroup(d) != null) {
-                            subgroups.add(configuration.get(b).getDaysOfWeek()[day].getGroup(c).getSubgroup(d));
-                        //}
-                    }
+        for (int c = 0; c < configuration.get(termGroup).getDaysOfWeek()[day].getGroupCount(); c++) {
+            //if (configuration.get(b).getDaysOfWeek()[day].getGroup(c) != null) {
+            for (int d = 0; d < configuration.get(termGroup).getDaysOfWeek()[day].getGroup(c).getSubgroupCount(); d++) {
+                //if (configuration.get(b).getDaysOfWeek()[day].getGroup(c).getSubgroup(d) != null) {
+                subgroups.add(configuration.get(termGroup).getDaysOfWeek()[day].getGroup(c).getSubgroup(d));
                 //}
             }
+            //}
         }
 
         // sorting subgroups by index

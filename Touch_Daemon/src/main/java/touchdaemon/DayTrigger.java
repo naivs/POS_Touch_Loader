@@ -93,16 +93,16 @@ public class DayTrigger {
                 
                 File day = new File(path + "/day" + (dayOfWeek));
                 if (day.exists()) {
-                    TouchDaemon.LOGGER.log(Level.INFO, "{0} exists. Loading...", day.getName());
+                    TouchDaemon.LOGGER.log(Level.INFO, day.getName() + " exists. Loading...");
                     loadToServer(day);
-                    TouchDaemon.LOGGER.log(Level.INFO, "Day {0} uploaded.", day.getName());
+                    TouchDaemon.LOGGER.log(Level.INFO, "Day " + day.getName() + " uploaded.");
                 } else {
-                    TouchDaemon.LOGGER.log(Level.INFO, "{0} not exists.", day.getName());
+                    TouchDaemon.LOGGER.log(Level.INFO, day.getName() + " not exists.");
                 }
                 TouchDaemon.LOGGER.log(Level.INFO, "Waiting for the next upload...\n");
             }
         }, fire.getTime(), 86400000L);
-        LOGGER.log(Level.INFO, "trigger started!\nUpload time: {0}", firedTime);
+        LOGGER.log(Level.INFO, "trigger started!\nUpload time: " + firedTime);
     }
     
     private void copyFile(File source, File dest) throws IOException {

@@ -45,7 +45,7 @@ public class Communicator extends Thread {
                     Socket client = socketIn.accept();
                     connection = new Connection(client, Connection.ACCEPT_MODE);
                     connection.start();
-                    TouchDaemon.LOGGER.log(Level.INFO, "Client {0} connected...", connection.getIP());
+                    TouchDaemon.LOGGER.log(Level.INFO, "Client " + connection.getIP() + " connected...");
                 }
                 if(!connection.isAlive()) {
                     connection = null;
@@ -97,7 +97,7 @@ public class Communicator extends Thread {
                             out.println(response);
                         } else if(str.equals("[bye]")) {
                             out.println("[bye]");
-                            TouchDaemon.LOGGER.log(Level.INFO, "Client {0} disconnected...", getIP());
+                            TouchDaemon.LOGGER.log(Level.INFO, "Client " + getIP() + " disconnected...");
                             return;
                         }
                     }

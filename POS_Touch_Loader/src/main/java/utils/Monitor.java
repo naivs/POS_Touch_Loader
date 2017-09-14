@@ -22,7 +22,7 @@ public class Monitor extends javax.swing.JPanel {
     private Graphics graphic;
     private JLabel[] labels = new JLabel[20];
     private Font textFont = new Font("Franklin Gothic Medium Cond Regular", Font.BOLD, 14);
-    private Font pluFont = new Font("Franklin Gothic Medium Cond Regular", Font.BOLD, 14);
+    private Font pluFont = new Font("Franklin Gothic Medium Cond Regular", Font.BOLD, 12);
 
     private String[] buttonsText = {"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""};
     private String[] buttonsPlu = {"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""};

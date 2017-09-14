@@ -661,9 +661,11 @@ public class Emulator extends javax.swing.JFrame {
                         }
                     }
                     t.interrupt();
+                    update();
                 } else if (manager.isModified() == PosDepartmentManager.DEPARTMENTS_CHANGED) {
                     try {
                         new ConfigurationWriter().write(terminalGroups);
+                        update();
                     } catch (TransformerException ex) {
                         System.err.println("TransformerException occured while configuration saving!");
                     }

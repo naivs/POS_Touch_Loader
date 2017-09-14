@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 ivan
+ * Copyright (C) 2017 Ivan Naumov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 package gui;
 
 import javax.swing.DefaultListModel;
+import javax.swing.JDialog;
 
 /**
  *
@@ -27,15 +28,12 @@ public class AddingTerminals extends javax.swing.JDialog {
     private static final DefaultListModel modelA = new DefaultListModel();
     private static final DefaultListModel modelB = new DefaultListModel();
     
-    private static String terminals = "";
-    
     /**
      * Creates new form AddingTerminals
-     * @param parent
-     * @param modal
+     * @param owner
      */
-    public AddingTerminals(java.awt.Frame parent, boolean modal) {
-        super(parent, modal);
+    private AddingTerminals(JDialog owner) {
+        super(owner, true);
         
         for (int i = 0; i < 200; i++) {
             if(i < 99) {
@@ -102,17 +100,19 @@ public class AddingTerminals extends javax.swing.JDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane11, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButton1)
-                    .addComponent(jButton3))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane13, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jScrollPane11, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jButton1)
+                            .addComponent(jButton3))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane13, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
 
@@ -142,13 +142,21 @@ public class AddingTerminals extends javax.swing.JDialog {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    public static String showAddTerminalsDialog() {
-        AddingTerminals at = new AddingTerminals(null, true);
+    public static String showAddTerminalsDialog(JDialog owner, String terminals) {
+        AddingTerminals at = new AddingTerminals(owner);
+        if (!terminals.isEmpty()) {
+            for (String terminal : terminals.split(":")) {
+                modelA.addElement(terminal);
+            }
+            terminals = "";
+        }
         at.setVisible(true);
         
         for(int i = 0; i < modelA.getSize(); i++) {
             terminals += modelA.get(i) + ":";
         }
+        
+        modelA.removeAllElements();
         
         return terminals.substring(0, terminals.length() - 1);
     }

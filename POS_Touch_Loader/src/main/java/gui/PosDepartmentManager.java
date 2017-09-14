@@ -457,8 +457,9 @@ public class PosDepartmentManager extends javax.swing.JDialog {
     }//GEN-LAST:event_btnDelActionPerformed
 
     private void boxTerminalsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_boxTerminalsMouseClicked
-        if(boxTerminals.isFocusable())
-            boxTerminals.setText(AddingTerminals.showAddTerminalsDialog());
+        if(boxTerminals.isFocusable()) {
+            boxTerminals.setText(AddingTerminals.showAddTerminalsDialog(this, boxTerminals.getText()));
+        }
     }//GEN-LAST:event_boxTerminalsMouseClicked
 
     private void btnEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditActionPerformed

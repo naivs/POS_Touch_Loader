@@ -167,9 +167,19 @@ public class DayTrigger {
         }
         
         // load PLUREF.DAT
+        FilenameFilter refFilter = new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.startsWith("S_PLUREF.DAT");
+            }
+        };
+        source = loadDay.listFiles(refFilter);
+        File pluPef = new File(TouchDaemon.SERVER_PATH + "S_PLUREF.DAT");
+        for(File plurefPart : source) {
+            injectToRef(plurefPart, pluPef);
+        }
+        
         try {
-            File pluPef = new File(TouchDaemon.SERVER_PATH + "S_PLUREF.DAT");
-            injectToRef(new File(loadDay.getCanonicalPath() + "/S_PLUREF.DAT"), pluPef);
             //Files.copy(pluPef.toPath(), new File(TouchDaemon.SERVER_PATH_LAN + "S_PLUREF.DAT").toPath(), StandardCopyOption.REPLACE_EXISTING);
             //Files.copy(pluPef.toPath(), new File(TouchDaemon.SERVER_PATH_LAN4SRV + "S_PLUREF.DAT").toPath(), StandardCopyOption.REPLACE_EXISTING);
             copyFile(pluPef, new File(TouchDaemon.SERVER_PATH_LAN + "S_PLUREF.DAT"));

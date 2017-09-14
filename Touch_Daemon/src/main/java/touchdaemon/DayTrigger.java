@@ -93,16 +93,16 @@ public class DayTrigger {
                 
                 File day = new File(path + "/day" + (dayOfWeek));
                 if (day.exists()) {
-                    TouchDaemon.LOGGER.log(Level.INFO, "{0} exists. Loading...", day.getName());
+                    TouchDaemon.LOGGER.log(Level.INFO, day.getName() + " exists. Loading...");
                     loadToServer(day);
-                    TouchDaemon.LOGGER.log(Level.INFO, "Day {0} uploaded.", day.getName());
+                    TouchDaemon.LOGGER.log(Level.INFO, "Day " + day.getName() + " uploaded.");
                 } else {
-                    TouchDaemon.LOGGER.log(Level.INFO, "{0} not exists.", day.getName());
+                    TouchDaemon.LOGGER.log(Level.INFO, day.getName() + " not exists.");
                 }
                 TouchDaemon.LOGGER.log(Level.INFO, "Waiting for the next upload...\n");
             }
         }, fire.getTime(), 86400000L);
-        LOGGER.log(Level.INFO, "trigger started!\nUpload time: {0}", firedTime);
+        LOGGER.log(Level.INFO, "trigger started!\nUpload time: " + firedTime);
     }
     
     private void copyFile(File source, File dest) throws IOException {
@@ -167,9 +167,19 @@ public class DayTrigger {
         }
         
         // load PLUREF.DAT
+        FilenameFilter refFilter = new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.startsWith("S_PLUREF.DAT");
+            }
+        };
+        source = loadDay.listFiles(refFilter);
+        File pluPef = new File(TouchDaemon.SERVER_PATH + "S_PLUREF.DAT");
+        for(File plurefPart : source) {
+            injectToRef(plurefPart, pluPef);
+        }
+        
         try {
-            File pluPef = new File(TouchDaemon.SERVER_PATH + "S_PLUREF.DAT");
-            injectToRef(new File(loadDay.getCanonicalPath() + "/S_PLUREF.DAT"), pluPef);
             //Files.copy(pluPef.toPath(), new File(TouchDaemon.SERVER_PATH_LAN + "S_PLUREF.DAT").toPath(), StandardCopyOption.REPLACE_EXISTING);
             //Files.copy(pluPef.toPath(), new File(TouchDaemon.SERVER_PATH_LAN4SRV + "S_PLUREF.DAT").toPath(), StandardCopyOption.REPLACE_EXISTING);
             copyFile(pluPef, new File(TouchDaemon.SERVER_PATH_LAN + "S_PLUREF.DAT"));

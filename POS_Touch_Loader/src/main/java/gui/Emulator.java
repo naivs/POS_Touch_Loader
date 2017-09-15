@@ -57,9 +57,9 @@ public class Emulator extends javax.swing.JFrame {
     
     private JButton[] touch = new JButton[8];
     private int level = 2;
-    private List<JMenu> groupsMenu = new ArrayList<>();
-    private List<JRadioButtonMenuItem> daysButtons = new ArrayList<>();
-    private final ButtonGroup dayButtonsGroup = new ButtonGroup();
+    private List<JMenu> tGroupsMenu;
+    private List<JRadioButtonMenuItem> daysMenuButtons = new ArrayList<>();
+    private ButtonGroup dayButtonsGroup;
     
     private List<TerminalGroup> terminalGroups;
     private int selectedTermGroup;
@@ -411,20 +411,23 @@ public class Emulator extends javax.swing.JFrame {
 
     private void update() {
         lockButtons(true);
+        dayButtonsGroup = new ButtonGroup();
+        tGroupsMenu = new ArrayList<>();
         jMenu2.removeAll();
+        
         for(int i = 0; i < terminalGroups.size(); i++) {
-            groupsMenu.add(new JMenu(terminalGroups.get(i).toString()));
-            jMenu2.add(groupsMenu.get(i));
+            tGroupsMenu.add(new JMenu(terminalGroups.get(i).toString()));
+            jMenu2.add(tGroupsMenu.get(i));
             
             for (DayOfWeek daysOfWeek : terminalGroups.get(i).getDaysOfWeek()) {
                 JRadioButtonMenuItem jrmi = new JRadioButtonMenuItem(daysOfWeek.toString());
-                daysButtons.add(jrmi);
-                groupsMenu.get(i).add(jrmi);
+                tGroupsMenu.get(i).add(jrmi);
                 dayButtonsGroup.add(jrmi);
+                daysMenuButtons.add(jrmi);
                 jrmi.addActionListener((ActionEvent e) -> {
                     int number = -1;
-                    for (int j = 0; j < daysButtons.size(); j++) {
-                        if (e.getSource().equals(daysButtons.get(j))) {
+                    for (int j = 0; j < daysMenuButtons.size(); j++) {
+                        if (e.getSource().equals(daysMenuButtons.get(j))) {
                             number = j;
                         }
                     }
@@ -596,14 +599,19 @@ public class Emulator extends javax.swing.JFrame {
                         System.err.println("TransformerException occured while configuration saving! " + ex.getMessage());
                     }
 
-                    // -> to make recursivelly deleting vvv
                     File picFolder = new File("resources/data");
                     try {
                         delete(picFolder);
                     } catch (IOException ex) {
                         System.out.println("IO Except " + ex.toString());
                     }
-                    picFolder.mkdir();
+                    if(!picFolder.mkdir()) {
+                        System.err.println("data folder doesn't created! trying again...");
+                        if(!picFolder.mkdir()) {
+                            System.err.println("data folder doesn't created again...");
+                            return;
+                        }
+                    }
 
                     for (int tGroup = 0; tGroup < terminalGroups.size(); tGroup++) {
                         for (int day = 0; day < terminalGroups.get(tGroup).getDaysOfWeek().length; day++) {

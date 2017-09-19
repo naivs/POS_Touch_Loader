@@ -55,6 +55,9 @@ public class Emulator extends javax.swing.JFrame {
     public static String SERVER_IP;
     public static int PORT;
     
+    public static final int NORMAL_STATE = 0;
+    public static final int LOCK_STATE = 1;
+    
     private JButton[] touch = new JButton[8];
     private int level = 2;
     private List<JMenu> tGroupsMenu;
@@ -401,7 +404,7 @@ public class Emulator extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void update() {
-        lockButtons(true);
+        setState(LOCK_STATE);
         dayButtonsGroup = new ButtonGroup();
         tGroupsMenu = new ArrayList<>();
         jMenu2.removeAll();
@@ -427,13 +430,16 @@ public class Emulator extends javax.swing.JFrame {
                     level = 2;
                     setButtonsLabels();
                     ((Monitor) jPanel2).clear();
-                    lockButtons(false);
+                    setState(NORMAL_STATE);
                 });
             }
         }
     }
     
-    private void lockButtons(boolean isLock) {
+    @Override
+    public void setState(int STATE) {
+        boolean isLock = STATE != NORMAL_STATE;
+        
         for(JButton btn : touch) {
             btn.setEnabled(!isLock);
         }

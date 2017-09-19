@@ -127,8 +127,6 @@ public class Emulator extends javax.swing.JFrame {
         menuDepartments = new javax.swing.JMenuItem();
         menuUpload = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
-        jMenu3 = new javax.swing.JMenu();
-        menuAbout = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Emulator");
@@ -378,13 +376,6 @@ public class Emulator extends javax.swing.JFrame {
 
         jMenu2.setText("Кассовый отдел...");
         jMenuBar1.add(jMenu2);
-
-        jMenu3.setText("Справка");
-
-        menuAbout.setText("О программе");
-        jMenu3.add(menuAbout);
-
-        jMenuBar1.add(jMenu3);
 
         setJMenuBar(jMenuBar1);
 
@@ -751,13 +742,11 @@ public class Emulator extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel4;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
-    private javax.swing.JMenu jMenu3;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
-    private javax.swing.JMenuItem menuAbout;
     private javax.swing.JMenuItem menuDepartments;
     private javax.swing.JMenuItem menuUpload;
     // End of variables declaration//GEN-END:variables

@@ -56,7 +56,7 @@ public class DayTrigger {
     }
     
     public void start() {
-        final Calendar fire = Calendar.getInstance();
+        Calendar fire = Calendar.getInstance();
         fire.set(Calendar.HOUR_OF_DAY, Integer.parseInt(firedTime.split(":")[0]));
         fire.set(Calendar.MINUTE, Integer.parseInt(firedTime.split(":")[1]));
         
@@ -65,7 +65,7 @@ public class DayTrigger {
             public void run() {
                 int dayOfWeek;
                 // check config on day
-                switch (fire.get(Calendar.DAY_OF_WEEK)) {
+                switch (Calendar.getInstance().get(Calendar.DAY_OF_WEEK)) {
                     case Calendar.MONDAY:
                         dayOfWeek = 1;
                         break;

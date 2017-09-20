@@ -61,7 +61,7 @@ public class Emulator extends javax.swing.JFrame {
     private JButton[] touch = new JButton[8];
     private int level = 2;
     private List<JMenu> tGroupsMenu;
-    private List<JRadioButtonMenuItem> daysMenuButtons = new ArrayList<>();
+    private List<List<JRadioButtonMenuItem>> daysMenuButtons;
     private ButtonGroup dayButtonsGroup;
     
     private List<TerminalGroup> terminalGroups;
@@ -74,6 +74,7 @@ public class Emulator extends javax.swing.JFrame {
      */
     public Emulator() {
         terminalGroups = new ArrayList<>();
+        dayButtonsGroup = new ButtonGroup();
         try {
             terminalGroups = new ConfigurationReader().read();
         } catch (SAXException e) {
@@ -404,12 +405,15 @@ public class Emulator extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void update() {
-        setState(LOCK_STATE);
-        dayButtonsGroup = new ButtonGroup();
-        tGroupsMenu = new ArrayList<>();
         jMenu2.removeAll();
-        
+        while(dayButtonsGroup.getElements().hasMoreElements()) {
+            dayButtonsGroup.remove(dayButtonsGroup.getElements().nextElement());
+        }
+        tGroupsMenu = new ArrayList<>();
+        daysMenuButtons = new ArrayList<>(terminalGroups.size()); // list of the lists of buttons
+                
         for(int i = 0; i < terminalGroups.size(); i++) {
+            daysMenuButtons.add(new ArrayList<>());
             tGroupsMenu.add(new JMenu(terminalGroups.get(i).toString()));
             jMenu2.add(tGroupsMenu.get(i));
             
@@ -417,16 +421,18 @@ public class Emulator extends javax.swing.JFrame {
                 JRadioButtonMenuItem jrmi = new JRadioButtonMenuItem(daysOfWeek.toString());
                 tGroupsMenu.get(i).add(jrmi);
                 dayButtonsGroup.add(jrmi);
-                daysMenuButtons.add(jrmi);
+                daysMenuButtons.get(i).add(jrmi);
+                
                 jrmi.addActionListener((ActionEvent e) -> {
                     int number = -1;
-                    for (int j = 0; j < daysMenuButtons.size(); j++) {
-                        if (e.getSource().equals(daysMenuButtons.get(j))) {
-                            number = j;
+                    for (int a = 0; a < daysMenuButtons.size(); a++) {
+                        for (int b = 0; b < daysMenuButtons.get(a).size(); b++) {
+                            if (e.getSource().equals(daysMenuButtons.get(a).get(b))) {
+                                selectedTermGroup = a;
+                                selectedDay = b;
+                            }
                         }
                     }
-                    selectedTermGroup = number / 7;
-                    selectedDay = number % 7;
                     level = 2;
                     setButtonsLabels();
                     ((Monitor) jPanel2).clear();
@@ -434,6 +440,8 @@ public class Emulator extends javax.swing.JFrame {
                 });
             }
         }
+        
+        setState(LOCK_STATE);
     }
     
     @Override

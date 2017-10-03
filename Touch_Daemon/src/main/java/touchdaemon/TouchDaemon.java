@@ -47,6 +47,7 @@ public class TouchDaemon {
         LOGGER.removeHandler(LOGGER.getHandlers()[0]);
         
         Formatter formatter = new Formatter() {
+            @Override
             public String format(LogRecord arg0) {
                 StringBuilder b = new StringBuilder();
                 b.append(new Date());

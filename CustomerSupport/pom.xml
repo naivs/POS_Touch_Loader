@@ -11,6 +11,11 @@
             <artifactId>swing-layout</artifactId>
             <version>1.0.3</version>
         </dependency>
+        <dependency>
+            <groupId>com.jtattoo</groupId>
+            <artifactId>JTattoo</artifactId>
+            <version>1.6.11</version>
+        </dependency>
     </dependencies>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -18,4 +23,12 @@
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
     <name>Customer Support</name>
+    
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/java/</directory>
+            </resource>
+        </resources>
+    </build>
 </project>

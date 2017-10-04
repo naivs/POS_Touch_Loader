@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.shape.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane id="AnchorPane" fx:id="mainScene" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="349.0" prefWidth="390.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.BrickGameController">
+   <children>
+      <Rectangle height="341.0" stroke="#51d4f2" strokeType="OUTSIDE" strokeWidth="4.0" width="171.0" x="4.0" y="4.0" />
+      <ChoiceBox fx:id="gamesChoiseBox" layoutX="182.0" layoutY="2.0" prefHeight="25.0" prefWidth="129.0" />
+      <Button fx:id="startButton" layoutX="182.0" layoutY="35.0" mnemonicParsing="false" prefWidth="60.0" text="Start" />
+      <Button fx:id="stopButton" layoutX="251.0" layoutY="35.0" mnemonicParsing="false" prefWidth="60.0" text="Stop" />
+      <Label fx:id="scores" layoutX="182.0" layoutY="78.0" textAlignment="CENTER">
+         <font>
+            <Font size="13.0" />
+         </font></Label>
+   </children>
+</AnchorPane>

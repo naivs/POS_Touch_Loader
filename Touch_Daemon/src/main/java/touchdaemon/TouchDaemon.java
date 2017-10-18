@@ -17,9 +17,17 @@
 package touchdaemon;
 
 import io.ConfigReader;
+import java.awt.AWTException;
+import java.awt.Image;
+import java.awt.MenuItem;
+import java.awt.PopupMenu;
+import java.awt.SystemTray;
+import java.awt.Toolkit;
+import java.awt.TrayIcon;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.Date;
-import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
 import java.util.logging.Level;
@@ -32,6 +40,9 @@ import net.Communicator;
  * @author Ivan
  */
 public class TouchDaemon {
+    
+    public static final String APPLICATION_NAME = "Touch Daemon";
+    public static final String ICON_STR = "icon32x32.png";
     
     public static final String SERVER_PATH = "c:/Server/";
     public static final String SERVER_PATH_LAN = SERVER_PATH + "lan/";
@@ -64,10 +75,10 @@ public class TouchDaemon {
             }
         };
         
-        ConsoleHandler ch = new ConsoleHandler();
-        ch.setLevel(Level.ALL);
-        ch.setFormatter(formatter);
-        LOGGER.addHandler(ch);
+        //ConsoleHandler ch = new ConsoleHandler();
+        //ch.setLevel(Level.ALL);
+        //ch.setFormatter(formatter);
+        //LOGGER.addHandler(ch);
         
         try {
             FileHandler fh = new FileHandler("touchdaemon.log");
@@ -101,9 +112,52 @@ public class TouchDaemon {
                 configReader.readRefSettings());
         dayTrigger.start();
         LOGGER.log(Level.INFO, "Daemon started!\n**************************\n");
+        
+        setTrayIcon();
+    }
+    
+    private void setTrayIcon() {
+        if (!SystemTray.isSupported()) {
+            return;
+        }
+
+        PopupMenu trayMenu = new PopupMenu();
+        MenuItem item = new MenuItem("Exit");
+        item.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
+            }
+        });
+        trayMenu.add(item);
+
+        Image icon = Toolkit.getDefaultToolkit().getImage(ICON_STR);
+        TrayIcon trayIcon = new TrayIcon(icon, APPLICATION_NAME, trayMenu);
+        trayIcon.setImageAutoSize(true);
+
+        SystemTray tray = SystemTray.getSystemTray();
+        try {
+            tray.add(trayIcon);
+        } catch (AWTException e) {
+            LOGGER.log(Level.WARNING, "Tray icon not shown...", e);
+        }
+
+        trayIcon.displayMessage(APPLICATION_NAME, "Application started!",
+                TrayIcon.MessageType.INFO);
+    }
+    
+    static private void daemonize() throws IOException {
+        System.in.close();
+        System.out.close();
     }
     
     public static void main(String[] args) {
+        try {
+            daemonize();
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Unable to close system streams...", e);
+        }
+        
         TouchDaemon daemon = new TouchDaemon();
     }
 }

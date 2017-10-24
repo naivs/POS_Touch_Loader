@@ -46,6 +46,8 @@ public class DayTrigger {
     private final boolean refSettings;
     
     private final Timer timer;
+    
+    private File day;
 
     public DayTrigger(String path, String firedTime, boolean parSettings, boolean refSettings) {
         this.path = path;
@@ -91,7 +93,7 @@ public class DayTrigger {
                         dayOfWeek = 0;
                 }
                 
-                File day = new File(path + "/day" + (dayOfWeek));
+                day = new File(path + "/day" + (dayOfWeek));
                 if (day.exists()) {
                     TouchDaemon.LOGGER.log(Level.INFO, day.getName() + " exists. Loading...");
                     loadToServer(day);
@@ -103,6 +105,13 @@ public class DayTrigger {
             }
         }, fire.getTime(), 86400000L);
         LOGGER.log(Level.INFO, "trigger started!\nUpload time: " + firedTime);
+    }
+    
+    public String getInfoStatus() {
+        String status = "UPLOAD TIME: " + firedTime + "\n"
+                + "CURRENT DAY: ";
+        status += day == null ? " " : day.getName();
+        return status;
     }
     
     private void copyFile(File source, File dest) throws IOException {

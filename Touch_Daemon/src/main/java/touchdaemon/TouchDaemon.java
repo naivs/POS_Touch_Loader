@@ -33,6 +33,7 @@ import java.util.logging.Formatter;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 import net.Communicator;
 
 /**
@@ -53,6 +54,8 @@ public class TouchDaemon {
     public static final String WEB_KEYFILE = "ASRPARAM.CTL";
     
     public static final Logger LOGGER = Logger.getAnonymousLogger().getParent();
+    
+    private final DayTrigger dayTrigger;
     
     public TouchDaemon() {
         LOGGER.removeHandler(LOGGER.getHandlers()[0]);
@@ -108,7 +111,7 @@ public class TouchDaemon {
         Communicator communicator = new Communicator(configReader.readPort(), response);
         communicator.start();
         LOGGER.log(Level.INFO, "trigger starting...");
-        DayTrigger dayTrigger = new DayTrigger(configReader.readPath(), configReader.readLoadTime(), configReader.readParSettings(),
+        dayTrigger = new DayTrigger(configReader.readPath(), configReader.readLoadTime(), configReader.readParSettings(),
                 configReader.readRefSettings());
         dayTrigger.start();
         LOGGER.log(Level.INFO, "Daemon started!\n**************************\n");
@@ -122,14 +125,24 @@ public class TouchDaemon {
         }
 
         PopupMenu trayMenu = new PopupMenu();
-        MenuItem item = new MenuItem("Exit");
-        item.addActionListener(new ActionListener() {
+        
+        MenuItem itemStatus = new MenuItem("Status");
+        itemStatus.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JOptionPane.showMessageDialog(null, dayTrigger.getInfoStatus(), "Status", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+        trayMenu.add(itemStatus);
+        
+        MenuItem itemExit = new MenuItem("Exit");
+        itemExit.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.exit(0);
             }
         });
-        trayMenu.add(item);
+        trayMenu.add(itemExit);
 
         Image icon = Toolkit.getDefaultToolkit().getImage(ICON_STR);
         TrayIcon trayIcon = new TrayIcon(icon, APPLICATION_NAME, trayMenu);

@@ -110,7 +110,44 @@ public class DayTrigger {
     public String getInfoStatus() {
         String status = "UPLOAD TIME: " + firedTime + "\n"
                 + "CURRENT DAY: ";
-        status += day == null ? " " : day.getName();
+        
+        if (day != null) {
+            switch (Integer.parseInt(day.getName().substring(day.getName().length() - 1))) {
+                case 0:
+                    status += "Monday";
+                    break;
+
+                case 1:
+                    status += "Thuesday";
+                    break;
+
+                case 2:
+                    status += "Wednesday";
+                    break;
+
+                case 3:
+                    status += "Thursday";
+                    break;
+
+                case 4:
+                    status += "Friday";
+                    break;
+
+                case 5:
+                    status += "Saturday";
+                    break;
+
+                case 6:
+                    status += "Sunday";
+                    break;
+
+                default:
+                    status += "---";
+            }
+        } else {
+            status += "---";
+        }
+
         return status;
     }
     

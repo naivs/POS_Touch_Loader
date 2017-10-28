@@ -121,9 +121,9 @@ public class TouchDaemon {
     
     private void setTrayIcon() {
         if (!SystemTray.isSupported()) {
+            LOGGER.log(Level.WARNING, "System Tray is not supported on that OS!");
             return;
         }
-
         PopupMenu trayMenu = new PopupMenu();
         
         MenuItem itemStatus = new MenuItem("Status");

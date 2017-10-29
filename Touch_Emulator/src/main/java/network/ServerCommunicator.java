@@ -16,7 +16,7 @@
  */
 package network;
 
-import gui.Emulator;
+import gui.Configurator;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -39,15 +39,15 @@ public class ServerCommunicator {
     
     public ServerCommunicator() {
         try {
-            socket = new Socket(Emulator.SERVER_IP, Emulator.PORT);
+            socket = new Socket(Configurator.SERVER_IP, Configurator.PORT);
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             // testing connection
             String buf = in.readLine();
             if (buf.equals("[helo]")) {
-                System.out.println(Emulator.SERVER_IP + ": connection established...");
+                System.out.println(Configurator.SERVER_IP + ": connection established...");
             } else {
-                System.out.println(Emulator.SERVER_IP + ": host unreachable.");
+                System.out.println(Configurator.SERVER_IP + ": host unreachable.");
             }
             // sending query
             System.out.println("getting data...");
@@ -57,7 +57,7 @@ public class ServerCommunicator {
             smbAuth = new SMBAuthentication(response[0], response[1], response[2]);
             loadTime = response[3];
         } catch (UnknownHostException ex) {
-            System.err.println("Unknown host " + Emulator.SERVER_IP);
+            System.err.println("Unknown host " + Configurator.SERVER_IP);
             shutDown();
         } catch (IOException ex) {
             System.err.println("I/O Socket error. " + ex.getMessage());

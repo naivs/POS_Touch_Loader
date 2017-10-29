@@ -18,7 +18,6 @@ package data;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.List;
 import javax.swing.table.DefaultTableModel;
 
@@ -30,21 +29,14 @@ public class DayOfWeek {
 
     private final String name;
     private List<Group> groups;
-    private String modifiedDate;
-
-    public DayOfWeek(String name) {
-        this(name, Calendar.getInstance().getTime().toString());
-    }
     
-    public DayOfWeek(String name, String modifiedDate) {
+    public DayOfWeek(String name) {
         this.name = name;
         groups = new ArrayList<>();
-        this.modifiedDate = modifiedDate;
     }
 
     public void addGroup(Group group) {
         groups.add(group);
-        updateTime();
     }
     
     public void addAllGroups(Group[] groups) {
@@ -53,7 +45,6 @@ public class DayOfWeek {
 
     public void removeGroup(int group) {
         groups.remove(group);
-        updateTime();
     }
     
     public void deleteAllGroups() {
@@ -85,14 +76,6 @@ public class DayOfWeek {
         return dtm;
     }
 
-    public void updateTime() {
-        modifiedDate = Calendar.getInstance().getTime().toString();
-    }
-    
-    public void setModifiedDate(String modifiedDate) {
-        this.modifiedDate = modifiedDate;
-    }
-
     public int getGroupCount() {
         return groups.size();
     }
@@ -107,10 +90,6 @@ public class DayOfWeek {
     
     public int getGroupNumber(String name) {
         return groups.indexOf(name);
-    }
-    
-    public String getModifiedDate() {
-        return modifiedDate;
     }
 
     @Override

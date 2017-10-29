@@ -57,13 +57,14 @@ public class ConfigurationReader {
         for (int a = 0; a < termGrps.getLength(); a++) {
             // terminalGroup
             Element elementA = (Element) termGrps.item(a);
-            terminalGroups.add(new TerminalGroup(Integer.parseInt(elementA.getAttribute("type")), elementA.getAttribute("name"), elementA.getAttribute("terminals"), elementA.getAttribute("startIndex")));
-            // daysOfWeek
-            NodeList dow = elementA.getElementsByTagName("DayOfWeek");
+            TerminalGroup tg = new TerminalGroup(Integer.parseInt(elementA.getAttribute("type")), elementA.getAttribute("name"), elementA.getAttribute("terminals"), elementA.getAttribute("startIndex"));
+            tg.setModified(elementA.getAttribute("modified"));
+            terminalGroups.add(tg);
+//            // daysOfWeek
+//            NodeList dow = elementA.getElementsByTagName("DayOfWeek");
             // groups
             for (int b = 0; b < terminalGroups.get(a).getDaysOfWeek().length; b++) {
                 terminalGroups.get(a).getDaysOfWeek()[b].addAllGroups(readGroups(termGrps, a, b));
-                terminalGroups.get(a).getDaysOfWeek()[b].setModifiedDate(((Element) dow.item(b)).getAttribute("lastConfigured"));
             }
         }
 
@@ -77,7 +78,7 @@ public class ConfigurationReader {
         
         for(int i = 0; i < groupsList.getLength(); i++) {
             Element grp = (Element) groupsList.item(i);
-            Group group = new Group(grp.getAttribute("name"), grp.getAttribute("creationDate"), grp.getAttribute("modifiedDate"));
+            Group group = new Group(grp.getAttribute("name"));
             //group.setNumber(Integer.parseInt(grp.getAttribute("number")));
             group.setSubgroups(readSubgroups(groupsList, i));
             groups[Integer.parseInt(grp.getAttribute("number"))] = group;
@@ -92,8 +93,7 @@ public class ConfigurationReader {
         
         for(int i = 0; i < subgroupsList.getLength(); i++) {
             Element sgrp = (Element) subgroupsList.item(i);
-            Subgroup subgroup = new Subgroup(sgrp.getAttribute("name"), Integer.parseInt(sgrp.getAttribute("index")), null, sgrp.getAttribute("creationDate"), sgrp.getAttribute("modifiedDate"));
-            subgroup.setPicturePath(sgrp.getAttribute("picPath"));
+            Subgroup subgroup = new Subgroup(sgrp.getAttribute("name"), Integer.parseInt(sgrp.getAttribute("index")));
             subgroup.setProducts(readProducts(subgroupsList, i));
             subgroups[Integer.parseInt(sgrp.getAttribute("number"))] = subgroup; //subgroup.getNumber()) - 1] = subgroup;
         }
@@ -107,7 +107,7 @@ public class ConfigurationReader {
         
         for(int i = 0; i < productsList.getLength(); i++) {
             Element prod = (Element) productsList.item(i);
-            Product product = new Product(prod.getAttribute("name"), prod.getAttribute("plu"), prod.getAttribute("picPath"), null, prod.getAttribute("creationDate"));
+            Product product = new Product(prod.getAttribute("name"), prod.getAttribute("plu"), prod.getAttribute("picPath"));
             //product.setNumber(Integer.parseInt(prod.getAttribute("number")));
             products[Integer.parseInt(prod.getAttribute("number"))] = product;
         }

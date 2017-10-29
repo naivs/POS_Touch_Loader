@@ -17,7 +17,6 @@
 package gui;
 
 import data.*;
-import io.ConfigurationReader;
 import io.ConfigurationWriter;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
@@ -33,16 +32,15 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
+import java.util.Enumeration;
 import java.util.Properties;
 import javax.imageio.ImageIO;
+import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
-import javax.swing.JMenu;
 import javax.swing.JOptionPane;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JToggleButton;
 import javax.xml.transform.TransformerException;
-import org.xml.sax.SAXException;
 import utils.Monitor;
 import utils.ParGenerator;
 import utils.RefGenerator;
@@ -52,40 +50,25 @@ import utils.RefGenerator;
  * @author Ivan
  */
 public class Emulator extends javax.swing.JFrame {
-    public static String SERVER_IP;
-    public static int PORT;
-    
     public static final int NORMAL_STATE = 0;
     public static final int LOCK_STATE = 1;
     
-    private JToggleButton[] touch = new JToggleButton[8];
+    private final JToggleButton[] touch = new JToggleButton[8];
     private int level = 2;
-    private List<JMenu> tGroupsMenu;
-    private List<List<JRadioButtonMenuItem>> daysMenuButtons;
-    private ButtonGroup dayButtonsGroup;
     
-    private List<TerminalGroup> terminalGroups;
-    private int selectedTermGroup;
+    private final ButtonGroup dayButtonsGroup;
+    
+    private final TerminalGroup terminalGroup;
     private int selectedDay;
     private int selectedGroup;
 
     /**
      * Creates new form Emulator
+     * @param terminalGroup
      */
-    public Emulator() {
-        terminalGroups = new ArrayList<>();
+    public Emulator(TerminalGroup terminalGroup) {
+        this.terminalGroup = terminalGroup;
         dayButtonsGroup = new ButtonGroup();
-        try {
-            terminalGroups = new ConfigurationReader().read();
-        } catch (SAXException e) {
-            // empty or corrupted
-            System.err.println(e.getMessage() + "\nФайл: \"resources/configuration.xml\" пуст или поврежден. Будет создана новая конфигурация");
-            openPosDepartmentManager();
-        } catch (IOException e) {
-            // no file
-            System.err.println(e.getMessage() + "\nФайл: \"resources/configuration.xml\" не найден. Будет создана новая конфигурация");
-            openPosDepartmentManager();
-        }
         
         initComponents();
         
@@ -128,12 +111,9 @@ public class Emulator extends javax.swing.JFrame {
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
-        jMenu1 = new javax.swing.JMenu();
-        menuDepartments = new javax.swing.JMenuItem();
-        menuUpload = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Emulator");
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         setResizable(false);
@@ -353,27 +333,7 @@ public class Emulator extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jMenu1.setText("Главное меню");
-
-        menuDepartments.setText("Кассовые отделы");
-        menuDepartments.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                menuDepartmentsActionPerformed(evt);
-            }
-        });
-        jMenu1.add(menuDepartments);
-
-        menuUpload.setText("Выгрузить на сервер...");
-        menuUpload.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                menuUploadActionPerformed(evt);
-            }
-        });
-        jMenu1.add(menuUpload);
-
-        jMenuBar1.add(jMenu1);
-
-        jMenu2.setText("Кассовый отдел...");
+        jMenu2.setText("День недели...");
         jMenuBar1.add(jMenu2);
 
         setJMenuBar(jMenuBar1);
@@ -401,41 +361,31 @@ public class Emulator extends javax.swing.JFrame {
 
     private void update() {
         jMenu2.removeAll();
-        while(dayButtonsGroup.getElements().hasMoreElements()) {
+        while (dayButtonsGroup.getElements().hasMoreElements()) {
             dayButtonsGroup.remove(dayButtonsGroup.getElements().nextElement());
         }
-        tGroupsMenu = new ArrayList<>();
-        daysMenuButtons = new ArrayList<>(terminalGroups.size()); // list of the lists of buttons
-                
-        for(int i = 0; i < terminalGroups.size(); i++) {
-            daysMenuButtons.add(new ArrayList<>());
-            tGroupsMenu.add(new JMenu(terminalGroups.get(i).toString()));
-            jMenu2.add(tGroupsMenu.get(i));
-            
-            for (DayOfWeek daysOfWeek : terminalGroups.get(i).getDaysOfWeek()) {
-                JRadioButtonMenuItem jrmi = new JRadioButtonMenuItem(daysOfWeek.toString());
-                tGroupsMenu.get(i).add(jrmi);
-                dayButtonsGroup.add(jrmi);
-                daysMenuButtons.get(i).add(jrmi);
-                
-                jrmi.addActionListener((ActionEvent e) -> {
-                    int number = -1;
-                    for (int a = 0; a < daysMenuButtons.size(); a++) {
-                        for (int b = 0; b < daysMenuButtons.get(a).size(); b++) {
-                            if (e.getSource().equals(daysMenuButtons.get(a).get(b))) {
-                                selectedTermGroup = a;
-                                selectedDay = b;
-                            }
+
+        for (DayOfWeek daysOfWeek : terminalGroup.getDaysOfWeek()) {
+            JRadioButtonMenuItem jrmi = new JRadioButtonMenuItem(daysOfWeek.toString());
+            dayButtonsGroup.add(jrmi);
+            jMenu2.add(jrmi);
+
+            jrmi.addActionListener((ActionEvent e) -> {
+                Enumeration elements = dayButtonsGroup.getElements();
+                int number = 0;
+                while (elements.hasMoreElements()) {
+                        if (((AbstractButton) elements.nextElement()).isSelected()) {
+                            selectedDay = number;
                         }
-                    }
-                    level = 2;
-                    setButtonsLabels();
-                    ((Monitor) jPanel2).clear();
-                    setState(NORMAL_STATE);
-                });
-            }
+                        number++;
+                }
+                level = 2;
+                setButtonsLabels();
+                ((Monitor) jPanel2).clear();
+                setState(NORMAL_STATE);
+            });
         }
-        
+
         setState(LOCK_STATE);
     }
     
@@ -451,45 +401,30 @@ public class Emulator extends javax.swing.JFrame {
     
     private void setButtonsLabels() {
         if (level == 2) {
-            jLabel2.setText("Кассовый отдел: " + terminalGroups.get(selectedTermGroup).toString());
-            jLabel3.setText("День: " + terminalGroups.get(selectedTermGroup).getDaysOfWeek()[selectedDay].toString());
+            jLabel2.setText("Кассовый отдел: " + terminalGroup.toString());
+            jLabel3.setText("День: " + terminalGroup.getDaysOfWeek()[selectedDay].toString());
             jLabel4.setText("");
-            String[] groupNames = terminalGroups.get(selectedTermGroup).getDaysOfWeek()[selectedDay].getGroupsAsStringArray();
+            String[] groupNames = terminalGroup.getDaysOfWeek()[selectedDay].getGroupsAsStringArray();
             for (int i = 0; i < touch.length; i++) {
                 touch[i].setText("<html>" + groupNames[i].replaceAll("::", "<br>") + "</html>");
             }
         } else {
-            String[] subgroupNames = terminalGroups.get(selectedTermGroup).getDaysOfWeek()[selectedDay].getGroup(selectedGroup).getSubgroupsAsStringArray();
+            String[] subgroupNames = terminalGroup.getDaysOfWeek()[selectedDay].getGroup(selectedGroup).getSubgroupsAsStringArray();
             for (int i = 0; i < subgroupNames.length; i++) {
                 touch[i].setText("<html>" + subgroupNames[i].replaceAll("::", "<br>") + "</html>");
             }
         }
     }
-    
-    private void menuUploadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuUploadActionPerformed
-        Uploader uploader = new Uploader(this, true, (ArrayList) terminalGroups);
-            uploader.addWindowListener(new java.awt.event.WindowAdapter() {
-                @Override
-                public void windowClosed(java.awt.event.WindowEvent e) {
-                    
-                }
-            });
-            uploader.setVisible(true);
-    }//GEN-LAST:event_menuUploadActionPerformed
-
-    private void menuDepartmentsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuDepartmentsActionPerformed
-        openPosDepartmentManager();
-    }//GEN-LAST:event_menuDepartmentsActionPerformed
-    
+        
     private void touchAction(int button) {
         if (level == 2) {
             level = 1;
             selectedGroup = button-1;
             setButtonsLabels();
-            jLabel4.setText("Гуппа: " + terminalGroups.get(selectedTermGroup).getDaysOfWeek()[selectedDay].getGroup(selectedGroup).getName().replace("::", " "));
+            jLabel4.setText("Гуппа: " + terminalGroup.getDaysOfWeek()[selectedDay].getGroup(selectedGroup).getName().replace("::", " "));
             jToggleButton1.doClick();
         } else if(level == 1) {
-            Product[] products = terminalGroups.get(selectedTermGroup).getDaysOfWeek()[selectedDay].getGroup(selectedGroup).getSubgroup(button-1).getProducts();
+            Product[] products = terminalGroup.getDaysOfWeek()[selectedDay].getGroup(selectedGroup).getSubgroup(button-1).getProducts();
             ((Monitor) jPanel2).display(products);
 
             System.out.println("\n====================");
@@ -541,182 +476,12 @@ public class Emulator extends javax.swing.JFrame {
         touchAction(8);
     }//GEN-LAST:event_jToggleButton8ActionPerformed
 
-    void delete(File f) throws IOException {
-        if (f.isDirectory()) {
-            for (File c : f.listFiles()) {
-                delete(c);
-            }
-        }
-        if (!f.delete()) {
-            throw new FileNotFoundException("Failed to delete file: " + f);
-        }
-    }
-    
-    private void openPosDepartmentManager() {
-        PosDepartmentManager manager = new PosDepartmentManager(this, true, (ArrayList) terminalGroups);
-        manager.addWindowListener(new java.awt.event.WindowAdapter() {
-            @Override
-            public void windowClosed(java.awt.event.WindowEvent e) {
-                if (manager.isModified() == PosDepartmentManager.CONTENT_CHANGED) {
-                    Thread t = new Thread() {
-                        @Override
-                        public void run() {
-                            JOptionPane.showMessageDialog(null, "", "Идет сохранение...", JOptionPane.PLAIN_MESSAGE);
-                        }
-                    };
-                    t.start();
-                    // configuration writing
-                    try {
-                        new ConfigurationWriter().write(terminalGroups);
-                    } catch (TransformerException ex) {
-                        System.err.println("TransformerException occured while configuration saving! " + ex.getMessage());
-                    }
-
-                    File picFolder = new File("resources/data");
-                    try {
-                        delete(picFolder);
-                    } catch (IOException ex) {
-                        System.out.println("IO Except " + ex.toString());
-                    }
-                    if(!picFolder.mkdir()) {
-                        System.err.println("data folder doesn't created! trying again...");
-                        if(!picFolder.mkdir()) {
-                            System.err.println("data folder doesn't created again...");
-                            return;
-                        }
-                    }
-
-                    for (int tGroup = 0; tGroup < terminalGroups.size(); tGroup++) {
-                        for (int day = 0; day < terminalGroups.get(tGroup).getDaysOfWeek().length; day++) {
-                            // clear pic folder                            
-                            // creation day dirs
-                            // saving all into it
-                            File anotherDay;
-                            if (terminalGroups.get(tGroup).getType() == TerminalGroup.TYPE_ALWAYS) {
-                                Calendar cal = Calendar.getInstance();
-                                cal.setTime(new Date());
-                                anotherDay = new File(picFolder.getPath() + "/day" + (cal.get(Calendar.DAY_OF_WEEK) - 1));
-                            } else {
-                                anotherDay = new File(picFolder.getPath() + "/day" + day);
-                            }
-                            anotherDay.mkdir();
-
-                            // saving .dat files
-                            ParGenerator pgen = new ParGenerator((ArrayList) terminalGroups, day, tGroup);
-                            File regpar = pgen.getFile();
-
-                            RefGenerator rgen = new RefGenerator((ArrayList) terminalGroups, day, tGroup);
-                            File pluref = rgen.getFile();
-
-                            String terminals = "";
-                            for (String num : terminalGroups.get(tGroup).getTerminalsAsString().split(":")) {
-                                terminals += num + "-";
-                            }
-                            terminals = terminals.substring(0, terminals.length() - 1);
-                            try {
-                                Files.copy(regpar.toPath(), new File(anotherDay.getPath() + "/P_REGPAR.DAT" + terminals).toPath(), StandardCopyOption.REPLACE_EXISTING);
-                                Files.copy(pluref.toPath(), new File(anotherDay.getPath() + "/S_PLUREF.DAT" + terminals).toPath(), StandardCopyOption.REPLACE_EXISTING);
-                            } catch (IOException ex) {
-                                System.err.println("IOException: " + ex.getMessage());
-                            }
-
-                            // saving images
-                            File cafe = new File(anotherDay.getPath() + "/cafe");
-                            cafe.mkdir();
-                            for (int c = 0; c < terminalGroups.get(tGroup).getDaysOfWeek()[day].getGroupCount(); c++) {
-                                for (int d = 0; d < terminalGroups.get(tGroup).getDaysOfWeek()[day].getGroup(c).getSubgroupCount(); d++) {
-                                    Product[] products = terminalGroups.get(tGroup).getDaysOfWeek()[day].getGroup(c).getSubgroup(d).getProducts();
-                                    ((Monitor) jPanel2).display(products);
-                                    BufferedImage bi = new BufferedImage(jPanel2.getSize().width, jPanel2.getSize().height, BufferedImage.TYPE_INT_ARGB);
-                                    Graphics g = bi.createGraphics();
-                                    jPanel2.paint(g);
-                                    g.dispose();
-                                    try {
-                                        File pic = new File(anotherDay.getAbsolutePath() + "/" + cafe.getName() + "/TCH_X" + terminalGroups.get(tGroup).getDaysOfWeek()[day].getGroup(c).getSubgroup(d).getIndex() + ".GIF");
-                                        ImageIO.write(bi, "GIF", pic);
-                                    } catch (IOException ex) {
-                                        System.out.println(ex.getMessage());
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    t.interrupt();
-                    JOptionPane.showMessageDialog(null, "Конфигурация успешно сохранена!", "Информация", JOptionPane.PLAIN_MESSAGE);
-                    update();
-                } else if (manager.isModified() == PosDepartmentManager.DEPARTMENTS_CHANGED) {
-                    try {
-                        new ConfigurationWriter().write(terminalGroups);
-                        update();
-                    } catch (TransformerException ex) {
-                        System.err.println("TransformerException occured while configuration saving!");
-                    }
-                }
-            }
-        });
-        manager.setVisible(true);
-    }
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(Emulator.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-        
-        //</editor-fold>
-
-        Properties properties = new Properties();
-        BufferedReader reader = null;
-
-        try {
-            reader = new BufferedReader(new InputStreamReader(new FileInputStream("touchLoader.conf")));
-            properties.load(reader);
-            SERVER_IP = properties.getProperty("serverIP");
-            PORT = Integer.parseInt(properties.getProperty("port"));
-            System.out.println("Server IP: " + SERVER_IP + ":" + PORT);
-        } catch (FileNotFoundException e) {
-            System.err.println("File touchDaemon.conf is not found! " + e.getMessage());
-            System.exit(1);
-        } catch (IOException e) {
-            System.err.println("Other IO Exception." + e.getMessage());
-            System.exit(1);
-        } finally {
-            try {
-                if(reader != null) reader.close();
-            } catch (IOException e) {
-                System.err.println("Can't close the stream!" + e.getMessage());
-                System.exit(1);
-            }
-        }
-        
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> {
-            new Emulator().setVisible(true);
-        });
-    }
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JButton jButton9;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel1;
@@ -731,7 +496,5 @@ public class Emulator extends javax.swing.JFrame {
     private javax.swing.JToggleButton jToggleButton6;
     private javax.swing.JToggleButton jToggleButton7;
     private javax.swing.JToggleButton jToggleButton8;
-    private javax.swing.JMenuItem menuDepartments;
-    private javax.swing.JMenuItem menuUpload;
     // End of variables declaration//GEN-END:variables
 }

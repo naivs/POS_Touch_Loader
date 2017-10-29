@@ -6,39 +6,16 @@
     </Component>
     <Menu class="javax.swing.JMenuBar" name="jMenuBar1">
       <SubComponents>
-        <Menu class="javax.swing.JMenu" name="jMenu1">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="&#x413;&#x43b;&#x430;&#x432;&#x43d;&#x43e;&#x435; &#x43c;&#x435;&#x43d;&#x44e;"/>
-          </Properties>
-          <SubComponents>
-            <MenuItem class="javax.swing.JMenuItem" name="menuDepartments">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="&#x41a;&#x430;&#x441;&#x441;&#x43e;&#x432;&#x44b;&#x435; &#x43e;&#x442;&#x434;&#x435;&#x43b;&#x44b;"/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="menuDepartmentsActionPerformed"/>
-              </Events>
-            </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="menuUpload">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="&#x412;&#x44b;&#x433;&#x440;&#x443;&#x437;&#x438;&#x442;&#x44c; &#x43d;&#x430; &#x441;&#x435;&#x440;&#x432;&#x435;&#x440;..."/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="menuUploadActionPerformed"/>
-              </Events>
-            </MenuItem>
-          </SubComponents>
-        </Menu>
         <Menu class="javax.swing.JMenu" name="jMenu2">
           <Properties>
-            <Property name="text" type="java.lang.String" value="&#x41a;&#x430;&#x441;&#x441;&#x43e;&#x432;&#x44b;&#x439; &#x43e;&#x442;&#x434;&#x435;&#x43b;..."/>
+            <Property name="text" type="java.lang.String" value="&#x414;&#x435;&#x43d;&#x44c; &#x43d;&#x435;&#x434;&#x435;&#x43b;&#x438;..."/>
           </Properties>
         </Menu>
       </SubComponents>
     </Menu>
   </NonVisualComponents>
   <Properties>
-    <Property name="defaultCloseOperation" type="int" value="3"/>
+    <Property name="defaultCloseOperation" type="int" value="2"/>
     <Property name="title" type="java.lang.String" value="Emulator"/>
     <Property name="cursor" type="java.awt.Cursor" editor="org.netbeans.modules.form.editors2.CursorEditor">
       <Color id="Default Cursor"/>

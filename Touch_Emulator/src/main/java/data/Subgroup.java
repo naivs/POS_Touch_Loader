@@ -1,6 +1,21 @@
+/*
+ * Copyright (C) 2017 Ivan Naumov
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package data;
 
-import java.util.Calendar;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -13,37 +28,11 @@ public class Subgroup {
     private int index;
     private Product[] products;
     private String picturePath;
-    private java.util.List<String> accessibleGroups;
-    private boolean isValid;
-    private String modifiedDate;
-    private final String creationDate;
     
-    public Subgroup(String name, int index, java.util.List<String> accessibleGroups) {
-        this(name, index, accessibleGroups, Calendar.getInstance().getTime().toString(), Calendar.getInstance().getTime().toString());
-    }
-    
-    public Subgroup(String name, int index, java.util.List<String> accessibleGroups, String creationDate, String modifiedDate) {
+    public Subgroup(String name, int index) {
         this.name = name;
         this.index = index;
         products = new Product[20];
-        this.accessibleGroups = accessibleGroups;
-        this.creationDate = creationDate;
-        this.modifiedDate = modifiedDate;
-    }
-    
-    public java.util.List<String> getAccessibleGroups() {
-        return accessibleGroups;
-    }
-    
-    public boolean isAccessible(String group) {
-        
-        for(int i = 0; i < accessibleGroups.size(); i++) {
-            if(accessibleGroups.get(i).equals(group)) {
-                return true;
-            }
-        }
-        
-        return false;
     }
     
     public void addProduct(Product product) {
@@ -51,7 +40,6 @@ public class Subgroup {
         for (int i = 0; i < products.length; i++) {
             if (products[i] == null) {
                 products[i] = product;
-                updateTime();
                 break;
             }
         }
@@ -66,21 +54,11 @@ public class Subgroup {
     }
     
     public void removeProduct(int index) {
-        
         products[index] = null;
-        updateTime();
-    }
-    
-    public boolean isValid() {
-        return isValid;
     }
     
     public void setProducts(Product[] products) {
         this.products = products;
-    }
-    
-    public String getCreationDate() {
-        return creationDate;
     }
     
     public DefaultTableModel getProductsAsTableModel() {
@@ -160,8 +138,6 @@ public class Subgroup {
             products[second] = products[first];
             products[first] = buf;
             
-            updateTime();
-            
 //            products[second].setNumber(second);
 //            
 //            if(products[first] != null) {
@@ -178,8 +154,6 @@ public class Subgroup {
             products[second] = products[first];
             products[first] = buf;
             
-            updateTime();
-            
 //            products[second].setNumber(second);
 //            
 //            if(products[first] != null) {
@@ -192,20 +166,8 @@ public class Subgroup {
         monitor.display(products);
     }
     
-    public void setRemoved(boolean statement) {
-        isValid = statement;
-    }
-    
-    public void updateTime() {
-        modifiedDate = Calendar.getInstance().getTime().toString();
-    }
-    
     public void setIndex(int index) {
         this.index = index;
-    }
-    
-    public void setAccessibleGroups(java.util.List<String> accessibleGroups) {
-        this.accessibleGroups = accessibleGroups;
     }
     
     public String getIndex() {
@@ -216,10 +178,6 @@ public class Subgroup {
         }
         
         return String.valueOf(index);
-    }
-    
-    public String getModifiedDate() {
-        return modifiedDate;
     }
     
     @Override

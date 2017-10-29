@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Ivan
+ * Copyright (C) 2017 Ivan Naumov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@
  */
 package data;
 
-import java.util.Calendar;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -27,19 +26,13 @@ public class Group {
 
     private final String name;
     private Subgroup[] subgroups;
-
-    public Group(String name) {
-
-        this(name, Calendar.getInstance().getTime().toString(), Calendar.getInstance().getTime().toString());
-    }
     
-    public Group(String name, String creationDate, String modifiedDate) {
+    public Group(String name) {
         this.name = name;
         subgroups = new Subgroup[8];
     }
 
     public void addSubgroup(Subgroup subgroup) {
-
         for (int i = 0; i < subgroups.length; i++) {
             if (subgroups[i] == null) {
                 subgroups[i] = subgroup;

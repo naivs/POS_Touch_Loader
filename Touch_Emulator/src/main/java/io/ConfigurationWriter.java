@@ -59,27 +59,22 @@ public class ConfigurationWriter {
             termGrp.setAttribute("name", termGroup.toString());
             termGrp.setAttribute("terminals", termGroup.getTerminalsAsString());
             termGrp.setAttribute("startIndex", termGroup.getStartIndex());
+            termGrp.setAttribute("modified", termGroup.getModified());
             // daysOfWeek
             for (DayOfWeek dayOfWeek : termGroup.getDaysOfWeek()) {
                 Element dayElement = doc.createElement("DayOfWeek");
                 dayElement.setAttribute("name", dayOfWeek.toString());
-                dayElement.setAttribute("modifiedDate", dayOfWeek.getModifiedDate());
                 // groups
                 for (int c = 0; c < dayOfWeek.getGroupCount(); c++) {
                         Element group = doc.createElement("Group");
                         group.setAttribute("name", dayOfWeek.getGroup(c).getName());
                         group.setAttribute("number", String.valueOf(c)); //terminalGroups.get(a).getDaysOfWeek()[b].getGroup(c).getNumber());
-                        group.setAttribute("creationDate", dayOfWeek.getGroup(c).getCreationDate());
-                        group.setAttribute("modifiedDate", dayOfWeek.getGroup(c).getModifiedDate());
                         // subgroups
                         for (int d = 0; d < dayOfWeek.getGroup(c).getSubgroupCount(); d++) {
                                 Element subgroup = doc.createElement("Subgroup");
                                 subgroup.setAttribute("name", dayOfWeek.getGroup(c).getSubgroup(d).getName());
                                 subgroup.setAttribute("index", dayOfWeek.getGroup(c).getSubgroup(d).getIndex());
-                                subgroup.setAttribute("picPath", dayOfWeek.getGroup(c).getSubgroup(d).getPicturePath());
                                 subgroup.setAttribute("number", String.valueOf(d));//terminalGroups.get(a).getDaysOfWeek()[b].getGroup(c).getSubgroup(d).getNumber());
-                                subgroup.setAttribute("creationDate", dayOfWeek.getGroup(c).getSubgroup(d).getCreationDate());
-                                subgroup.setAttribute("modifiedDate", dayOfWeek.getGroup(c).getSubgroup(d).getModifiedDate());
                                 // products
                                 for (int e = 0; e < dayOfWeek.getGroup(c).getSubgroup(d).getProductCount(); e++) {
                                         Element product = doc.createElement("Product");
@@ -87,7 +82,6 @@ public class ConfigurationWriter {
                                         product.setAttribute("plu", dayOfWeek.getGroup(c).getSubgroup(d).getProduct(e).getPlu());
                                         product.setAttribute("picPath", dayOfWeek.getGroup(c).getSubgroup(d).getProduct(e).getPicturePath());
                                         product.setAttribute("number", String.valueOf(e));//terminalGroups.get(a).getDaysOfWeek()[b].getGroup(c).getSubgroup(d).getProduct(e).getNumber());
-                                        product.setAttribute("creationDate", dayOfWeek.getGroup(c).getSubgroup(d).getProduct(e).getCreationDate());
                                         subgroup.appendChild(product);
                                 }
                                 group.appendChild(subgroup);

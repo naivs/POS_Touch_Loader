@@ -29,13 +29,15 @@ public class TerminalGroup {
     private final String name;
     private final String terminals;
     private DayOfWeek[] daysOfWeek;
-    private String startIndex;
+    private final String startIndex;
+    private String modified;
 
     public TerminalGroup(int TYPE, String name, String terminals, String startIndex) {
         this.type = TYPE;
         this.name = name;
         this.terminals = terminals;
         this.startIndex = startIndex;
+        modified = "---";
         
         if (TYPE == TYPE_ALWAYS) {
             daysOfWeek = new DayOfWeek[1];
@@ -55,6 +57,14 @@ public class TerminalGroup {
     
     public DayOfWeek[] getDaysOfWeek() {
         return daysOfWeek;
+    }
+    
+    public String getModified() {
+        return modified;
+    }
+
+    public void setModified(String modified) {
+        this.modified = modified;
     }
     
     public String getTerminalsAsString() {

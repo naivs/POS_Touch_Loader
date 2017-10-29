@@ -27,9 +27,6 @@ public class Group {
 
     private final String name;
     private Subgroup[] subgroups;
-    private final String creationDate;
-    private boolean isValid;
-    private String modifiedDate;
 
     public Group(String name) {
 
@@ -39,8 +36,6 @@ public class Group {
     public Group(String name, String creationDate, String modifiedDate) {
         this.name = name;
         subgroups = new Subgroup[8];
-        this.creationDate = creationDate;
-        this.modifiedDate = modifiedDate;
     }
 
     public void addSubgroup(Subgroup subgroup) {
@@ -48,23 +43,13 @@ public class Group {
         for (int i = 0; i < subgroups.length; i++) {
             if (subgroups[i] == null) {
                 subgroups[i] = subgroup;
-                updateTime();
                 break;
             }
         }
     }
-    
-    public void updateTime() {
-        modifiedDate = Calendar.getInstance().getTime().toString();
-    }
-    
-    public String getModifiedDate() {
-        return modifiedDate;
-    }
 
     public void removeSubgroup(int index) {
         subgroups[index] = null;
-        updateTime();
     }
     
     public void setSubgroups(Subgroup[] subgroups) {
@@ -73,14 +58,6 @@ public class Group {
 
     public String getName() {
         return name;
-    }
-
-    public boolean isValid() {
-        return isValid;
-    }
-    
-    public void setRemoved(boolean statement) {
-        isValid = statement;
     }
 
     public Subgroup getSubgroup(int index) {
@@ -149,7 +126,6 @@ public class Group {
             Subgroup buf = subgroups[second];
             subgroups[second] = subgroups[first];
             subgroups[first] = buf;
-            updateTime();
         //}
     }
 
@@ -160,12 +136,7 @@ public class Group {
             Subgroup buf = subgroups[second];
             subgroups[second] = subgroups[first];
             subgroups[first] = buf;
-            updateTime();
         //}
-    }
-
-    public String getCreationDate() {
-        return creationDate;
     }
 
     @Override

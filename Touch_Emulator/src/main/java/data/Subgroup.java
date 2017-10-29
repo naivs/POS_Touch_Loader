@@ -27,7 +27,6 @@ public class Subgroup {
     private final String name;
     private int index;
     private Product[] products;
-    private String picturePath;
     
     public Subgroup(String name, int index) {
         this.name = name;
@@ -43,14 +42,6 @@ public class Subgroup {
                 break;
             }
         }
-    }
-    
-    public void setPicturePath(String picurePath) {
-        this.picturePath = picurePath;
-    }
-    
-    public String getPicturePath() {
-        return picturePath;
     }
     
     public void removeProduct(int index) {

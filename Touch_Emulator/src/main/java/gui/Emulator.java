@@ -642,6 +642,7 @@ public class Emulator extends javax.swing.JFrame {
                         }
                     }
                     t.interrupt();
+                    JOptionPane.showMessageDialog(null, "Конфигурация успешно сохранена!", "Информация", JOptionPane.PLAIN_MESSAGE);
                     update();
                 } else if (manager.isModified() == PosDepartmentManager.DEPARTMENTS_CHANGED) {
                     try {

@@ -28,7 +28,7 @@ import javax.swing.table.DefaultTableModel;
 public class DayOfWeek {
 
     private final String name;
-    private List<Group> groups;
+    private final List<Group> groups;
     
     public DayOfWeek(String name) {
         this.name = name;

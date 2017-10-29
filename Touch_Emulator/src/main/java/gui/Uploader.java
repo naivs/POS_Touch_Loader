@@ -36,6 +36,8 @@ public class Uploader extends javax.swing.JDialog {
     private LoadAnalyzer la;
     private ServerCommunicator communicator;
     private SMBClient smbClient;
+    
+    private int progress;
 
     /**
      * Creates new form Uploader
@@ -89,6 +91,7 @@ public class Uploader extends javax.swing.JDialog {
         jScrollPane3 = new javax.swing.JScrollPane();
         jTextPane2 = new javax.swing.JTextPane();
         jLabel6 = new javax.swing.JLabel();
+        jProgressBar1 = new javax.swing.JProgressBar();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Загрузка параметров на сервер");
@@ -130,6 +133,8 @@ public class Uploader extends javax.swing.JDialog {
 
         jLabel6.setForeground(new java.awt.Color(204, 0, 0));
 
+        jProgressBar1.setStringPainted(true);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -142,9 +147,10 @@ public class Uploader extends javax.swing.JDialog {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(btnUpload, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 528, Short.MAX_VALUE)
-                            .addComponent(jScrollPane2))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jProgressBar1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 528, Short.MAX_VALUE)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.LEADING))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel6)
                         .addGap(63, 63, 63)))
@@ -165,8 +171,10 @@ public class Uploader extends javax.swing.JDialog {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 61, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jProgressBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -175,31 +183,44 @@ public class Uploader extends javax.swing.JDialog {
 
     private void btnUploadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUploadActionPerformed
         // upload to server
-        smbClient.clearShare();
+        progress = 0;
+        Thread task = new Thread() {
+            @Override
+            public void run() {
+                smbClient.clearShare();
 
-        for(int tGroupNum = 0; tGroupNum < configuration.size(); tGroupNum++) {
-            for (int dayNum = 0; dayNum < configuration.get(tGroupNum).getDaysOfWeek().length; dayNum++) {
-                try {
-                    // create day folder
-                    smbClient.createFolder("day" + dayNum + "/");
-                    // create cafe folder
-                    smbClient.createFolder("day" + dayNum + "/cafe/");
-                    // copy .dat files
-                    File datFiles = new File("resources/data/day" + dayNum);
-                    for (File f : datFiles.listFiles((File directory, String fileName) -> fileName.contains(".DAT"))) {
-                        smbClient.putFile(f, "day" + dayNum + "/" + f.getName());
+                for (int tGroupNum = 0; tGroupNum < configuration.size(); tGroupNum++) {
+                    for (int dayNum = 0; dayNum < configuration.get(tGroupNum).getDaysOfWeek().length; dayNum++) {
+                        try {
+                            // create day folder
+                            smbClient.createFolder("day" + dayNum + "/");
+                            // create cafe folder
+                            smbClient.createFolder("day" + dayNum + "/cafe/");
+                            // copy .dat files
+                            File datFiles = new File("resources/data/day" + dayNum);
+                            for (File f : datFiles.listFiles((File directory, String fileName) -> fileName.contains(".DAT"))) {
+                                smbClient.putFile(f, "day" + dayNum + "/" + f.getName());
+                            }
+                            // copy images
+                            for (File img : new File("resources/data/day" + dayNum + "/cafe").listFiles()) {
+                                smbClient.putFile(img, "day" + dayNum + "/cafe/" + img.getName());
+                            }
+                        } catch (MalformedURLException ex) {
+                            System.err.println("Wrong destenation URL. " + ex.getMessage());
+                        } catch (IOException ex) {
+                            System.err.println("I/O exception while P_REGPAR.DAT or S_PLUREF.DAT uploading. " + ex.getMessage());
+                        }
+                        
+                        progress += 100 / (configuration.size() * configuration.get(tGroupNum).getDaysOfWeek().length);
+                        jProgressBar1.setValue(progress);
                     }
-                    // copy images
-                    for (File img : new File("resources/data/day" + dayNum + "/cafe").listFiles()) {
-                        smbClient.putFile(img, "day" + dayNum + "/cafe/" + img.getName());
-                    }
-                } catch (MalformedURLException ex) {
-                    System.err.println("Wrong destenation URL. " + ex.getMessage());
-                } catch (IOException ex) {
-                    System.err.println("I/O exception while P_REGPAR.DAT or S_PLUREF.DAT uploading. " + ex.getMessage());
                 }
+                
+                jProgressBar1.setValue(100);
             }
-        }
+        };
+        
+        task.start();   
     }//GEN-LAST:event_btnUploadActionPerformed
 
     private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
@@ -210,6 +231,7 @@ public class Uploader extends javax.swing.JDialog {
     private javax.swing.JButton btnUpload;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JProgressBar jProgressBar1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JTable jTable1;

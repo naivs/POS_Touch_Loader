@@ -71,7 +71,7 @@ public class Uploader extends javax.swing.JDialog {
         
         communicator = new ServerCommunicator();
         jLabel1.setText(communicator.getLoadTime());
-        smbClient = new SMBClient(Emulator.SERVER_IP, communicator.getSmbAuth());
+        smbClient = new SMBClient(Configurator.SERVER_IP, communicator.getSmbAuth());
         System.out.println(smbClient.testConnection());
     }
 

@@ -32,7 +32,7 @@ import utils.LoadAnalyzer;
  * @author Ivan
  */
 public class Uploader extends javax.swing.JDialog {
-    private final LoadAnalyzer la;
+    //private final LoadAnalyzer la;
     private final ServerCommunicator communicator;
     private final SMBClient smbClient;
     
@@ -53,8 +53,8 @@ public class Uploader extends javax.swing.JDialog {
         for (int i = 0; i < colNames.length; i++) {
             colNames[i] = configuration.get(i).toString();
         }
-        la = new LoadAnalyzer(configuration);
-        jTable1.setModel(new UploaderTableModel(colNames, la.getDaysLoad()));
+        //la = new LoadAnalyzer(configuration);
+        //jTable1.setModel(new UploaderTableModel(colNames, la.getDaysLoad()));
         
         /*
         -> test connection to server demon

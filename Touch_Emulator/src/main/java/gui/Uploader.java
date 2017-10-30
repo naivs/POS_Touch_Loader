@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import javax.swing.JOptionPane;
 import models.UploaderTableModel;
 import network.SMBClient;
 import network.ServerCommunicator;
@@ -181,6 +182,26 @@ public class Uploader extends javax.swing.JDialog {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
+    private void recursiveCopy(File file) {
+        String name = file.getPath().substring(15);
+        if (file.isDirectory()) {
+            //System.out.println("create smb folder: " + file.getPath().substring(15));
+            smbClient.createFolder(name);
+            for (File fl : file.listFiles()) {
+                recursiveCopy(fl);
+            }
+        } else {
+            try {
+                //System.out.println(file.getPath() + " -> " + file.getPath().substring(15));
+                smbClient.putFile(file, file.getPath().substring(15));
+            } catch (MalformedURLException ex) {
+                System.err.println("Wrong destenation URL. " + ex.getMessage());
+            } catch (IOException ex) {
+                System.err.println("I/O exception while P_REGPAR.DAT or S_PLUREF.DAT uploading. " + ex.getMessage());
+            }
+        }
+    }
+    
     private void btnUploadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUploadActionPerformed
         // upload to server
         progress = 0;
@@ -188,35 +209,45 @@ public class Uploader extends javax.swing.JDialog {
             @Override
             public void run() {
                 smbClient.clearShare();
-
-                for (int tGroupNum = 0; tGroupNum < configuration.size(); tGroupNum++) {
-                    for (int dayNum = 0; dayNum < configuration.get(tGroupNum).getDaysOfWeek().length; dayNum++) {
-                        try {
-                            // create day folder
-                            smbClient.createFolder("day" + dayNum + "/");
-                            // create cafe folder
-                            smbClient.createFolder("day" + dayNum + "/cafe/");
-                            // copy .dat files
-                            File datFiles = new File("resources/data/day" + dayNum);
-                            for (File f : datFiles.listFiles((File directory, String fileName) -> fileName.contains(".DAT"))) {
-                                smbClient.putFile(f, "day" + dayNum + "/" + f.getName());
-                            }
-                            // copy images
-                            for (File img : new File("resources/data/day" + dayNum + "/cafe").listFiles()) {
-                                smbClient.putFile(img, "day" + dayNum + "/cafe/" + img.getName());
-                            }
-                        } catch (MalformedURLException ex) {
-                            System.err.println("Wrong destenation URL. " + ex.getMessage());
-                        } catch (IOException ex) {
-                            System.err.println("I/O exception while P_REGPAR.DAT or S_PLUREF.DAT uploading. " + ex.getMessage());
-                        }
-                        
-                        progress += 100 / (configuration.size() * configuration.get(tGroupNum).getDaysOfWeek().length);
-                        jProgressBar1.setValue(progress);
-                    }
+                //get local directory
+                File sourseFolder = new File("resources/data/");
+                int col = sourseFolder.listFiles().length;
+                for(File f : sourseFolder.listFiles()) {
+                    recursiveCopy(f);
+                    progress += 100 / col;
+                    jProgressBar1.setValue(progress);
                 }
                 
+//                for (int tGroupNum = 0; tGroupNum < configuration.size(); tGroupNum++) {
+//                    for (int dayNum = 0; dayNum < configuration.get(tGroupNum).getDaysOfWeek().length; dayNum++) {
+//                        try {
+//                            // create day folder
+//                            smbClient.createFolder("day" + dayNum + "/");
+//                            // create cafe folder
+//                            smbClient.createFolder("day" + dayNum + "/cafe/");
+//                            // copy .dat files
+//                            File datFiles = new File("resources/data/day" + dayNum);
+//                            for (File f : datFiles.listFiles((File directory, String fileName) -> fileName.contains(".DAT"))) {
+//                                smbClient.putFile(f, "day" + dayNum + "/" + f.getName());
+//                            }
+//                            // copy images
+//                            for (File img : new File("resources/data/day" + dayNum + "/cafe").listFiles()) {
+//                                smbClient.putFile(img, "day" + dayNum + "/cafe/" + img.getName());
+//                            }
+//                        } catch (MalformedURLException ex) {
+//                            System.err.println("Wrong destenation URL. " + ex.getMessage());
+//                        } catch (IOException ex) {
+//                            System.err.println("I/O exception while P_REGPAR.DAT or S_PLUREF.DAT uploading. " + ex.getMessage());
+//                        }
+//                        
+//                        progress += 100 / (configuration.size() * configuration.get(tGroupNum).getDaysOfWeek().length);
+//                        jProgressBar1.setValue(progress);
+//                    }
+//                }
+                
                 jProgressBar1.setValue(100);
+                JOptionPane.showMessageDialog(null, "Данные выгружены на кассовый сервер!", "Информация", JOptionPane.PLAIN_MESSAGE);
+                dispose();
             }
         };
         

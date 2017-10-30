@@ -32,11 +32,9 @@ import utils.LoadAnalyzer;
  * @author Ivan
  */
 public class Uploader extends javax.swing.JDialog {
-
-    private final ArrayList<TerminalGroup> configuration;
-    private LoadAnalyzer la;
-    private ServerCommunicator communicator;
-    private SMBClient smbClient;
+    private final LoadAnalyzer la;
+    private final ServerCommunicator communicator;
+    private final SMBClient smbClient;
     
     private int progress;
 
@@ -50,8 +48,6 @@ public class Uploader extends javax.swing.JDialog {
     public Uploader(java.awt.Frame parent, boolean modal, ArrayList<TerminalGroup> configuration) {
         super(parent, modal);
         initComponents();
-
-        this.configuration = configuration;
 
         String[] colNames = new String[configuration.size()];
         for (int i = 0; i < colNames.length; i++) {
@@ -71,7 +67,7 @@ public class Uploader extends javax.swing.JDialog {
         */
         
         communicator = new ServerCommunicator();
-        jLabel1.setText(communicator.getLoadTime());
+        jLabel1.setText("Выгрузка дынных на кассы будет произведена в: " + communicator.getLoadTime());
         smbClient = new SMBClient(Emulator.SERVER_IP, communicator.getSmbAuth());
         System.out.println(smbClient.testConnection());
     }
@@ -85,14 +81,34 @@ public class Uploader extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jLabel1 = new javax.swing.JLabel();
-        btnUpload = new javax.swing.JButton();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
         jScrollPane3 = new javax.swing.JScrollPane();
         jTextPane2 = new javax.swing.JTextPane();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jTable1 = new javax.swing.JTable();
+        jLabel1 = new javax.swing.JLabel();
+        btnUpload = new javax.swing.JButton();
         jLabel6 = new javax.swing.JLabel();
         jProgressBar1 = new javax.swing.JProgressBar();
+
+        jTextPane2.setEditable(false);
+        jTextPane2.setBorder(null);
+        jTextPane2.setText("* В таблице представлена информация о заполненности кассовых групп продуктами в каждый день недели. Информация выводится в процентном эквиваленте.");
+        jTextPane2.setFocusable(false);
+        jScrollPane3.setViewportView(jTextPane2);
+
+        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        jTable1.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        jScrollPane2.setViewportView(jTable1);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Загрузка параметров на сервер");
@@ -112,26 +128,6 @@ public class Uploader extends javax.swing.JDialog {
             }
         });
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
-            }
-        ));
-        jTable1.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        jScrollPane2.setViewportView(jTable1);
-
-        jTextPane2.setEditable(false);
-        jTextPane2.setBorder(null);
-        jTextPane2.setText("* В таблице представлена информация о заполненности кассовых групп продуктами в каждый день недели. Информация выводится в процентном эквиваленте.");
-        jTextPane2.setFocusable(false);
-        jScrollPane3.setViewportView(jTextPane2);
-
         jLabel6.setForeground(new java.awt.Color(204, 0, 0));
 
         jProgressBar1.setStringPainted(true);
@@ -145,37 +141,26 @@ public class Uploader extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 431, Short.MAX_VALUE)
                         .addComponent(btnUpload, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jProgressBar1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 528, Short.MAX_VALUE)
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.LEADING))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(jLabel6)
-                        .addGap(63, 63, 63)))
+                        .addGap(63, 63, 63))
+                    .addComponent(jProgressBar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnUpload)
                     .addComponent(jLabel1))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(48, 48, 48)
-                        .addComponent(jLabel6))
-                    .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(18, 18, 18)
                 .addComponent(jProgressBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(12, 12, 12)
+                .addComponent(jLabel6))
         );
 
         pack();

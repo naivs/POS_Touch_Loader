@@ -119,9 +119,10 @@ public class Uploader extends javax.swing.JDialog {
             }
         });
 
-        jLabel1.setText("Адрес:");
+        jLabel1.setText("time");
 
         btnUpload.setText("Выгрузить");
+        btnUpload.setFocusPainted(false);
         btnUpload.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnUploadActionPerformed(evt);
@@ -141,7 +142,7 @@ public class Uploader extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 431, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 449, Short.MAX_VALUE)
                         .addComponent(btnUpload, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
@@ -193,6 +194,7 @@ public class Uploader extends javax.swing.JDialog {
         Thread task = new Thread() {
             @Override
             public void run() {
+                btnUpload.setEnabled(false);
                 smbClient.clearShare();
                 //get local directory
                 File sourseFolder = new File("resources/data/");

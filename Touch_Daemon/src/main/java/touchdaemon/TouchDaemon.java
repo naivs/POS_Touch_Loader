@@ -43,7 +43,7 @@ import net.Communicator;
 public class TouchDaemon {
     
     public static final String APPLICATION_NAME = "Touch Daemon";
-    public static final String ICON_STR = "icon32x32.png";
+    public static final String ICON_STR = "icon.png";
     
     public static final String SERVER_PATH = "c:/Server/";
     public static final String SERVER_PATH_LAN = SERVER_PATH + "lan/";

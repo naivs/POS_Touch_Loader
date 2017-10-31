@@ -41,21 +41,26 @@ public class PosDepartmentManager extends javax.swing.JDialog {
 
     private final ArrayList<TerminalGroup> configuration;
     private final DefaultListModel listModel = new DefaultListModel<>();
-    
+
     private final IndexDispatcher idisp = new IndexDispatcher();
+
+    private static int currentState;
     
-    private static final int NORMAL = 1;
+    private static final int IDLE = 0;
+    private static final int ITEM_SELECTED = 1;
     private static final int ADD = 2;
-    private static final int EDIT = 3;
-    
+    private static final int LOAD_FILE = 3;
+    private static final int EDIT = 4;
+
     public static final int NO_CHANGES = 0;
     public static final int DEPARTMENTS_CHANGED = 1;
     public static final int CONTENT_CHANGED = 2;
-    
+
     private int isModified;
-    
+
     /**
      * Creates new form NewDept
+     *
      * @param parent
      * @param modal
      * @param configuration
@@ -154,8 +159,7 @@ public class PosDepartmentManager extends javax.swing.JDialog {
         jLabel3.setText("Служебный стартовый индекс");
 
         btnOk.setText("ОК");
-        btnOk.setEnabled(false);
-        btnOk.setFocusable(false);
+        btnOk.setFocusPainted(false);
         btnOk.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnOkActionPerformed(evt);
@@ -163,8 +167,7 @@ public class PosDepartmentManager extends javax.swing.JDialog {
         });
 
         btnCancel.setText("Отмена");
-        btnCancel.setEnabled(false);
-        btnCancel.setFocusable(false);
+        btnCancel.setFocusPainted(false);
         btnCancel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCancelActionPerformed(evt);
@@ -206,14 +209,13 @@ public class PosDepartmentManager extends javax.swing.JDialog {
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(boxName, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 280, Short.MAX_VALUE)
-                            .addComponent(jLabel1)
-                            .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel2)
-                            .addComponent(jLabel3)
-                            .addComponent(boxTerminals, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jLabel4))
+                        .addComponent(boxName, javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addComponent(jLabel1)
+                        .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel2)
+                        .addComponent(jLabel3)
+                        .addComponent(boxTerminals, javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addComponent(jLabel4)
                         .addGroup(jPanel1Layout.createSequentialGroup()
                             .addComponent(boxFile, javax.swing.GroupLayout.PREFERRED_SIZE, 253, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -269,6 +271,7 @@ public class PosDepartmentManager extends javax.swing.JDialog {
         );
 
         btnEdit.setText("/");
+        btnEdit.setEnabled(false);
         btnEdit.setFocusable(false);
         btnEdit.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -323,17 +326,24 @@ public class PosDepartmentManager extends javax.swing.JDialog {
             return false;
         }
     }
-    
+
     public int isModified() {
         return isModified;
     }
-    
+
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
-        if(autorization()) turnState(ADD);
+        if (autorization()) {
+            turnState(ADD);
+        }
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
-        turnState(NORMAL);
+        if (currentState == ADD || currentState == LOAD_FILE) {
+                turnState(IDLE);
+        } else {
+                isModified = NO_CHANGES;
+                dispose();
+        }
     }//GEN-LAST:event_btnCancelActionPerformed
 
     private void btnFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFileActionPerformed
@@ -375,11 +385,11 @@ public class PosDepartmentManager extends javax.swing.JDialog {
                         }
 
                         String[] subgroupsNames = parser.getSubgroupNames(i, j);
-                        
+
                         for (int s = 0; s < subgroups.length; s++) {
                             //subgroups[s] = new Subgroup(String.valueOf(s + 1), idisp.getNextFreeIndex(i), Collections.EMPTY_LIST);
-                            subgroups[s] = new Subgroup(subgroupsNames[s], 
-                                    idisp.getNextFreeIndex(i, Integer.parseInt(String.valueOf(jComboBox1.getSelectedItem()).substring(1, 4))), 
+                            subgroups[s] = new Subgroup(subgroupsNames[s],
+                                    idisp.getNextFreeIndex(i, Integer.parseInt(String.valueOf(jComboBox1.getSelectedItem()).substring(1, 4))),
                                     Collections.EMPTY_LIST);
                         }
 
@@ -407,6 +417,7 @@ public class PosDepartmentManager extends javax.swing.JDialog {
                 System.err.println("Other IO Exception");
             }
             isModified = CONTENT_CHANGED;
+            turnState(LOAD_FILE);
         }
     }//GEN-LAST:event_btnFileActionPerformed
 
@@ -418,27 +429,35 @@ public class PosDepartmentManager extends javax.swing.JDialog {
             boxTerminals.setText(tGrp.getTerminalsAsString());
             jComboBox1.setSelectedItem(tGrp.getStartIndex());
             btnFile.setEnabled(true);
-            
-            if(tGrp.getType() == TerminalGroup.TYPE_ALWAYS) {
+
+            if (tGrp.getType() == TerminalGroup.TYPE_ALWAYS) {
                 jRadioButton1.setSelected(true);
             } else {
                 jRadioButton2.setSelected(true);
             }
+            turnState(ITEM_SELECTED);
         }
     }//GEN-LAST:event_jList1ValueChanged
 
     private void btnOkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOkActionPerformed
-        if (listModel.contains(boxName.getText())) {
-            jLabel5.setText("Отдел с таким именем существует");
-        } else if (boxName.getText().isEmpty() || boxTerminals.getText().isEmpty() || jComboBox1.getSelectedIndex() == 0) {
-            jLabel5.setText("Заполните все поля");
-        } else {
-            int tGroupType = jRadioButton1.isSelected() ? TerminalGroup.TYPE_ALWAYS : TerminalGroup.TYPE_DAYS;
-            TerminalGroup tGrp = new TerminalGroup(tGroupType, boxName.getText(), boxTerminals.getText(), jComboBox1.getSelectedItem().toString());
-            configuration.add(tGrp);
-            listModel.addElement(tGrp);
-            turnState(NORMAL);
-            isModified = isModified == 0 ? DEPARTMENTS_CHANGED : CONTENT_CHANGED;
+        switch (currentState) {
+            case ADD:
+                if (listModel.contains(boxName.getText())) {
+                    jLabel5.setText("Отдел с таким именем существует");
+                } else if (boxName.getText().isEmpty() || boxTerminals.getText().isEmpty() || jComboBox1.getSelectedIndex() == 0) {
+                    jLabel5.setText("Заполните все поля");
+                } else {
+                    int tGroupType = jRadioButton1.isSelected() ? TerminalGroup.TYPE_ALWAYS : TerminalGroup.TYPE_DAYS;
+                    TerminalGroup tGrp = new TerminalGroup(tGroupType, boxName.getText(), boxTerminals.getText(), jComboBox1.getSelectedItem().toString());
+                    configuration.add(tGrp);
+                    listModel.addElement(tGrp);
+                    turnState(IDLE);
+                    isModified = isModified == 0 ? DEPARTMENTS_CHANGED : CONTENT_CHANGED;
+                }
+                break;
+                
+            default:
+                dispose();
         }
     }//GEN-LAST:event_btnOkActionPerformed
 
@@ -452,12 +471,14 @@ public class PosDepartmentManager extends javax.swing.JDialog {
             if (response == JOptionPane.OK_OPTION) {
                 configuration.remove(selectedIndex);
                 listModel.remove(selectedIndex);
+                isModified = DEPARTMENTS_CHANGED;
+                turnState(ITEM_SELECTED);
             }
         }
     }//GEN-LAST:event_btnDelActionPerformed
 
     private void boxTerminalsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_boxTerminalsMouseClicked
-        if(boxTerminals.isFocusable()) {
+        if (boxTerminals.isFocusable()) {
             boxTerminals.setText(AddingTerminals.showAddTerminalsDialog(this, boxTerminals.getText()));
         }
     }//GEN-LAST:event_boxTerminalsMouseClicked
@@ -474,10 +495,10 @@ public class PosDepartmentManager extends javax.swing.JDialog {
         jLabel5.setText("");
         btnFile.setEnabled(false);
     }
-    
+
     private void turnState(int STATE) {
-        switch(STATE) {
-            case NORMAL:
+        switch (STATE) {
+            case IDLE:
                 clear();
                 jList1.setEnabled(true);
                 
@@ -485,49 +506,93 @@ public class PosDepartmentManager extends javax.swing.JDialog {
                 btnDel.setEnabled(true);
                 btnEdit.setEnabled(true);
                 btnOk.setEnabled(false);
-                btnCancel.setEnabled(false);
-                btnFile.setEnabled(true);
-                
+                btnCancel.setEnabled(true);
+                btnFile.setEnabled(false);
+
                 boxName.setFocusable(false);
                 boxName.setEditable(false);
                 boxTerminals.setFocusable(false);
-                
+
                 jComboBox1.setEnabled(false);
-                
+
                 jRadioButton1.setEnabled(false);
                 jRadioButton2.setEnabled(false);
+                currentState = IDLE;
                 break;
-                
+            
+            case ITEM_SELECTED:
+                jList1.setEnabled(true);
+
+                btnAdd.setEnabled(true);
+                btnDel.setEnabled(true);
+                btnEdit.setEnabled(true);
+                btnOk.setEnabled(true);
+                btnCancel.setEnabled(true);
+                btnFile.setEnabled(true);
+
+                boxName.setFocusable(false);
+                boxName.setEditable(false);
+                boxTerminals.setFocusable(false);
+
+                jComboBox1.setEnabled(false);
+
+                jRadioButton1.setEnabled(false);
+                jRadioButton2.setEnabled(false);
+                currentState = ITEM_SELECTED;
+                break;
+
             case ADD:
                 clear();
                 jList1.setEnabled(false);
-                
+
                 btnAdd.setEnabled(false);
                 btnDel.setEnabled(false);
                 btnEdit.setEnabled(false);
                 btnOk.setEnabled(true);
                 btnCancel.setEnabled(true);
                 btnFile.setEnabled(false);
-                
+
                 boxName.setFocusable(true);
                 boxName.setEditable(true);
                 boxTerminals.setFocusable(true);
-                
+
                 jComboBox1.setEnabled(true);
-                
+
                 jRadioButton1.setEnabled(true);
                 jRadioButton2.setEnabled(true);
+                currentState = ADD;
+                break;
+
+            case LOAD_FILE:
+                jList1.setEnabled(false);
+
+                btnAdd.setEnabled(false);
+                btnDel.setEnabled(false);
+                btnEdit.setEnabled(false);
+                btnOk.setEnabled(true);
+                btnCancel.setEnabled(true);
+                btnFile.setEnabled(true);
+
+                boxName.setFocusable(false);
+                boxName.setEditable(false);
+                boxTerminals.setFocusable(false);
+
+                jComboBox1.setEnabled(false);
+
+                jRadioButton1.setEnabled(false);
+                jRadioButton2.setEnabled(false);
+                currentState = LOAD_FILE;
                 break;
                 
             case EDIT:
                 break;
         }
     }
-    
+
     /**
      * @param args the command line arguments
      */
- 
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField boxFile;
     private javax.swing.JTextField boxName;

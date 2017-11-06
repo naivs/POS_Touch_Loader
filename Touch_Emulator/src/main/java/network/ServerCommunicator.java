@@ -37,11 +37,11 @@ public class ServerCommunicator {
     private PrintWriter out;
     private BufferedReader in;
     
-    public ServerCommunicator() {
+    public ServerCommunicator() throws UnknownHostException, IOException {
+        socket = new Socket(Configurator.SERVER_IP, Configurator.PORT);
+        out = new PrintWriter(socket.getOutputStream(), true);
+        in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         try {
-            socket = new Socket(Configurator.SERVER_IP, Configurator.PORT);
-            out = new PrintWriter(socket.getOutputStream(), true);
-            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             // testing connection
             String buf = in.readLine();
             if (buf.equals("[helo]")) {
@@ -56,9 +56,6 @@ public class ServerCommunicator {
             System.out.println(Arrays.toString(response));
             smbAuth = new SMBAuthentication(response[0], response[1], response[2]);
             loadTime = response[3];
-        } catch (UnknownHostException ex) {
-            System.err.println("Unknown host " + Configurator.SERVER_IP);
-            shutDown();
         } catch (IOException ex) {
             System.err.println("I/O Socket error. " + ex.getMessage());
             shutDown();

@@ -20,6 +20,7 @@ import data.TerminalGroup;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import models.UploaderTableModel;
 import network.SMBClient;
@@ -43,11 +44,11 @@ public class Uploader extends javax.swing.JDialog {
      * Creates new form Uploader
      *
      * @param parent
-     * @param modal
      * @param configuration
+     * @throws java.net.UnknownHostException
      */
-    public Uploader(java.awt.Frame parent, boolean modal, ArrayList<TerminalGroup> configuration) {
-        super(parent, modal);
+    public Uploader(java.awt.Frame parent, ArrayList<TerminalGroup> configuration) throws UnknownHostException, IOException {
+        super(parent, true);
         initComponents();
 
         this.configuration = configuration;

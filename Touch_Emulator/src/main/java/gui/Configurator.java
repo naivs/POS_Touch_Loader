@@ -35,6 +35,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
@@ -294,6 +295,7 @@ public class Configurator extends javax.swing.JFrame {
         setTitle("Touch Configurator");
 
         jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        jPanel1.setLayout(new java.awt.GridLayout());
 
         addButton.setText("Новый отдел...");
         addButton.addActionListener(new java.awt.event.ActionListener() {
@@ -301,6 +303,7 @@ public class Configurator extends javax.swing.JFrame {
                 addButtonActionPerformed(evt);
             }
         });
+        jPanel1.add(addButton);
 
         uploadButton.setText("Загрузить все на сервер");
         uploadButton.addActionListener(new java.awt.event.ActionListener() {
@@ -308,6 +311,7 @@ public class Configurator extends javax.swing.JFrame {
                 uploadButtonActionPerformed(evt);
             }
         });
+        jPanel1.add(uploadButton);
 
         updateFromFileButton.setText("Обновить данные из фала...");
         updateFromFileButton.addActionListener(new java.awt.event.ActionListener() {
@@ -315,25 +319,7 @@ public class Configurator extends javax.swing.JFrame {
                 updateFromFileButtonActionPerformed(evt);
             }
         });
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addComponent(addButton)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 101, Short.MAX_VALUE)
-                .addComponent(updateFromFileButton)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(uploadButton))
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                .addComponent(addButton)
-                .addComponent(uploadButton)
-                .addComponent(updateFromFileButton))
-        );
+        jPanel1.add(updateFromFileButton);
 
         jTable1.setModel(new DepartmentsTableModel(terminalGroups));
         jTable1.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
@@ -432,7 +418,21 @@ public class Configurator extends javax.swing.JFrame {
     }//GEN-LAST:event_addButtonActionPerformed
 
     private void uploadButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_uploadButtonActionPerformed
-        Uploader uploader = new Uploader(this, true, (ArrayList) terminalGroups);
+        Uploader uploader;
+        try {
+            uploader = new Uploader(this, (ArrayList) terminalGroups);
+        } catch (UnknownHostException ex) {
+            System.err.println("Unknown host " + Configurator.SERVER_IP);
+            showMessage(SERVER_MESSAGE, "Некорректный сетевой адрес...", WARN);
+            return;
+        } catch (IOException ex) {
+            System.err.println("I/O Socket error. " + ex.getMessage());
+            showMessage(SERVER_MESSAGE, "Сервер офлайн...", WARN);
+            return;
+        }
+        
+        generateFiles();
+
         uploader.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosed(java.awt.event.WindowEvent e) {

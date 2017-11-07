@@ -16,6 +16,7 @@
  */
 package gui;
 
+import java.util.Arrays;
 import javax.swing.DefaultListModel;
 import javax.swing.JDialog;
 
@@ -25,25 +26,37 @@ import javax.swing.JDialog;
  */
 public class AddingTerminals extends javax.swing.JDialog {
 
-    private static final DefaultListModel modelA = new DefaultListModel();
+    private static AddingTerminals instance;
+    private static DefaultListModel modelA;
     private static final DefaultListModel modelB = new DefaultListModel();
-    
+
     /**
      * Creates new form AddingTerminals
+     *
      * @param owner
+     * @param holdedPOS
      */
-    private AddingTerminals(JDialog owner) {
-        super(owner, true);
-        
-        for (int i = 0; i < 200; i++) {
-            if(i < 99) {
-                modelB.addElement(i < 9 ? "00" + String.valueOf(i+1) : "0" + String.valueOf(i+1));
-            } else {
-                modelB.addElement(String.valueOf(i+1));
+    private AddingTerminals(JDialog parent, String holdedTeminals) {
+        super(parent, true);
+
+        for (int i = 122; i < 200; i++) {
+            //if (i < 99) {
+            //modelB.addElement(i < 9 ? "00" + String.valueOf(i + 1) : "0" + String.valueOf(i + 1));
+            //} else {
+            if (Arrays.binarySearch(holdedTeminals.split(":"), i) != -1) {
+                modelB.addElement(String.valueOf(i));
             }
+            //}
         }
-        
+
         initComponents();
+    }
+
+    protected static synchronized AddingTerminals getInstance(JDialog parent, String holdedTeminals) {
+        if (instance == null) {
+            instance = new AddingTerminals(parent, holdedTeminals);
+        }
+        return instance;
     }
 
     /**
@@ -57,8 +70,8 @@ public class AddingTerminals extends javax.swing.JDialog {
 
         jScrollPane11 = new javax.swing.JScrollPane();
         termsAddedList = new javax.swing.JList();
-        jButton1 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
+        addToDepButton = new javax.swing.JButton();
+        remFromDepButton = new javax.swing.JButton();
         jScrollPane13 = new javax.swing.JScrollPane();
         termsAllList = new javax.swing.JList();
         jLabel1 = new javax.swing.JLabel();
@@ -72,17 +85,17 @@ public class AddingTerminals extends javax.swing.JDialog {
         termsAddedList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPane11.setViewportView(termsAddedList);
 
-        jButton1.setText("<");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        addToDepButton.setText("<");
+        addToDepButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                addToDepButtonActionPerformed(evt);
             }
         });
 
-        jButton3.setText(">");
-        jButton3.addActionListener(new java.awt.event.ActionListener() {
+        remFromDepButton.setText(">");
+        remFromDepButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton3ActionPerformed(evt);
+                remFromDepButtonActionPerformed(evt);
             }
         });
 
@@ -105,14 +118,12 @@ public class AddingTerminals extends javax.swing.JDialog {
                         .addComponent(jScrollPane11, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jButton1)
-                            .addComponent(jButton3))
+                            .addComponent(addToDepButton)
+                            .addComponent(remFromDepButton))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane13, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -130,9 +141,9 @@ public class AddingTerminals extends javax.swing.JDialog {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(195, 195, 195)
-                        .addComponent(jButton1)
+                        .addComponent(addToDepButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton3)
+                        .addComponent(remFromDepButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 216, Short.MAX_VALUE)))
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 15, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -142,26 +153,26 @@ public class AddingTerminals extends javax.swing.JDialog {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    public static String showAddTerminalsDialog(JDialog owner, String terminals) {
-        AddingTerminals at = new AddingTerminals(owner);
+    public String showAddTerminalsDialog(String terminals) {
+        modelA = new DefaultListModel();
         if (!terminals.isEmpty()) {
             for (String terminal : terminals.split(":")) {
                 modelA.addElement(terminal);
             }
             terminals = "";
         }
-        at.setVisible(true);
-        
-        for(int i = 0; i < modelA.getSize(); i++) {
+        setVisible(true);
+
+        for (int i = 0; i < modelA.getSize(); i++) {
             terminals += modelA.get(i) + ":";
         }
-        
+
         modelA.removeAllElements();
-        
+
         return terminals.substring(0, terminals.length() - 1);
     }
-    
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+
+    private void addToDepButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addToDepButtonActionPerformed
         int index = termsAllList.getSelectedIndex();
 
         if (index == -1) {
@@ -169,24 +180,24 @@ public class AddingTerminals extends javax.swing.JDialog {
         } else {
             modelA.addElement(modelB.remove(index));
         }
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_addToDepButtonActionPerformed
 
-    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+    private void remFromDepButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_remFromDepButtonActionPerformed
         int index = termsAddedList.getSelectedIndex();
-        
+
         if (index == -1) {
             jLabel1.setText("Выберите хотя бы одну кассу!");
         } else {
             modelB.addElement(modelA.remove(index));
         }
-    }//GEN-LAST:event_jButton3ActionPerformed
+    }//GEN-LAST:event_remFromDepButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton3;
+    private javax.swing.JButton addToDepButton;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane11;
     private javax.swing.JScrollPane jScrollPane13;
+    private javax.swing.JButton remFromDepButton;
     private javax.swing.JList<String> termsAddedList;
     private javax.swing.JList<String> termsAllList;
     // End of variables declaration//GEN-END:variables

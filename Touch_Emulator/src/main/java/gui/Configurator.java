@@ -35,6 +35,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -53,6 +54,8 @@ import javax.swing.JTable;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.xml.transform.TransformerException;
 import models.DepartmentsTableModel;
+import network.SMBClient;
+import network.ServerCommunicator;
 import org.xml.sax.SAXException;
 import utils.IndexDispatcher;
 import utils.Monitor;
@@ -396,8 +399,12 @@ public class Configurator extends javax.swing.JFrame {
 
     private void addButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addButtonActionPerformed
         if (autorization()) {
-            DepartmentCreator depCreator = new DepartmentCreator(this);
-            TerminalGroup tg = depCreator.createDepartment();
+            String holdedPOS = "";
+            for (TerminalGroup buf : terminalGroups) {
+                holdedPOS += ":" + buf.getTerminalsAsString();
+            }
+            DepartmentCreator dc = new DepartmentCreator(this, holdedPOS);
+            TerminalGroup tg = dc.createDepartment();
 
             if (tg != null) {
                 boolean contains = false;
@@ -418,9 +425,14 @@ public class Configurator extends javax.swing.JFrame {
     }//GEN-LAST:event_addButtonActionPerformed
 
     private void uploadButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_uploadButtonActionPerformed
-        Uploader uploader;
+        ServerCommunicator communicator;
+        SMBClient smbClient;
+
         try {
-            uploader = new Uploader(this, (ArrayList) terminalGroups);
+            communicator = new ServerCommunicator();
+            smbClient = new SMBClient(SERVER_IP, communicator.getSmbAuth());
+            System.out.println(smbClient.testConnection());
+
         } catch (UnknownHostException ex) {
             System.err.println("Unknown host " + Configurator.SERVER_IP);
             showMessage(SERVER_MESSAGE, "Некорректный сетевой адрес...", WARN);
@@ -430,16 +442,36 @@ public class Configurator extends javax.swing.JFrame {
             showMessage(SERVER_MESSAGE, "Сервер офлайн...", WARN);
             return;
         }
-        
+
         generateFiles();
 
-        uploader.addWindowListener(new java.awt.event.WindowAdapter() {
-            @Override
-            public void windowClosed(java.awt.event.WindowEvent e) {
+        smbClient.clearShare();
 
+        for (int tGroupNum = 0; tGroupNum < terminalGroups.size(); tGroupNum++) {
+            for (int dayNum = 0; dayNum < terminalGroups.get(tGroupNum).getDaysOfWeek().length; dayNum++) {
+                try {
+                    // create day folder
+                    smbClient.createFolder("day" + dayNum + "/");
+                    // create cafe folder
+                    smbClient.createFolder("day" + dayNum + "/cafe/");
+                    // copy .dat files
+                    File datFiles = new File("resources/data/day" + dayNum);
+                    for (File f : datFiles.listFiles((File directory, String fileName) -> fileName.contains(".DAT"))) {
+                        smbClient.putFile(f, "day" + dayNum + "/" + f.getName());
+                    }
+                    // copy images
+                    for (File img : new File("resources/data/day" + dayNum + "/cafe").listFiles()) {
+                        smbClient.putFile(img, "day" + dayNum + "/cafe/" + img.getName());
+                    }
+                } catch (MalformedURLException ex) {
+                    System.err.println("Wrong destenation URL. " + ex.getMessage());
+                } catch (IOException ex) {
+                    System.err.println("I/O exception while P_REGPAR.DAT or S_PLUREF.DAT uploading. " + ex.getMessage());
+                }
             }
-        });
-        uploader.setVisible(true);
+        }
+        
+        communicator.shutDown();
     }//GEN-LAST:event_uploadButtonActionPerformed
 
     private void jTable1MousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MousePressed
@@ -451,7 +483,17 @@ public class Configurator extends javax.swing.JFrame {
         });
         JMenuItem modifyMenuItem = new JMenuItem("Изменить");
         modifyMenuItem.addActionListener((ActionEvent e) -> {
-            // -> not supported yet
+            if (autorization()) {
+
+                String holdedPOS = "";
+                for (TerminalGroup buf : terminalGroups) {
+                    holdedPOS += ":" + buf.getTerminalsAsString();
+                }
+                DepartmentCreator dc = new DepartmentCreator(this, holdedPOS);
+                if (dc.editDepartment(terminalGroups.get(rowindex))) {
+                    update();
+                }
+            }
         });
         JMenuItem removeMenuItem = new JMenuItem("Удалить");
         removeMenuItem.addActionListener((ActionEvent e) -> {

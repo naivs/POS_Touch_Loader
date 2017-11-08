@@ -23,24 +23,53 @@ import data.TerminalGroup;
  * @author ivan
  */
 public class DepartmentCreator extends javax.swing.JDialog {
-    public static final int ADD_MODE = 0;
-    public static final int EDIT_MODE = 1;
-    
+    private boolean isModified;
+    private final String holdedPOS;
     private TerminalGroup terminalGroup;
-    
+
     /**
      * Creates new form DepartmentCreator
+     *
      * @param parent
+     * @param holdedPOS
      */
-    public DepartmentCreator(java.awt.Frame parent) {
+    public DepartmentCreator(java.awt.Frame parent, String holdedPOS) {
         super(parent, true);
+        this.holdedPOS = holdedPOS;
         initComponents();
     }
-    
+
     public TerminalGroup createDepartment() {
-        this.setVisible(true);
-        
+        setVisible(true);
+        if(isModified) {
+            int tGroupType = jRadioButton1.isSelected() ? TerminalGroup.TYPE_ALWAYS : TerminalGroup.TYPE_DAYS;
+            terminalGroup = new TerminalGroup(tGroupType, boxName.getText(), boxTerminals.getText(), jComboBox1.getSelectedItem().toString());
+        }
         return terminalGroup;
+    }
+
+    public boolean editDepartment(TerminalGroup terminalGroup) {
+        this.terminalGroup = terminalGroup;
+        boxName.setText(this.terminalGroup.toString());
+        boxTerminals.setText(this.terminalGroup.getTerminalsAsString());
+        jComboBox1.setSelectedItem(this.terminalGroup.getStartIndex());
+
+        if (this.terminalGroup.getType() == TerminalGroup.TYPE_ALWAYS) {
+            jRadioButton1.setSelected(true);
+        } else {
+            jRadioButton2.setSelected(true);
+        }
+        setVisible(true);
+        
+        if(isModified) {
+            this.terminalGroup.setName(boxName.getText());
+            this.terminalGroup.setTerminals(boxTerminals.getText());
+            this.terminalGroup.setStartIndex(String.valueOf(jComboBox1.getSelectedItem()));
+            if(jRadioButton1.isSelected()) {
+                this.terminalGroup.setType(TerminalGroup.TYPE_ALWAYS);
+            }
+        }
+        return isModified;
     }
 
     /**
@@ -174,8 +203,8 @@ public class DepartmentCreator extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void boxTerminalsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_boxTerminalsMouseClicked
-        if(boxTerminals.isFocusable()) {
-            boxTerminals.setText(AddingTerminals.showAddTerminalsDialog(this, boxTerminals.getText()));
+        if (boxTerminals.isFocusable()) {
+            boxTerminals.setText(new AddingTerminals(null, holdedPOS, boxTerminals.getText()).showAddTerminalsDialog());
         }
     }//GEN-LAST:event_boxTerminalsMouseClicked
 
@@ -183,8 +212,7 @@ public class DepartmentCreator extends javax.swing.JDialog {
         if (boxName.getText().isEmpty() || boxTerminals.getText().isEmpty() || jComboBox1.getSelectedIndex() == 0) {
             jLabel5.setText("Заполните все поля");
         } else {
-            int tGroupType = jRadioButton1.isSelected() ? TerminalGroup.TYPE_ALWAYS : TerminalGroup.TYPE_DAYS;
-            terminalGroup = new TerminalGroup(tGroupType, boxName.getText(), boxTerminals.getText(), jComboBox1.getSelectedItem().toString());
+            isModified = true;
             dispose();
         }
     }//GEN-LAST:event_btnOkActionPerformed

@@ -427,13 +427,13 @@ public class Emulator extends javax.swing.JFrame {
             Product[] products = terminalGroup.getDaysOfWeek()[selectedDay].getGroup(selectedGroup).getSubgroup(button-1).getProducts();
             ((Monitor) jPanel2).display(products);
 
-            System.out.println("\n====================");
+            //System.out.println("\n====================");
             for (int i = 0; i < products.length; i++) {
                 if (products[i] != null) {
-                    System.out.println(i + 1 + ") " + products[i].getName() + " - " + products[i].getPlu());
+                    //System.out.println(i + 1 + ") " + products[i].getName() + " - " + products[i].getPlu());
                 }
             }
-            System.out.println("====================");
+            //System.out.println("====================");
         }
     }
     

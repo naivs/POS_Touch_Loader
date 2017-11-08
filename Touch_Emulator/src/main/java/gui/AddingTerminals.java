@@ -16,9 +16,7 @@
  */
 package gui;
 
-import java.util.Arrays;
 import javax.swing.DefaultListModel;
-import javax.swing.JDialog;
 
 /**
  *
@@ -26,37 +24,51 @@ import javax.swing.JDialog;
  */
 public class AddingTerminals extends javax.swing.JDialog {
 
-    private static AddingTerminals instance;
-    private static DefaultListModel modelA;
-    private static final DefaultListModel modelB = new DefaultListModel();
+    private final DefaultListModel modelA;
+    private final DefaultListModel modelB;
 
     /**
      * Creates new form AddingTerminals
      *
-     * @param owner
+     * @param parent
      * @param holdedPOS
+     * @param terminals
      */
-    private AddingTerminals(JDialog parent, String holdedTeminals) {
+    protected AddingTerminals(java.awt.Frame parent, String holdedPOS, String terminals) {
         super(parent, true);
 
+        modelA = new DefaultListModel();
+        if (!terminals.isEmpty()) {
+            for (String terminal : terminals.split(":")) {
+                modelA.addElement(terminal);
+            }
+        }
+        
+        modelB = new DefaultListModel();
         for (int i = 122; i < 200; i++) {
             //if (i < 99) {
             //modelB.addElement(i < 9 ? "00" + String.valueOf(i + 1) : "0" + String.valueOf(i + 1));
             //} else {
-            if (Arrays.binarySearch(holdedTeminals.split(":"), i) != -1) {
-                modelB.addElement(String.valueOf(i));
-            }
+            modelB.addElement(String.valueOf(i));
             //}
+        }
+        for(String number : holdedPOS.split(":")) {
+            modelB.removeElement(number);
         }
 
         initComponents();
     }
-
-    protected static synchronized AddingTerminals getInstance(JDialog parent, String holdedTeminals) {
-        if (instance == null) {
-            instance = new AddingTerminals(parent, holdedTeminals);
+    
+    private void sortList(DefaultListModel listModel) {
+        for(int i = 0; i < listModel.getSize(); i++) {
+            for(int j = 0; j < listModel.getSize() - 1; j++) {
+                if(Integer.parseInt(String.valueOf(listModel.elementAt(i))) < Integer.parseInt(String.valueOf(listModel.elementAt(j)))) {
+                    int buf = Integer.parseInt(String.valueOf(listModel.elementAt(i)));
+                    listModel.set(i, Integer.parseInt(String.valueOf(listModel.elementAt(j))));
+                    listModel.set(j, buf);
+                }
+            }
         }
-        return instance;
     }
 
     /**
@@ -80,6 +92,7 @@ public class AddingTerminals extends javax.swing.JDialog {
         setMaximumSize(new java.awt.Dimension(200, 2147483647));
         setMinimumSize(new java.awt.Dimension(200, 500));
         setPreferredSize(new java.awt.Dimension(200, 500));
+        setResizable(false);
 
         termsAddedList.setModel(modelA);
         termsAddedList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
@@ -153,23 +166,15 @@ public class AddingTerminals extends javax.swing.JDialog {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    public String showAddTerminalsDialog(String terminals) {
-        modelA = new DefaultListModel();
-        if (!terminals.isEmpty()) {
-            for (String terminal : terminals.split(":")) {
-                modelA.addElement(terminal);
-            }
-            terminals = "";
-        }
+    public String showAddTerminalsDialog() {
         setVisible(true);
 
+        String terminals = "";
         for (int i = 0; i < modelA.getSize(); i++) {
             terminals += modelA.get(i) + ":";
         }
 
-        modelA.removeAllElements();
-
-        return terminals.substring(0, terminals.length() - 1);
+        return terminals.isEmpty() ? terminals : terminals.substring(0, terminals.length() - 1);
     }
 
     private void addToDepButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addToDepButtonActionPerformed
@@ -179,6 +184,7 @@ public class AddingTerminals extends javax.swing.JDialog {
             jLabel1.setText("Выберите хотя бы одну кассу!");
         } else {
             modelA.addElement(modelB.remove(index));
+            sortList(modelA);
         }
     }//GEN-LAST:event_addToDepButtonActionPerformed
 
@@ -189,6 +195,7 @@ public class AddingTerminals extends javax.swing.JDialog {
             jLabel1.setText("Выберите хотя бы одну кассу!");
         } else {
             modelB.addElement(modelA.remove(index));
+            sortList(modelB);
         }
     }//GEN-LAST:event_remFromDepButtonActionPerformed
 

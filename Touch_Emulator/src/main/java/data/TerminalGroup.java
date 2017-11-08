@@ -25,11 +25,11 @@ public class TerminalGroup {
     public static final int TYPE_ALWAYS = 0;
     public static final int TYPE_DAYS = 1;
     
-    private final int type;
-    private final String name;
-    private final String terminals;
+    private int type;
+    private String name;
+    private String terminals;
     private DayOfWeek[] daysOfWeek;
-    private final String startIndex;
+    private String startIndex;
     private String modified;
 
     public TerminalGroup(int TYPE, String name, String terminals, String startIndex) {
@@ -77,6 +77,22 @@ public class TerminalGroup {
 
     public int getType() {
         return type;
+    }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
+
+    public void setTerminals(String terminals) {
+        this.terminals = terminals;
+    }
+
+    public void setStartIndex(String startIndex) {
+        this.startIndex = startIndex;
     }
     
     @Override

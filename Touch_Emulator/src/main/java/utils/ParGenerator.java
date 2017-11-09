@@ -32,14 +32,14 @@ public class ParGenerator {
 
     private final ArrayList<String> data;
 
-    public ParGenerator(ArrayList<data.TerminalGroup> configuration, int day, int termGroup) {
+    public ParGenerator(data.DayOfWeek day) {
         data = new ArrayList();
         
-        for (int a = 0; a < configuration.get(termGroup).getDaysOfWeek()[day].getGroupCount(); a++) {
-            generateSubgroupBlock(configuration.get(termGroup).getDaysOfWeek()[day].getGroup(a), a);
+        for (int a = 0; a < day.getGroupCount(); a++) {
+            generateSubgroupBlock(day.getGroup(a), a);
         }
 
-        generateGroupBlock(configuration.get(termGroup).getDaysOfWeek()[day].getGroupsAsStringArray());
+        generateGroupBlock(day.getGroupsAsStringArray());
     }
 
     private void generateSubgroupBlock(Group group, int groupNumber) {
@@ -111,7 +111,7 @@ public class ParGenerator {
         try {
             tmp = File.createTempFile("~rp", ".tmp");
         } catch (IOException ex) {
-
+            System.err.println("Unable to create .tmp file: " + ex.getMessage());
         }
 
         try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tmp), "cp866"))) {
@@ -120,7 +120,7 @@ public class ParGenerator {
             }
             bw.flush();
         } catch (IOException ex) {
-            
+            System.err.println("I/O Error while write data: " + ex.getMessage());
         }
         return tmp;
     }

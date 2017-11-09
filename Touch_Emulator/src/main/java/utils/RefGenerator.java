@@ -34,36 +34,32 @@ public class RefGenerator {
 
     private final ArrayList<String> data;
 
-    public RefGenerator(ArrayList<data.TerminalGroup> configuration, int day, int termGroup) {
+    public RefGenerator(data.DayOfWeek day) {
 
         data = new ArrayList();
 
         // getting all subgroups per day
         ArrayList<Subgroup> subgroups = new ArrayList();
 
-        for (int c = 0; c < configuration.get(termGroup).getDaysOfWeek()[day].getGroupCount(); c++) {
-            //if (configuration.get(b).getDaysOfWeek()[day].getGroup(c) != null) {
-            for (int d = 0; d < configuration.get(termGroup).getDaysOfWeek()[day].getGroup(c).getSubgroupCount(); d++) {
-                //if (configuration.get(b).getDaysOfWeek()[day].getGroup(c).getSubgroup(d) != null) {
-                subgroups.add(configuration.get(termGroup).getDaysOfWeek()[day].getGroup(c).getSubgroup(d));
-                //}
+        for (int c = 0; c < day.getGroupCount(); c++) {
+            for (int d = 0; d < day.getGroup(c).getSubgroupCount(); d++) {
+                subgroups.add(day.getGroup(c).getSubgroup(d));
             }
-            //}
         }
 
         // sorting subgroups by index
-        for(int i = 0; i < subgroups.size(); i++) {
-            for(int j = subgroups.size() - 1; j > i; j--) {
-                if(Integer.parseInt(subgroups.get(i).getIndex()) > Integer.parseInt(subgroups.get(j).getIndex())) {                   
+        for (int i = 0; i < subgroups.size(); i++) {
+            for (int j = subgroups.size() - 1; j > i; j--) {
+                if (Integer.parseInt(subgroups.get(i).getIndex()) > Integer.parseInt(subgroups.get(j).getIndex())) {
                     Collections.swap(subgroups, i, j);
                 }
             }
         }
-        
+
         // add lines to data
-        for(Subgroup subgroup : subgroups) {
+        subgroups.forEach((subgroup) -> {
             data.addAll(Arrays.asList(generateBlock(subgroup)));
-        }
+        });
     }
 
     private String[] generateBlock(Subgroup subgroup) {
@@ -99,13 +95,13 @@ public class RefGenerator {
     public ArrayList<String> getData() {
         return data;
     }
-    
+
     public File getFile() {
         File tmp = null;
         try {
             tmp = File.createTempFile("~pr", ".tmp");
         } catch (IOException ex) {
-
+            System.err.println("Unable to create .tmp file: " + ex.getMessage());
         }
 
         try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tmp), "cp866"))) {
@@ -114,7 +110,7 @@ public class RefGenerator {
             }
             bw.flush();
         } catch (IOException ex) {
-
+            System.err.println("I/O Error while write data: " + ex.getMessage());
         }
         return tmp;
     }

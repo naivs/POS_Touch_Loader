@@ -33,16 +33,16 @@ import org.apache.commons.text.WordUtils;
  */
 public class PictureDrawer {
     
-    private static final File ground = new File("resources/ground.gif");
-    private static final BufferedImage screen = new BufferedImage(555, 384, BufferedImage.TYPE_INT_RGB);
-    private static final Font textFont = new Font("Franklin Gothic Medium Cond", Font.BOLD, 14);
-    private static final Font pluFont = new Font("Franklin Gothic Medium Cond", Font.PLAIN, 15);
+    private static final File GROUND = new File("resources/ground.gif");
+    private static final BufferedImage SCREEN = new BufferedImage(555, 384, BufferedImage.TYPE_INT_RGB);
+    private static final Font TEXT_FONT = new Font("Franklin Gothic Medium Cond", Font.BOLD, 14);
+    private static final Font PLU_FONT = new Font("Franklin Gothic Medium Cond", Font.PLAIN, 15);
 
     private static final int dx = 111;
     private static final int dy = 96;
 
-    public static void draw(String filePath, Subgroup subgroup) throws IOException {
-        screen.createGraphics().drawImage(ImageIO.read(ground), 0, 0, null);
+    public static void draw(File file, Subgroup subgroup) throws IOException {
+        SCREEN.createGraphics().drawImage(ImageIO.read(GROUND), 0, 0, null);
         Product[] products = subgroup.getProducts();
 
         int i = 0;
@@ -71,13 +71,13 @@ public class PictureDrawer {
             numY += dy;
         }
 
-        ImageIO.write(screen, "GIF", new File(filePath + "/TCH_X" + subgroup.getIndex() + ".GIF"));
-        screen.createGraphics().dispose();
+        ImageIO.write(SCREEN, "GIF", file);
+        SCREEN.createGraphics().dispose();
     }
 
     private static void drawName(String text, int x, int y) {
-        Graphics2D graphics = screen.createGraphics();
-        graphics.setFont(textFont);
+        Graphics2D graphics = SCREEN.createGraphics();
+        graphics.setFont(TEXT_FONT);
         graphics.setColor(Color.black);
 
         for (String out : WordUtils.wrap(text, 14, "\n", true).split("\n")) {
@@ -87,8 +87,8 @@ public class PictureDrawer {
     }
 
     private static void drawPlu(String plu, int x, int y) {
-        Graphics2D graphics = screen.createGraphics();
-        graphics.setFont(pluFont);
+        Graphics2D graphics = SCREEN.createGraphics();
+        graphics.setFont(PLU_FONT);
         graphics.setColor(Color.white);
 
         // разделение plu строки на разряды для удобного чтения
@@ -110,8 +110,8 @@ public class PictureDrawer {
     }
 
     private static void drawNumber(String number, int x, int y) {
-        Graphics2D graphics = screen.createGraphics();
-        graphics.setFont(pluFont);
+        Graphics2D graphics = SCREEN.createGraphics();
+        graphics.setFont(PLU_FONT);
         graphics.setColor(Color.black);
         graphics.drawString(number, x, y);
     }

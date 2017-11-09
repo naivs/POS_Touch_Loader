@@ -25,10 +25,8 @@ import excel.Parser;
 import io.ConfigurationReader;
 import io.ConfigurationWriter;
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
-import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -44,7 +42,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
-import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -58,8 +55,8 @@ import network.SMBClient;
 import network.ServerCommunicator;
 import org.xml.sax.SAXException;
 import utils.IndexDispatcher;
-import utils.Monitor;
 import utils.ParGenerator;
+import utils.PictureDrawer;
 import utils.RefGenerator;
 
 /**
@@ -192,87 +189,91 @@ public class Configurator extends javax.swing.JFrame {
         }
     }
 
-    private boolean generateFiles() {
-        Thread t = new Thread() {
+    private void generateFiles() {
+        int groupsCount = 0;
+        for (TerminalGroup tGrp : terminalGroups) {
+            for (int i = 0; i < tGrp.getDaysOfWeek().length; i++) {
+                groupsCount += tGrp.getDaysOfWeek()[i].getGroupCount();
+            }
+        }
+        ProgressMonitor progressMonitor = new ProgressMonitor(this, "Подготовка файлов для выгрузки...", groupsCount);
+        Thread generateThread = new Thread() {
             @Override
             public void run() {
-                JOptionPane.showMessageDialog(null, "", "Идет сохранение...", JOptionPane.PLAIN_MESSAGE);
-            }
-        };
-        t.start();
-
-        File picFolder = new File("resources/data");
-        try {
-            delete(picFolder);
-        } catch (IOException ex) {
-            System.out.println("IO Except " + ex.toString());
-        }
-        if (!picFolder.mkdir()) {
-            System.err.println("data folder doesn't created! trying again...");
-            if (!picFolder.mkdir()) {
-                System.err.println("data folder doesn't created again...");
-                return false;
-            }
-        }
-
-        for (int tGroup = 0; tGroup < terminalGroups.size(); tGroup++) {
-            for (int day = 0; day < terminalGroups.get(tGroup).getDaysOfWeek().length; day++) {
-                // clear pic folder                            
-                // creation day dirs
-                // saving all into it
-                File anotherDay;
-                if (terminalGroups.get(tGroup).getType() == TerminalGroup.TYPE_ALWAYS) {
-                    Calendar cal = Calendar.getInstance();
-                    cal.setTime(new Date());
-                    anotherDay = new File(picFolder.getPath() + "/day" + (cal.get(Calendar.DAY_OF_WEEK) - 1));
-                } else {
-                    anotherDay = new File(picFolder.getPath() + "/day" + day);
-                }
-                anotherDay.mkdir();
-
-                // saving .dat files
-                ParGenerator pgen = new ParGenerator((ArrayList) terminalGroups, day, tGroup);
-                File regpar = pgen.getFile();
-
-                RefGenerator rgen = new RefGenerator((ArrayList) terminalGroups, day, tGroup);
-                File pluref = rgen.getFile();
-
-                String terminals = "";
-                for (String num : terminalGroups.get(tGroup).getTerminalsAsString().split(":")) {
-                    terminals += num + "-";
-                }
-                terminals = terminals.substring(0, terminals.length() - 1);
+                File picFolder = new File("resources/data");
                 try {
-                    Files.copy(regpar.toPath(), new File(anotherDay.getPath() + "/P_REGPAR.DAT" + terminals).toPath(), StandardCopyOption.REPLACE_EXISTING);
-                    Files.copy(pluref.toPath(), new File(anotherDay.getPath() + "/S_PLUREF.DAT" + terminals).toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    delete(picFolder);
                 } catch (IOException ex) {
-                    System.err.println("IOException: " + ex.getMessage());
+                    System.out.println("IO Except " + ex.toString());
+                }
+                if (!picFolder.mkdir()) {
+                    System.err.println("data folder doesn't created! trying again...");
+                    if (!picFolder.mkdir()) {
+                        System.err.println("data folder doesn't created again...");
+                        //return false;
+                    }
                 }
 
-                // saving images
-                File cafe = new File(anotherDay.getPath() + "/cafe");
-                cafe.mkdir();
-                for (int c = 0; c < terminalGroups.get(tGroup).getDaysOfWeek()[day].getGroupCount(); c++) {
-                    for (int d = 0; d < terminalGroups.get(tGroup).getDaysOfWeek()[day].getGroup(c).getSubgroupCount(); d++) {
-                        Product[] products = terminalGroups.get(tGroup).getDaysOfWeek()[day].getGroup(c).getSubgroup(d).getProducts();
-                        ((Monitor) jPanel2).display(products);
-                        BufferedImage bi = new BufferedImage(jPanel2.getSize().width, jPanel2.getSize().height, BufferedImage.TYPE_INT_ARGB);
-                        Graphics g = bi.createGraphics();
-                        jPanel2.paint(g);
-                        g.dispose();
+                for (int i = 0; i < terminalGroups.size(); i++) {
+                    TerminalGroup department = terminalGroups.get(i);
+                    for (int j = 0; j < department.getDaysOfWeek().length; j++) {
+                        DayOfWeek day = department.getDaysOfWeek()[j];
+                        // clear pic folder                            
+                        // creation day dirs
+                        // saving all into it
+                        File anotherDay;
+                        if (department.getType() == TerminalGroup.TYPE_ALWAYS) {
+                            Calendar calendar = Calendar.getInstance();
+                            calendar.setTime(new Date());
+                            anotherDay = new File(picFolder.getPath() + "/day" + (calendar.get(Calendar.DAY_OF_WEEK) - 1));
+                        } else {
+                            anotherDay = new File(picFolder.getPath() + "/day" + j);
+                        }
+                        anotherDay.mkdir();
+
+                        // saving .dat files
+                        File regpar = new ParGenerator(day).getFile();
+                        File pluref = new RefGenerator(day).getFile();
+
+                        String terminals = "";
+                        for (String num : terminalGroups.get(i).getTerminalsAsString().split(":")) {
+                            terminals += num + "-";
+                        }
+                        terminals = terminals.substring(0, terminals.length() - 1);
                         try {
-                            File pic = new File(anotherDay.getAbsolutePath() + "/" + cafe.getName() + "/TCH_X" + terminalGroups.get(tGroup).getDaysOfWeek()[day].getGroup(c).getSubgroup(d).getIndex() + ".GIF");
-                            ImageIO.write(bi, "GIF", pic);
+                            Files.copy(regpar.toPath(), new File(anotherDay.getPath() + "/P_REGPAR.DAT" + terminals).toPath(), StandardCopyOption.REPLACE_EXISTING);
+                            Files.copy(pluref.toPath(), new File(anotherDay.getPath() + "/S_PLUREF.DAT" + terminals).toPath(), StandardCopyOption.REPLACE_EXISTING);
                         } catch (IOException ex) {
-                            System.out.println(ex.getMessage());
+                            System.err.println("IOException: " + ex.getMessage());
+                        }
+
+                        // saving images
+                        File cafe = new File(anotherDay.getPath() + "/cafe");
+                        cafe.mkdir();
+                        for (int c = 0; c < day.getGroupCount(); c++) {
+                            Group group = day.getGroup(c);
+                            for (int d = 0; d < group.getSubgroupCount(); d++) {
+                                Subgroup subgroup = group.getSubgroup(d);
+                                try {
+                                    File pic = new File(anotherDay.getAbsolutePath() + "/" + cafe.getName() + "/TCH_X" + subgroup.getIndex() + ".GIF");
+                                    PictureDrawer.draw(pic, subgroup);
+                                } catch (IOException ex) {
+                                    System.err.println(ex.getMessage());
+                                }
+                            }
+                            progressMonitor.stepUp();
                         }
                     }
                 }
+
+                JOptionPane.showMessageDialog(null, "Конфигурация успешно сохранена!", "Информация", JOptionPane.PLAIN_MESSAGE);
+                progressMonitor.dispose();
+                interrupt();
             }
-        }
-        t.interrupt();
-        JOptionPane.showMessageDialog(null, "Конфигурация успешно сохранена!", "Информация", JOptionPane.PLAIN_MESSAGE);
-        return true;
+        };
+
+        generateThread.start();
+        progressMonitor.setVisible(true);
     }
 
     /**
@@ -432,7 +433,6 @@ public class Configurator extends javax.swing.JFrame {
             communicator = new ServerCommunicator();
             smbClient = new SMBClient(SERVER_IP, communicator.getSmbAuth());
             System.out.println(smbClient.testConnection());
-
         } catch (UnknownHostException ex) {
             System.err.println("Unknown host " + Configurator.SERVER_IP);
             showMessage(SERVER_MESSAGE, "Некорректный сетевой адрес...", WARN);
@@ -445,33 +445,47 @@ public class Configurator extends javax.swing.JFrame {
 
         generateFiles();
 
-        smbClient.clearShare();
-
-        for (int tGroupNum = 0; tGroupNum < terminalGroups.size(); tGroupNum++) {
-            for (int dayNum = 0; dayNum < terminalGroups.get(tGroupNum).getDaysOfWeek().length; dayNum++) {
-                try {
-                    // create day folder
-                    smbClient.createFolder("day" + dayNum + "/");
-                    // create cafe folder
-                    smbClient.createFolder("day" + dayNum + "/cafe/");
-                    // copy .dat files
-                    File datFiles = new File("resources/data/day" + dayNum);
-                    for (File f : datFiles.listFiles((File directory, String fileName) -> fileName.contains(".DAT"))) {
-                        smbClient.putFile(f, "day" + dayNum + "/" + f.getName());
-                    }
-                    // copy images
-                    for (File img : new File("resources/data/day" + dayNum + "/cafe").listFiles()) {
-                        smbClient.putFile(img, "day" + dayNum + "/cafe/" + img.getName());
-                    }
-                } catch (MalformedURLException ex) {
-                    System.err.println("Wrong destenation URL. " + ex.getMessage());
-                } catch (IOException ex) {
-                    System.err.println("I/O exception while P_REGPAR.DAT or S_PLUREF.DAT uploading. " + ex.getMessage());
-                }
-            }
+        int days = 0;
+        for(TerminalGroup tGrp : terminalGroups) {
+            days += tGrp.getDaysOfWeek().length;
         }
-        
-        communicator.shutDown();
+        ProgressMonitor progressMonitor = new ProgressMonitor(this, "Загрузка данных на сервер...", days);
+        Thread uploadingThread = new Thread() {
+            @Override
+            public void run() {
+                smbClient.clearShare();
+
+                for (int tGroupNum = 0; tGroupNum < terminalGroups.size(); tGroupNum++) {
+                    for (int dayNum = 0; dayNum < terminalGroups.get(tGroupNum).getDaysOfWeek().length; dayNum++) {
+                        try {
+                            // create day folder
+                            smbClient.createFolder("day" + dayNum + "/");
+                            // create cafe folder
+                            smbClient.createFolder("day" + dayNum + "/cafe/");
+                            // copy .dat files
+                            File datFiles = new File("resources/data/day" + dayNum);
+                            for (File f : datFiles.listFiles((File directory, String fileName) -> fileName.contains(".DAT"))) {
+                                smbClient.putFile(f, "day" + dayNum + "/" + f.getName());
+                            }
+                            // copy images
+                            for (File img : new File("resources/data/day" + dayNum + "/cafe").listFiles()) {
+                                smbClient.putFile(img, "day" + dayNum + "/cafe/" + img.getName());
+                            }
+                            progressMonitor.stepUp();
+                        } catch (MalformedURLException ex) {
+                            System.err.println("Wrong destenation URL. " + ex.getMessage());
+                        } catch (IOException ex) {
+                            System.err.println("I/O exception while P_REGPAR.DAT or S_PLUREF.DAT uploading. " + ex.getMessage());
+                        }
+                    }
+                }
+                communicator.shutDown();
+                JOptionPane.showMessageDialog(null, "Выгрузка завершена!", "Информация", JOptionPane.PLAIN_MESSAGE);
+                progressMonitor.dispose();
+            }
+        };
+
+        uploadingThread.start();
     }//GEN-LAST:event_uploadButtonActionPerformed
 
     private void jTable1MousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MousePressed

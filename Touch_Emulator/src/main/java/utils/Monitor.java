@@ -50,7 +50,8 @@ public class Monitor extends javax.swing.JPanel {
         super();
 
         try {
-            ground = ImageIO.read(new File("resources/ground.gif"));
+            ClassLoader classLoader = getClass().getClassLoader();
+            ground = ImageIO.read(new File(classLoader.getResource("ground.gif").getFile()));
         } catch (IOException e) {
             System.out.println("ground image or cell image read failed... " + e.getMessage());
         }

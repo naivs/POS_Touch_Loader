@@ -76,35 +76,26 @@ public class Configurator extends javax.swing.JFrame {
     public static final int CRIT = 2;
 
     private List<TerminalGroup> terminalGroups;
-    private static boolean isOpen;
 
     private final IndexDispatcher idisp = new IndexDispatcher();
 
-    /**
-     * Creates new form Configurator
-     */
     public Configurator() {
-        terminalGroups = new ArrayList<>();
+        initComponents();
+        
         try {
             terminalGroups = new ConfigurationReader().read();
-            isOpen = true;
+            showMessage(CLIENT_MESSAGE, "Конфигурация открыта", PLAIN);
         } catch (SAXException e) {
             // empty or corrupted
             System.err.println(e.getMessage() + "\nФайл: \"resources/configuration.xml\" пуст или поврежден. Будет создана новая конфигурация");
-            //openPosDepartmentManager();
+            showMessage(CLIENT_MESSAGE, "\"configuration.xml\" пуст или поврежден", WARN);
+            terminalGroups = new ArrayList<>();
         } catch (IOException e) {
             // no file
             System.err.println(e.getMessage() + "\nФайл: \"resources/configuration.xml\" не найден. Будет создана новая конфигурация");
-            //openPosDepartmentManager();
+            terminalGroups = new ArrayList<>();
         }
-
-        initComponents();
-
-        if (isOpen) {
-            showMessage(CLIENT_MESSAGE, "Конфигурация открыта", PLAIN);
-        } else {
-            showMessage(CLIENT_MESSAGE, "\"configuration.xml\" пуст или поврежден", WARN);
-        }
+        update();
         showMessage(SERVER_MESSAGE, "Server IP: " + SERVER_IP + ":" + PORT, PLAIN);
     }
 
@@ -177,9 +168,16 @@ public class Configurator extends javax.swing.JFrame {
 
     private void update() {
         jTable1.setModel(new DepartmentsTableModel(terminalGroups));
-
-        // write to XML
-        // configuration writing
+        
+        if(jTable1.getRowCount() < 1) {
+            uploadButton.setEnabled(false);
+        } else {
+            jTable1.setRowSelectionInterval(0, 0);
+            uploadButton.setEnabled(true);
+        }
+    }
+    
+    private void saveXMLConfiguration() {
         try {
             new ConfigurationWriter().write(terminalGroups);
             showMessage(CLIENT_MESSAGE, "Конфигурация обновлена!", PLAIN);
@@ -297,9 +295,11 @@ public class Configurator extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Touch Configurator");
+        setMaximumSize(new java.awt.Dimension(1280, 1024));
+        setMinimumSize(new java.awt.Dimension(715, 364));
 
         jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        jPanel1.setLayout(new java.awt.GridLayout());
+        jPanel1.setLayout(new java.awt.GridLayout(1, 0));
 
         addButton.setText("Новый отдел...");
         addButton.addActionListener(new java.awt.event.ActionListener() {
@@ -325,7 +325,6 @@ public class Configurator extends javax.swing.JFrame {
         });
         jPanel1.add(updateFromFileButton);
 
-        jTable1.setModel(new DepartmentsTableModel(terminalGroups));
         jTable1.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
         jTable1.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jTable1.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -419,6 +418,7 @@ public class Configurator extends javax.swing.JFrame {
 
                 if (!contains) {
                     terminalGroups.add(tg);
+                    saveXMLConfiguration();
                     update();
                 }
             }
@@ -446,7 +446,7 @@ public class Configurator extends javax.swing.JFrame {
         generateFiles();
 
         int days = 0;
-        for(TerminalGroup tGrp : terminalGroups) {
+        for (TerminalGroup tGrp : terminalGroups) {
             days += tGrp.getDaysOfWeek().length;
         }
         ProgressMonitor progressMonitor = new ProgressMonitor(this, "Загрузка данных на сервер...", days);
@@ -498,13 +498,13 @@ public class Configurator extends javax.swing.JFrame {
         JMenuItem modifyMenuItem = new JMenuItem("Изменить");
         modifyMenuItem.addActionListener((ActionEvent e) -> {
             if (autorization()) {
-
                 String holdedPOS = "";
                 for (TerminalGroup buf : terminalGroups) {
                     holdedPOS += ":" + buf.getTerminalsAsString();
                 }
                 DepartmentCreator dc = new DepartmentCreator(this, holdedPOS);
                 if (dc.editDepartment(terminalGroups.get(rowindex))) {
+                    saveXMLConfiguration();
                     update();
                 }
             }
@@ -518,6 +518,7 @@ public class Configurator extends javax.swing.JFrame {
                         JOptionPane.OK_CANCEL_OPTION);
                 if (response == JOptionPane.OK_OPTION) {
                     terminalGroups.remove(rowindex);
+                    saveXMLConfiguration();
                     update();
                 }
             }
@@ -605,6 +606,7 @@ public class Configurator extends javax.swing.JFrame {
 
                 terminalGroups.get(jTable1.getSelectedRow()).setModified(Calendar.getInstance().getTime().toString());
                 showMessage(CLIENT_MESSAGE, "Загружен файл: " + file.getCanonicalPath(), PLAIN);
+                saveXMLConfiguration();
                 update();
             } catch (FileNotFoundException ex) {
                 System.err.println("File not found");
@@ -649,7 +651,7 @@ public class Configurator extends javax.swing.JFrame {
             properties.load(reader);
             SERVER_IP = properties.getProperty("serverIP");
             PORT = Integer.parseInt(properties.getProperty("port"));
-            System.out.println("Server IP: " + SERVER_IP + ":" + PORT);
+            //System.out.println("Server IP: " + SERVER_IP + ":" + PORT);
         } catch (FileNotFoundException e) {
             System.err.println("File touchDaemon.conf is not found! " + e.getMessage());
             System.exit(1);

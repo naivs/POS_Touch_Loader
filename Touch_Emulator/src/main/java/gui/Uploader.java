@@ -67,7 +67,7 @@ public class Uploader extends javax.swing.JDialog {
         */
         
         communicator = new ServerCommunicator();
-        jLabel1.setText("Выгрузка дынных на кассы будет произведена в: " + communicator.getLoadTime());
+        jLabel1.setText("Выгрузка данных на кассы будет произведена в: " + communicator.getLoadTime());
         smbClient = new SMBClient(Emulator.SERVER_IP, communicator.getSmbAuth());
         System.out.println(smbClient.testConnection());
     }

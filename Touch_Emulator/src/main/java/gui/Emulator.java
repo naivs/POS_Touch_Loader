@@ -17,61 +17,46 @@
 package gui;
 
 import data.*;
-import io.ConfigurationWriter;
-import java.awt.Graphics;
 import java.awt.event.ActionEvent;
-import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Enumeration;
-import java.util.Properties;
 import javax.imageio.ImageIO;
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
-import javax.swing.JOptionPane;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JToggleButton;
-import javax.xml.transform.TransformerException;
-import utils.Monitor;
-import utils.ParGenerator;
-import utils.RefGenerator;
+import utils.PictureDrawer;
 
 /**
  *
  * @author Ivan
  */
 public class Emulator extends javax.swing.JFrame {
+
     public static final int NORMAL_STATE = 0;
     public static final int LOCK_STATE = 1;
-    
+
     private final JToggleButton[] touch = new JToggleButton[8];
     private int level = 2;
-    
+
     private final ButtonGroup dayButtonsGroup;
-    
+
     private final TerminalGroup terminalGroup;
-    private int selectedDay;
-    private int selectedGroup;
+    private DayOfWeek selectedDay;
+    private Group selectedGroup;
+
+    private final PictureDrawer pictureDrawer;
 
     /**
      * Creates new form Emulator
+     *
      * @param terminalGroup
      */
     public Emulator(TerminalGroup terminalGroup) {
-        this.terminalGroup = terminalGroup;
         dayButtonsGroup = new ButtonGroup();
-        
         initComponents();
-        
+
         touch[0] = jToggleButton1;
         touch[1] = jToggleButton2;
         touch[2] = jToggleButton3;
@@ -80,8 +65,75 @@ public class Emulator extends javax.swing.JFrame {
         touch[5] = jToggleButton6;
         touch[6] = jToggleButton7;
         touch[7] = jToggleButton8;
-        
-        update();
+
+        this.terminalGroup = terminalGroup;
+        pictureDrawer = new PictureDrawer();
+
+        for (DayOfWeek daysOfWeek : terminalGroup.getDaysOfWeek()) {
+            JRadioButtonMenuItem jrmi = new JRadioButtonMenuItem(daysOfWeek.toString());
+            dayButtonsGroup.add(jrmi);
+            jMenu2.add(jrmi);
+
+            jrmi.addActionListener((ActionEvent e) -> {
+                Enumeration elements = dayButtonsGroup.getElements();
+                int number = 0;
+                while (elements.hasMoreElements()) {
+                    if (!((AbstractButton) elements.nextElement()).isSelected()) {
+                        number++;
+                    }
+                }
+                selectedDay = terminalGroup.getDaysOfWeek()[number];
+                level = 2;
+                buttonGroup1.clearSelection();
+                setButtonsLabels();
+            });
+        }
+    }
+
+    private void setButtonsLabels() {
+        if (level == 2) {
+            jLabel2.setText("Кассовый отдел: " + terminalGroup.toString());
+            jLabel3.setText("День: " + selectedDay.toString());
+            jLabel4.setText("");
+            String[] groupNames = selectedDay.getGroupsAsStringArray();
+            for (int i = 0; i < touch.length; i++) {
+                touch[i].setText("<html>" + groupNames[i].replaceAll("::", "<br>") + "</html>");
+            }
+        } else {
+            String[] subgroupNames = selectedGroup.getSubgroupsAsStringArray();
+            for (int i = 0; i < subgroupNames.length; i++) {
+                touch[i].setText("<html>" + subgroupNames[i].replaceAll("::", "<br>") + "</html>");
+            }
+        }
+    }
+
+    private void touchAction(int button) {
+        if (level == 2) {
+            level = 1;
+            selectedGroup = selectedDay.getGroup(button - 1);
+            setButtonsLabels();
+            jLabel4.setText("Гуппа: " + selectedGroup.getName().replace("::", " "));
+            jToggleButton1.doClick();
+        } else if (level == 1) {
+            Subgroup subgroup = selectedGroup.getSubgroup(button - 1);
+            jPanel2.getGraphics().drawImage(pictureDrawer.draw(subgroup), 0, 0, null);
+
+            System.out.println("\n====================");
+            for (Product product : subgroup.getProducts()) {
+                if (product != null) {
+                    System.out.println(product.getName() + " - " + product.getPlu());
+                }
+            }
+            System.out.println("====================");
+        }
+    }
+
+    private void resetImage() {
+        try {
+            jPanel2.getGraphics().drawImage(ImageIO.read(new File(getClass().getClassLoader().getResource("ground.gif").getFile())), 0, 0, null);
+        } catch (IOException ex) {
+            System.err.println("Can't read \"ground.gif\"." + ex.getMessage());
+        }
     }
 
     /**
@@ -104,7 +156,7 @@ public class Emulator extends javax.swing.JFrame {
         jToggleButton7 = new javax.swing.JToggleButton();
         jToggleButton8 = new javax.swing.JToggleButton();
         jPanel3 = new javax.swing.JPanel();
-        jPanel2 = new Monitor();
+        jPanel2 = new javax.swing.JPanel();
         jButton9 = new javax.swing.JButton();
         jPanel4 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
@@ -359,86 +411,8 @@ public class Emulator extends javax.swing.JFrame {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void update() {
-        jMenu2.removeAll();
-        while (dayButtonsGroup.getElements().hasMoreElements()) {
-            dayButtonsGroup.remove(dayButtonsGroup.getElements().nextElement());
-        }
-
-        for (DayOfWeek daysOfWeek : terminalGroup.getDaysOfWeek()) {
-            JRadioButtonMenuItem jrmi = new JRadioButtonMenuItem(daysOfWeek.toString());
-            dayButtonsGroup.add(jrmi);
-            jMenu2.add(jrmi);
-
-            jrmi.addActionListener((ActionEvent e) -> {
-                Enumeration elements = dayButtonsGroup.getElements();
-                int number = 0;
-                while (elements.hasMoreElements()) {
-                        if (((AbstractButton) elements.nextElement()).isSelected()) {
-                            selectedDay = number;
-                        }
-                        number++;
-                }
-                level = 2;
-                setButtonsLabels();
-                ((Monitor) jPanel2).clear();
-                setState(NORMAL_STATE);
-            });
-        }
-
-        setState(LOCK_STATE);
-    }
-    
-    @Override
-    public void setState(int STATE) {
-        boolean isLock = STATE != NORMAL_STATE;
-        
-        for(JToggleButton btn : touch) {
-            btn.setEnabled(!isLock);
-        }
-        jButton9.setEnabled(!isLock);
-    }
-    
-    private void setButtonsLabels() {
-        if (level == 2) {
-            jLabel2.setText("Кассовый отдел: " + terminalGroup.toString());
-            jLabel3.setText("День: " + terminalGroup.getDaysOfWeek()[selectedDay].toString());
-            jLabel4.setText("");
-            String[] groupNames = terminalGroup.getDaysOfWeek()[selectedDay].getGroupsAsStringArray();
-            for (int i = 0; i < touch.length; i++) {
-                touch[i].setText("<html>" + groupNames[i].replaceAll("::", "<br>") + "</html>");
-            }
-        } else {
-            String[] subgroupNames = terminalGroup.getDaysOfWeek()[selectedDay].getGroup(selectedGroup).getSubgroupsAsStringArray();
-            for (int i = 0; i < subgroupNames.length; i++) {
-                touch[i].setText("<html>" + subgroupNames[i].replaceAll("::", "<br>") + "</html>");
-            }
-        }
-    }
-        
-    private void touchAction(int button) {
-        if (level == 2) {
-            level = 1;
-            selectedGroup = button-1;
-            setButtonsLabels();
-            jLabel4.setText("Гуппа: " + terminalGroup.getDaysOfWeek()[selectedDay].getGroup(selectedGroup).getName().replace("::", " "));
-            jToggleButton1.doClick();
-        } else if(level == 1) {
-            Product[] products = terminalGroup.getDaysOfWeek()[selectedDay].getGroup(selectedGroup).getSubgroup(button-1).getProducts();
-            ((Monitor) jPanel2).display(products);
-
-            //System.out.println("\n====================");
-            for (int i = 0; i < products.length; i++) {
-                if (products[i] != null) {
-                    //System.out.println(i + 1 + ") " + products[i].getName() + " - " + products[i].getPlu());
-                }
-            }
-            //System.out.println("====================");
-        }
-    }
-    
     private void jButton9ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton9ActionPerformed
-        ((Monitor) jPanel2).clear();
+        resetImage();
         level = 2;
         setButtonsLabels();
         buttonGroup1.clearSelection();

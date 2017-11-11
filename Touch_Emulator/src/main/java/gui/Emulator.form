@@ -289,9 +289,6 @@
               <Dimension value="[555, 384]"/>
             </Property>
           </Properties>
-          <AuxValues>
-            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new Monitor();"/>
-          </AuxValues>
 
           <Layout>
             <DimensionLayout dim="0">

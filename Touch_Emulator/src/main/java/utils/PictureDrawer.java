@@ -33,18 +33,28 @@ import org.apache.commons.text.WordUtils;
  */
 public class PictureDrawer {
     
-    private static final File GROUND = new File("resources/ground.gif");
-    private static final BufferedImage SCREEN = new BufferedImage(555, 384, BufferedImage.TYPE_INT_RGB);
+    private final File GROUND;
+    private BufferedImage SCREEN;
     private static final Font TEXT_FONT = new Font("Franklin Gothic Medium Cond", Font.BOLD, 14);
     private static final Font PLU_FONT = new Font("Franklin Gothic Medium Cond", Font.PLAIN, 15);
-
-    private static final int dx = 111;
-    private static final int dy = 96;
-
-    public static void draw(File file, Subgroup subgroup) throws IOException {
-        SCREEN.createGraphics().drawImage(ImageIO.read(GROUND), 0, 0, null);
+    
+    public PictureDrawer() {
+        ClassLoader classLoader = getClass().getClassLoader();
+        GROUND = new File(classLoader.getResource("ground.gif").getFile());
+    }
+    
+    public BufferedImage draw(Subgroup subgroup) {
+        SCREEN = new BufferedImage(555, 384, BufferedImage.TYPE_INT_RGB);
+        try {
+            SCREEN.createGraphics().drawImage(ImageIO.read(GROUND), 0, 0, null);
+        } catch (IOException ex) {
+            System.err.println("Can't read \"ground.gif\"." + ex.getMessage());
+        }
         Product[] products = subgroup.getProducts();
 
+        int dx = 111;
+        int dy = 96;
+        
         int i = 0;
         
         int nameY = 15;
@@ -71,11 +81,12 @@ public class PictureDrawer {
             numY += dy;
         }
 
-        ImageIO.write(SCREEN, "GIF", file);
-        SCREEN.createGraphics().dispose();
+        //ImageIO.write(SCREEN, "GIF", file);
+        //SCREEN.createGraphics().dispose();
+        return SCREEN;
     }
 
-    private static void drawName(String text, int x, int y) {
+    private void drawName(String text, int x, int y) {
         Graphics2D graphics = SCREEN.createGraphics();
         graphics.setFont(TEXT_FONT);
         graphics.setColor(Color.black);
@@ -86,7 +97,7 @@ public class PictureDrawer {
         }
     }
 
-    private static void drawPlu(String plu, int x, int y) {
+    private void drawPlu(String plu, int x, int y) {
         Graphics2D graphics = SCREEN.createGraphics();
         graphics.setFont(PLU_FONT);
         graphics.setColor(Color.white);
@@ -109,7 +120,7 @@ public class PictureDrawer {
         graphics.drawString(plu, (13 - plu.length()) * 8 + x, y);
     }
 
-    private static void drawNumber(String number, int x, int y) {
+    private void drawNumber(String number, int x, int y) {
         Graphics2D graphics = SCREEN.createGraphics();
         graphics.setFont(PLU_FONT);
         graphics.setColor(Color.black);

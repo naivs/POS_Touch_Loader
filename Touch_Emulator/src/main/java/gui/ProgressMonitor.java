@@ -27,13 +27,13 @@ public class ProgressMonitor extends javax.swing.JDialog {
     /**
      * Creates new form ProgressMonitor
      * @param parent
-     * @param title
+     * @param description
      * @param maximum
      */
-    public ProgressMonitor(java.awt.Frame parent, String title, int maximum) {
+    public ProgressMonitor(java.awt.Frame parent, String description, int maximum) {
         super(parent, true);
         initComponents();
-        super.setTitle(title);
+        jLabel1.setText(description);
         jProgressBar1.setMaximum(maximum);
     }
     
@@ -80,9 +80,7 @@ public class ProgressMonitor extends javax.swing.JDialog {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jProgressBar1, javax.swing.GroupLayout.DEFAULT_SIZE, 588, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(

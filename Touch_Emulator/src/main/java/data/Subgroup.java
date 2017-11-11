@@ -153,10 +153,6 @@ public class Subgroup {
         //}
     }
     
-    public void show(utils.Monitor monitor) {
-        monitor.display(products);
-    }
-    
     public void setIndex(int index) {
         this.index = index;
     }

@@ -42,6 +42,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -103,7 +104,12 @@ public class Configurator extends javax.swing.JFrame {
         JTable table = (JTable) evt.getSource();
         Point p = evt.getPoint();
         int row = table.rowAtPoint(p);
-        new Emulator(terminalGroups.get(row)).setVisible(true);
+        TerminalGroup department = terminalGroups.get(row);
+        if(!department.getModified().equals("---")) {
+            new Emulator(department).setVisible(true);
+        } else {
+            showMessage(CLIENT_MESSAGE, "Отдел пуст!", WARN);
+        }
     }
 
     void delete(File f) throws IOException {
@@ -254,7 +260,7 @@ public class Configurator extends javax.swing.JFrame {
                                 Subgroup subgroup = group.getSubgroup(d);
                                 try {
                                     File pic = new File(anotherDay.getAbsolutePath() + "/" + cafe.getName() + "/TCH_X" + subgroup.getIndex() + ".GIF");
-                                    PictureDrawer.draw(pic, subgroup);
+                                    ImageIO.write(new PictureDrawer().draw(subgroup), "GIF", pic);
                                 } catch (IOException ex) {
                                     System.err.println(ex.getMessage());
                                 }
@@ -484,8 +490,8 @@ public class Configurator extends javax.swing.JFrame {
                 progressMonitor.dispose();
             }
         };
-
         uploadingThread.start();
+        progressMonitor.setVisible(true);
     }//GEN-LAST:event_uploadButtonActionPerformed
 
     private void jTable1MousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MousePressed

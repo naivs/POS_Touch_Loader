@@ -82,12 +82,12 @@
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="uploadButtonActionPerformed"/>
           </Events>
         </Component>
-        <Component class="javax.swing.JButton" name="updateFromFileButton">
+        <Component class="javax.swing.JButton" name="dropToPOSesButton">
           <Properties>
-            <Property name="text" type="java.lang.String" value="&#x41e;&#x431;&#x43d;&#x43e;&#x432;&#x438;&#x442;&#x44c; &#x434;&#x430;&#x43d;&#x43d;&#x44b;&#x435; &#x438;&#x437; &#x444;&#x430;&#x43b;&#x430;..."/>
+            <Property name="text" type="java.lang.String" value="&#x421;&#x431;&#x440;&#x43e;&#x441; &#x434;&#x430;&#x43d;&#x43d;&#x44b;&#x445; &#x43d;&#x430; &#x43a;&#x430;&#x441;&#x441;&#x44b;..."/>
           </Properties>
           <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="updateFromFileButtonActionPerformed"/>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="dropToPOSesButtonActionPerformed"/>
           </Events>
         </Component>
       </SubComponents>

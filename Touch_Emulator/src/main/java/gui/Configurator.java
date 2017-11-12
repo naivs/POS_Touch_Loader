@@ -82,7 +82,7 @@ public class Configurator extends javax.swing.JFrame {
 
     public Configurator() {
         initComponents();
-        
+
         try {
             terminalGroups = new ConfigurationReader().read();
             showMessage(CLIENT_MESSAGE, "Конфигурация открыта", PLAIN);
@@ -105,7 +105,7 @@ public class Configurator extends javax.swing.JFrame {
         Point p = evt.getPoint();
         int row = table.rowAtPoint(p);
         TerminalGroup department = terminalGroups.get(row);
-        if(!department.getModified().equals("---")) {
+        if (!department.getModified().equals("---")) {
             new Emulator(department).setVisible(true);
         } else {
             showMessage(CLIENT_MESSAGE, "Отдел пуст!", WARN);
@@ -174,15 +174,15 @@ public class Configurator extends javax.swing.JFrame {
 
     private void update() {
         jTable1.setModel(new DepartmentsTableModel(terminalGroups));
-        
-        if(jTable1.getRowCount() < 1) {
+
+        if (jTable1.getRowCount() < 1) {
             uploadButton.setEnabled(false);
         } else {
             jTable1.setRowSelectionInterval(0, 0);
             uploadButton.setEnabled(true);
         }
     }
-    
+
     private void saveXMLConfiguration() {
         try {
             new ConfigurationWriter().write(terminalGroups);
@@ -191,93 +191,6 @@ public class Configurator extends javax.swing.JFrame {
             System.err.println("TransformerException occured while configuration saving! " + ex.getMessage());
             showMessage(CLIENT_MESSAGE, "Ошибка записи данных!", CRIT);
         }
-    }
-
-    private void generateFiles() {
-        int groupsCount = 0;
-        for (TerminalGroup tGrp : terminalGroups) {
-            for (int i = 0; i < tGrp.getDaysOfWeek().length; i++) {
-                groupsCount += tGrp.getDaysOfWeek()[i].getGroupCount();
-            }
-        }
-        ProgressMonitor progressMonitor = new ProgressMonitor(this, "Подготовка файлов для выгрузки...", groupsCount);
-        Thread generateThread = new Thread() {
-            @Override
-            public void run() {
-                File picFolder = new File("resources/data");
-                try {
-                    delete(picFolder);
-                } catch (IOException ex) {
-                    System.out.println("IO Except " + ex.toString());
-                }
-                if (!picFolder.mkdir()) {
-                    System.err.println("data folder doesn't created! trying again...");
-                    if (!picFolder.mkdir()) {
-                        System.err.println("data folder doesn't created again...");
-                        //return false;
-                    }
-                }
-
-                for (int i = 0; i < terminalGroups.size(); i++) {
-                    TerminalGroup department = terminalGroups.get(i);
-                    for (int j = 0; j < department.getDaysOfWeek().length; j++) {
-                        DayOfWeek day = department.getDaysOfWeek()[j];
-                        // clear pic folder                            
-                        // creation day dirs
-                        // saving all into it
-                        File anotherDay;
-                        if (department.getType() == TerminalGroup.TYPE_ALWAYS) {
-                            Calendar calendar = Calendar.getInstance();
-                            calendar.setTime(new Date());
-                            anotherDay = new File(picFolder.getPath() + "/day" + (calendar.get(Calendar.DAY_OF_WEEK) - 1));
-                        } else {
-                            anotherDay = new File(picFolder.getPath() + "/day" + j);
-                        }
-                        anotherDay.mkdir();
-
-                        // saving .dat files
-                        File regpar = new ParGenerator(day).getFile();
-                        File pluref = new RefGenerator(day).getFile();
-
-                        String terminals = "";
-                        for (String num : terminalGroups.get(i).getTerminalsAsString().split(":")) {
-                            terminals += num + "-";
-                        }
-                        terminals = terminals.substring(0, terminals.length() - 1);
-                        try {
-                            Files.copy(regpar.toPath(), new File(anotherDay.getPath() + "/P_REGPAR.DAT" + terminals).toPath(), StandardCopyOption.REPLACE_EXISTING);
-                            Files.copy(pluref.toPath(), new File(anotherDay.getPath() + "/S_PLUREF.DAT" + terminals).toPath(), StandardCopyOption.REPLACE_EXISTING);
-                        } catch (IOException ex) {
-                            System.err.println("IOException: " + ex.getMessage());
-                        }
-
-                        // saving images
-                        File cafe = new File(anotherDay.getPath() + "/cafe");
-                        cafe.mkdir();
-                        for (int c = 0; c < day.getGroupCount(); c++) {
-                            Group group = day.getGroup(c);
-                            for (int d = 0; d < group.getSubgroupCount(); d++) {
-                                Subgroup subgroup = group.getSubgroup(d);
-                                try {
-                                    File pic = new File(anotherDay.getAbsolutePath() + "/" + cafe.getName() + "/TCH_X" + subgroup.getIndex() + ".GIF");
-                                    ImageIO.write(new PictureDrawer().draw(subgroup), "GIF", pic);
-                                } catch (IOException ex) {
-                                    System.err.println(ex.getMessage());
-                                }
-                            }
-                            progressMonitor.stepUp();
-                        }
-                    }
-                }
-
-                JOptionPane.showMessageDialog(null, "Конфигурация успешно сохранена!", "Информация", JOptionPane.PLAIN_MESSAGE);
-                progressMonitor.dispose();
-                interrupt();
-            }
-        };
-
-        generateThread.start();
-        progressMonitor.setVisible(true);
     }
 
     /**
@@ -292,7 +205,7 @@ public class Configurator extends javax.swing.JFrame {
         jPanel1 = new javax.swing.JPanel();
         addButton = new javax.swing.JButton();
         uploadButton = new javax.swing.JButton();
-        updateFromFileButton = new javax.swing.JButton();
+        dropToPOSesButton = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
         statusPanel = new javax.swing.JPanel();
@@ -323,13 +236,13 @@ public class Configurator extends javax.swing.JFrame {
         });
         jPanel1.add(uploadButton);
 
-        updateFromFileButton.setText("Обновить данные из фала...");
-        updateFromFileButton.addActionListener(new java.awt.event.ActionListener() {
+        dropToPOSesButton.setText("Сброс данных на кассы...");
+        dropToPOSesButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                updateFromFileButtonActionPerformed(evt);
+                dropToPOSesButtonActionPerformed(evt);
             }
         });
-        jPanel1.add(updateFromFileButton);
+        jPanel1.add(dropToPOSesButton);
 
         jTable1.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
         jTable1.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
@@ -449,13 +362,99 @@ public class Configurator extends javax.swing.JFrame {
             return;
         }
 
-        generateFiles();
+        int groupsCount = 0;
+        for (TerminalGroup tGrp : terminalGroups) {
+            for (int i = 0; i < tGrp.getDaysOfWeek().length; i++) {
+                groupsCount += tGrp.getDaysOfWeek()[i].getGroupCount();
+            }
+        }
+        ProgressMonitor preparingProgress = new ProgressMonitor(this, "Подготовка файлов для выгрузки...", groupsCount);
+        Thread generateThread = new Thread() {
+            @Override
+            public void run() {
+                File picFolder = new File("resources/data");
+                try {
+                    delete(picFolder);
+                } catch (IOException ex) {
+                    System.out.println("IO Except " + ex.toString());
+                }
+                if (!picFolder.mkdir()) {
+                    System.err.println("data folder doesn't created! trying again...");
+                    if (!picFolder.mkdir()) {
+                        System.err.println("data folder doesn't created again...");
+                        //return false;
+                    }
+                }
+
+                for (int i = 0; i < terminalGroups.size(); i++) {
+                    if (!terminalGroups.get(i).getModified().equals("---")) {
+                        TerminalGroup department = terminalGroups.get(i);
+                        for (int j = 0; j < department.getDaysOfWeek().length; j++) {
+                            DayOfWeek day = department.getDaysOfWeek()[j];
+                            // clear pic folder                            
+                            // creation day dirs
+                            // saving all into it
+                            File anotherDay;
+                            if (department.getType() == TerminalGroup.TYPE_ALWAYS) {
+                                Calendar calendar = Calendar.getInstance();
+                                calendar.setTime(new Date());
+                                anotherDay = new File(picFolder.getPath() + "/day" + (calendar.get(Calendar.DAY_OF_WEEK) - 1));
+                            } else {
+                                anotherDay = new File(picFolder.getPath() + "/day" + j);
+                            }
+                            anotherDay.mkdir();
+
+                            // saving .dat files
+                            File regpar = new ParGenerator(day).getFile();
+                            File pluref = new RefGenerator(day).getFile();
+
+                            String terminals = "";
+                            for (String num : terminalGroups.get(i).getTerminalsAsString().split(":")) {
+                                terminals += num + "-";
+                            }
+                            terminals = terminals.substring(0, terminals.length() - 1);
+                            try {
+                                Files.copy(regpar.toPath(), new File(anotherDay.getPath() + "/P_REGPAR.DAT" + terminals).toPath(), StandardCopyOption.REPLACE_EXISTING);
+                                Files.copy(pluref.toPath(), new File(anotherDay.getPath() + "/S_PLUREF.DAT" + terminals).toPath(), StandardCopyOption.REPLACE_EXISTING);
+                            } catch (IOException ex) {
+                                System.err.println("IOException: " + ex.getMessage());
+                            }
+
+                            // saving images
+                            File cafe = new File(anotherDay.getPath() + "/cafe");
+                            cafe.mkdir();
+                            for (int c = 0; c < day.getGroupCount(); c++) {
+                                Group group = day.getGroup(c);
+                                for (int d = 0; d < group.getSubgroupCount(); d++) {
+                                    Subgroup subgroup = group.getSubgroup(d);
+                                    if (subgroup.getProductCount() != 0) {
+                                        try {
+                                            File pic = new File(anotherDay.getAbsolutePath() + "/" + cafe.getName() + "/TCH_X" + subgroup.getIndex() + ".GIF");
+                                            ImageIO.write(new PictureDrawer().draw(subgroup), "GIF", pic);
+                                        } catch (IOException ex) {
+                                            System.err.println(ex.getMessage());
+                                        }
+                                    }
+                                }
+                                preparingProgress.stepUp();
+                            }
+                        }
+                    }
+                }
+                JOptionPane.showMessageDialog(null, "Конфигурация успешно сохранена!", "Информация", JOptionPane.PLAIN_MESSAGE);
+                preparingProgress.dispose();
+                interrupt();
+            }
+        };
+
+        generateThread.start();
+        preparingProgress.setVisible(true);
 
         int days = 0;
         for (TerminalGroup tGrp : terminalGroups) {
             days += tGrp.getDaysOfWeek().length;
         }
-        ProgressMonitor progressMonitor = new ProgressMonitor(this, "Загрузка данных на сервер...", days);
+        ProgressMonitor uploadProgress = new ProgressMonitor(this, "Загрузка данных на сервер...", days);
         Thread uploadingThread = new Thread() {
             @Override
             public void run() {
@@ -477,7 +476,7 @@ public class Configurator extends javax.swing.JFrame {
                             for (File img : new File("resources/data/day" + dayNum + "/cafe").listFiles()) {
                                 smbClient.putFile(img, "day" + dayNum + "/cafe/" + img.getName());
                             }
-                            progressMonitor.stepUp();
+                            uploadProgress.stepUp();
                         } catch (MalformedURLException ex) {
                             System.err.println("Wrong destenation URL. " + ex.getMessage());
                         } catch (IOException ex) {
@@ -487,15 +486,18 @@ public class Configurator extends javax.swing.JFrame {
                 }
                 communicator.shutDown();
                 JOptionPane.showMessageDialog(null, "Выгрузка завершена!", "Информация", JOptionPane.PLAIN_MESSAGE);
-                progressMonitor.dispose();
+                uploadProgress.dispose();
             }
         };
         uploadingThread.start();
-        progressMonitor.setVisible(true);
+        uploadProgress.setVisible(true);
     }//GEN-LAST:event_uploadButtonActionPerformed
 
     private void jTable1MousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MousePressed
-        int rowindex = jTable1.getSelectedRow();
+        JTable table = (JTable) evt.getSource();
+        Point p = evt.getPoint();
+        int rowindex = table.rowAtPoint(p);
+        jTable1.setRowSelectionInterval(rowindex, rowindex);
 
         JMenuItem openMenuItem = new JMenuItem("Открыть");
         openMenuItem.addActionListener((ActionEvent e) -> {
@@ -515,6 +517,83 @@ public class Configurator extends javax.swing.JFrame {
                 }
             }
         });
+
+        JMenuItem loadFromFile = new JMenuItem("Обновить из файла...");
+        loadFromFile.addActionListener((ActionEvent e) -> {
+            // choose file configuration
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setCurrentDirectory(new java.io.File("./"));
+            fileChooser.setFileFilter(new FileNameExtensionFilter("Файлы Microsoft Excel 2007*", "xlsx"));
+
+            if (fileChooser.showDialog(this, "Открыть файл Excel...") == JFileChooser.APPROVE_OPTION) {
+                File file = new File(fileChooser.getSelectedFile().getAbsolutePath());
+                try {
+                    Parser parser = new Parser(file);
+
+                    // reading all products
+                    DayOfWeek[] days = terminalGroups.get(jTable1.getSelectedRow()).getDaysOfWeek();
+
+                    for (int i = 0; i < days.length; i++) {
+                        // groups name reading. It same for any day.
+                        Group[] groups = new Group[8];
+
+                        int k = 0;
+                        for (String name : parser.getGroupsNames()) {
+                            groups[k] = new Group(name);
+                            k++;
+                        }
+
+                        for (int j = 0; j < groups.length; j++) {
+                            ArrayList<Product> products = new ArrayList();
+
+                            for (String name : parser.getProducts(i, j)) {
+                                products.add(new Product(name.split("::")[1], name.split("::")[0], ""));
+                            }
+
+                            Subgroup[] subgroups;
+                            if (products.size() % 20 > 0) {
+                                subgroups = new Subgroup[(products.size() / 20) + 1];
+                            } else {
+                                subgroups = new Subgroup[products.size() / 20];
+                            }
+
+                            String[] subgroupsNames = parser.getSubgroupNames(i, j);
+
+                            for (int s = 0; s < subgroups.length; s++) {
+                                subgroups[s] = new Subgroup(subgroupsNames[s],
+                                        idisp.getNextFreeIndex(i, Integer.parseInt(terminalGroups.get(jTable1.getSelectedRow()).getStartIndex().substring(1))));
+                            }
+
+                            for (int g = 0; g < products.size(); g++) {
+                                subgroups[g / 20].addProduct(products.get(g));
+                            }
+                            // =====================
+
+                            for (Subgroup sgrp : subgroups) {
+                                groups[j].addSubgroup(sgrp);
+                            }
+                        }
+
+                        days[i].deleteAllGroups();
+                        for (Group grp : groups) {
+                            days[i].addGroup(grp);
+                        }
+                    }
+
+                    terminalGroups.get(jTable1.getSelectedRow()).setModified(Calendar.getInstance().getTime().toString());
+                    showMessage(CLIENT_MESSAGE, "Загружен файл: " + file.getCanonicalPath(), PLAIN);
+                    saveXMLConfiguration();
+                    update();
+                } catch (FileNotFoundException ex) {
+                    System.err.println("File not found");
+                    showMessage(CLIENT_MESSAGE, "Файл " + file.getName() + " не найден!", CRIT);
+                } catch (IOException ex) {
+                    System.err.println("Other IO Exception");
+                    showMessage(CLIENT_MESSAGE, "Ошибка ввода/вывода!", CRIT);
+                }
+            }
+        });
+
         JMenuItem removeMenuItem = new JMenuItem("Удалить");
         removeMenuItem.addActionListener((ActionEvent e) -> {
             if (autorization()) {
@@ -549,80 +628,9 @@ public class Configurator extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jTable1MouseClicked
 
-    private void updateFromFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateFromFileButtonActionPerformed
-        // choose file configuration
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setCurrentDirectory(new java.io.File("./"));
-        fileChooser.setFileFilter(new FileNameExtensionFilter("Файлы Microsoft Excel 2007*", "xlsx"));
+    private void dropToPOSesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dropToPOSesButtonActionPerformed
 
-        if (fileChooser.showDialog(this, "Открыть файл Excel...") == JFileChooser.APPROVE_OPTION) {
-            File file = new File(fileChooser.getSelectedFile().getAbsolutePath());
-            try {
-                Parser parser = new Parser(file);
-
-                // reading all products
-                DayOfWeek[] days = terminalGroups.get(jTable1.getSelectedRow()).getDaysOfWeek();
-
-                for (int i = 0; i < days.length; i++) {
-                    // groups name reading. It same for any day.
-                    Group[] groups = new Group[8];
-
-                    int k = 0;
-                    for (String name : parser.getGroupsNames()) {
-                        groups[k] = new Group(name);
-                        k++;
-                    }
-
-                    for (int j = 0; j < groups.length; j++) {
-                        ArrayList<Product> products = new ArrayList();
-
-                        for (String name : parser.getProducts(i, j)) {
-                            products.add(new Product(name.split("::")[1], name.split("::")[0], ""));
-                        }
-
-                        Subgroup[] subgroups;
-                        if (products.size() % 20 > 0) {
-                            subgroups = new Subgroup[(products.size() / 20) + 1];
-                        } else {
-                            subgroups = new Subgroup[products.size() / 20];
-                        }
-
-                        String[] subgroupsNames = parser.getSubgroupNames(i, j);
-
-                        for (int s = 0; s < subgroups.length; s++) {
-                            subgroups[s] = new Subgroup(subgroupsNames[s],
-                                    idisp.getNextFreeIndex(i, Integer.parseInt(terminalGroups.get(jTable1.getSelectedRow()).getStartIndex().substring(1))));
-                        }
-
-                        for (int g = 0; g < products.size(); g++) {
-                            subgroups[g / 20].addProduct(products.get(g));
-                        }
-                        // =====================
-
-                        for (Subgroup sgrp : subgroups) {
-                            groups[j].addSubgroup(sgrp);
-                        }
-                    }
-
-                    days[i].deleteAllGroups();
-                    for (Group grp : groups) {
-                        days[i].addGroup(grp);
-                    }
-                }
-
-                terminalGroups.get(jTable1.getSelectedRow()).setModified(Calendar.getInstance().getTime().toString());
-                showMessage(CLIENT_MESSAGE, "Загружен файл: " + file.getCanonicalPath(), PLAIN);
-                saveXMLConfiguration();
-                update();
-            } catch (FileNotFoundException ex) {
-                System.err.println("File not found");
-                showMessage(CLIENT_MESSAGE, "Файл " + file.getName() + " не найден!", CRIT);
-            } catch (IOException ex) {
-                System.err.println("Other IO Exception");
-                showMessage(CLIENT_MESSAGE, "Ошибка ввода/вывода!", CRIT);
-            }
-        }
-    }//GEN-LAST:event_updateFromFileButtonActionPerformed
+    }//GEN-LAST:event_dropToPOSesButtonActionPerformed
 
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
@@ -683,13 +691,13 @@ public class Configurator extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addButton;
+    private javax.swing.JButton dropToPOSesButton;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTable1;
     private javax.swing.JLabel messageLabel;
     private javax.swing.JLabel serverStatusLabel;
     private javax.swing.JPanel statusPanel;
-    private javax.swing.JButton updateFromFileButton;
     private javax.swing.JButton uploadButton;
     // End of variables declaration//GEN-END:variables
 }

@@ -54,7 +54,7 @@ public class TouchDaemon {
     public static final String WEB_KEYFILE = "ASRPARAM.CTL";
 
     public static final Logger LOGGER = Logger.getAnonymousLogger().getParent();
-
+    
     private final DayTrigger dayTrigger;
 
     public TouchDaemon() {

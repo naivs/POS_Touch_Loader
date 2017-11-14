@@ -41,10 +41,10 @@ import net.Communicator;
  * @author Ivan
  */
 public class TouchDaemon {
-    
+
     public static final String APPLICATION_NAME = "Touch Daemon";
     public static final String ICON_STR = "icon.png";
-    
+
     public static final String SERVER_PATH = "c:/Server/";
     public static final String SERVER_PATH_LAN = SERVER_PATH + "lan/";
     public static final String SERVER_PATH_LAN4SRV = SERVER_PATH + "lan4srv/";
@@ -52,14 +52,14 @@ public class TouchDaemon {
     public static final String WEB_PATH = "c:/web/mtxwm/gm/hoc/par/web/";
     public static final String HOC_PATH = "c:/web/mtxwm/gm/hoc/par/";
     public static final String WEB_KEYFILE = "ASRPARAM.CTL";
-    
+
     public static final Logger LOGGER = Logger.getAnonymousLogger().getParent();
-    
+
     private final DayTrigger dayTrigger;
-    
+
     public TouchDaemon() {
         LOGGER.removeHandler(LOGGER.getHandlers()[0]);
-        
+
         Formatter formatter = new Formatter() {
             @Override
             public String format(LogRecord arg0) {
@@ -78,11 +78,6 @@ public class TouchDaemon {
             }
         };
         
-        //ConsoleHandler ch = new ConsoleHandler();
-        //ch.setLevel(Level.ALL);
-        //ch.setFormatter(formatter);
-        //LOGGER.addHandler(ch);
-        
         try {
             FileHandler fh = new FileHandler("touchdaemon.log");
             fh.setFormatter(formatter);
@@ -100,7 +95,7 @@ public class TouchDaemon {
             LOGGER.log(Level.SEVERE, "config read fail!");
             System.exit(1);
         }
-        
+
         LOGGER.log(Level.INFO, "starting daemon...");
         String response
                 = configReader.readSharePath() + " "
@@ -115,17 +110,14 @@ public class TouchDaemon {
                 configReader.readRefSettings());
         dayTrigger.start();
         LOGGER.log(Level.INFO, "Daemon started!\n**************************\n");
-        
-        setTrayIcon();
-    }
-    
-    private void setTrayIcon() {
+
+        // SET TRAY ICON
         if (!SystemTray.isSupported()) {
             LOGGER.log(Level.WARNING, "System Tray is not supported on that OS!");
             return;
         }
         PopupMenu trayMenu = new PopupMenu();
-        
+
         MenuItem itemStatus = new MenuItem("Status");
         itemStatus.addActionListener(new ActionListener() {
             @Override
@@ -134,7 +126,7 @@ public class TouchDaemon {
             }
         });
         trayMenu.add(itemStatus);
-        
+
         MenuItem itemExit = new MenuItem("Exit");
         itemExit.addActionListener(new ActionListener() {
             @Override
@@ -158,19 +150,15 @@ public class TouchDaemon {
         trayIcon.displayMessage(APPLICATION_NAME, "Application started!",
                 TrayIcon.MessageType.INFO);
     }
-    
-    static private void daemonize() throws IOException {
-        System.in.close();
-        System.out.close();
-    }
-    
+
     public static void main(String[] args) {
         try {
-            daemonize();
+            System.in.close();
+            System.out.close();
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Unable to close system streams...", e);
         }
-        
+
         TouchDaemon daemon = new TouchDaemon();
     }
 }

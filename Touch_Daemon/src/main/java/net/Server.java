@@ -39,11 +39,14 @@ public class Server implements Observer {
     private final List<ClientThread> clients;
 
     private boolean isRunning;
+    
+    private final String wellcomeMsg;
 
-    public Server(int port) {
+    public Server(int port, String wellcomeMsg) {
         this.port = port;
         isRunning = false;
         clients = new ArrayList();
+        this.wellcomeMsg = wellcomeMsg;
     }
 
     public void startServer() {
@@ -51,6 +54,8 @@ public class Server implements Observer {
             serverThread = new ServerThread();
             serverThread.start();
             isRunning = true;
+            touchdaemon.TouchDaemon.LOGGER.log(Level.INFO,
+                            String.format("Server started on %d port...", port));
         }
     }
 
@@ -85,7 +90,7 @@ public class Server implements Observer {
                     touchdaemon.TouchDaemon.LOGGER.log(Level.INFO,
                             "Client connected...");
 
-                    ClientThread clientThread = new ClientThread(clientSocket, clients.size());
+                    ClientThread clientThread = new ClientThread(clientSocket, wellcomeMsg, clients.size());
                     clientThread.addObserver(Server.this);
                     clients.add(clientThread);
                     new Thread(clientThread).start();

@@ -34,7 +34,7 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
-import net.Communicator;
+import net.Server;
 
 /**
  *
@@ -55,6 +55,7 @@ public class TouchDaemon {
 
     public static final Logger LOGGER = Logger.getAnonymousLogger().getParent();
     
+    private final Server server;
     private final DayTrigger dayTrigger;
 
     public TouchDaemon() {
@@ -66,10 +67,10 @@ public class TouchDaemon {
                 StringBuilder b = new StringBuilder();
                 b.append(new Date());
                 b.append(" ");
-                b.append(arg0.getSourceClassName());
-                b.append(" ");
-                b.append(arg0.getSourceMethodName());
-                b.append(" ");
+//                b.append(arg0.getSourceClassName());
+//                b.append(" ");
+//                b.append(arg0.getSourceMethodName());
+//                b.append(" ");
                 b.append(arg0.getLevel());
                 b.append(" ");
                 b.append(arg0.getMessage());
@@ -102,9 +103,11 @@ public class TouchDaemon {
                 + configReader.readUsername() + " "
                 + configReader.readPassword() + " "
                 + configReader.readLoadTime();
-        LOGGER.log(Level.INFO, "communicator starting...");
-        Communicator communicator = new Communicator(configReader.readPort(), response);
-        communicator.start();
+        LOGGER.log(Level.INFO, "server starting...");
+        server = new Server(8080, response);
+        server.startServer();
+        //Communicator communicator = new Communicator(configReader.readPort(), response);
+        //communicator.start();
         LOGGER.log(Level.INFO, "trigger starting...");
         dayTrigger = new DayTrigger(configReader.readPath(), configReader.readLoadTime(), configReader.readParSettings(),
                 configReader.readRefSettings());
@@ -131,6 +134,7 @@ public class TouchDaemon {
         itemExit.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                server.stopServer();
                 System.exit(0);
             }
         });

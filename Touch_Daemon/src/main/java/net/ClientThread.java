@@ -38,14 +38,17 @@ class ClientThread extends Observable implements Runnable {
     private Socket socket;
 
     private boolean isRunning;
+    
+    private String wellcomeMsg;
 
-    public ClientThread(Socket socket, int clientsCount) {
+    public ClientThread(Socket socket, String wellcomeMsg, int clientsCount) {
         this.socket = socket;
         this.clientsCount = clientsCount;
         isRunning = false;
+        this.wellcomeMsg = wellcomeMsg;
         try {
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            out = new PrintWriter(socket.getOutputStream());
+            out = new PrintWriter(socket.getOutputStream(), true);
         } catch (IOException ex) {
             touchdaemon.TouchDaemon.LOGGER.log(Level.WARNING, "Unable to get streams from socket.", ex);
         }
@@ -59,14 +62,26 @@ class ClientThread extends Observable implements Runnable {
             out.println("Server is busy!");
             isRunning = false;
         } else {
-            out.println("Welcome to Touch Server!");
+            out.println(wellcomeMsg);
             try {
                 while ((msg = in.readLine()) != null && isRunning) {
-                    out.println(msg);
+                    switch(Integer.parseInt(msg)) {
+                        case 0: // <- get samba parameters
+                            out.println(msg);
+                            break;
+                            
+                        case 2: // <- test
+                            out.println(wellcomeMsg);
+                            break;
+                    }
+                    touchdaemon.TouchDaemon.LOGGER.log(Level.INFO, String.format("Message from client: %s", msg));
                 }
                 // disconnecting of client
                 isRunning = false;
+                touchdaemon.TouchDaemon.LOGGER.log(Level.INFO,
+                            "Client disconnected...");
             } catch (IOException ex) {
+                touchdaemon.TouchDaemon.LOGGER.log(Level.WARNING, "IOException in client loop.", ex);
                 isRunning = false;
             }
         }

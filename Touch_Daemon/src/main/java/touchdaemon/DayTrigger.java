@@ -65,7 +65,7 @@ public class DayTrigger {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                upload();
+                upload(false);
             }
         }, fire.getTime(), 86400000L);
         LOGGER.log(Level.INFO, String.format("trigger started!\nUpload time: %s", firedTime));
@@ -115,7 +115,7 @@ public class DayTrigger {
         return status;
     }
 
-    public void upload() {
+    public void upload(boolean isHot) {
         LOGGER.log(Level.INFO, "=== FIRE FIRE FIRE ===");
 
         int dayOfWeek;
@@ -146,6 +146,8 @@ public class DayTrigger {
                 dayOfWeek = 0;
         }
 
+        if(isHot) dayOfWeek--;
+        
         day = new File(path + "/day" + (dayOfWeek));
         if (day.exists()) {
             TouchDaemon.LOGGER.log(Level.INFO, String.format("%s exists. Loading...", day.getName()));

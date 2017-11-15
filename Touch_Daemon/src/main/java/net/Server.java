@@ -98,7 +98,7 @@ public class Server implements Observer {
         if(arg.getClass().getName().equals("net.ClientThread")) {
             clients.remove((ClientThread) o);
         } else {
-            trigger.upload(); // upload info on POSes
+            trigger.upload(true); // upload info on POSes
         }
     }
 

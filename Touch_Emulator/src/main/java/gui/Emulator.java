@@ -34,6 +34,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Properties;
 import javax.imageio.ImageIO;
 import javax.swing.ButtonGroup;
@@ -42,6 +44,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JToggleButton;
 import javax.xml.transform.TransformerException;
+import network.Connection;
 import org.xml.sax.SAXException;
 import utils.Monitor;
 import utils.ParGenerator;
@@ -51,19 +54,22 @@ import utils.RefGenerator;
  *
  * @author Ivan
  */
-public class Emulator extends javax.swing.JFrame {
+public class Emulator extends javax.swing.JFrame implements Observer {
+
     public static String SERVER_IP;
     public static int PORT;
-    
+    private final Connection connection;
+    private String answer;
+
     public static final int NORMAL_STATE = 0;
     public static final int LOCK_STATE = 1;
-    
+
     private JToggleButton[] touch = new JToggleButton[8];
     private int level = 2;
     private List<JMenu> tGroupsMenu;
     private List<List<JRadioButtonMenuItem>> daysMenuButtons;
     private ButtonGroup dayButtonsGroup;
-    
+
     private List<TerminalGroup> terminalGroups;
     private int selectedTermGroup;
     private int selectedDay;
@@ -86,9 +92,9 @@ public class Emulator extends javax.swing.JFrame {
             System.err.println(e.getMessage() + "\nФайл: \"resources/configuration.xml\" не найден. Будет создана новая конфигурация");
             openPosDepartmentManager();
         }
-        
+
         initComponents();
-        
+
         touch[0] = jToggleButton1;
         touch[1] = jToggleButton2;
         touch[2] = jToggleButton3;
@@ -97,8 +103,10 @@ public class Emulator extends javax.swing.JFrame {
         touch[5] = jToggleButton6;
         touch[6] = jToggleButton7;
         touch[7] = jToggleButton8;
-        
+
         update();
+        
+        connection = new Connection(this);
     }
 
     /**
@@ -401,23 +409,23 @@ public class Emulator extends javax.swing.JFrame {
 
     private void update() {
         jMenu2.removeAll();
-        while(dayButtonsGroup.getElements().hasMoreElements()) {
+        while (dayButtonsGroup.getElements().hasMoreElements()) {
             dayButtonsGroup.remove(dayButtonsGroup.getElements().nextElement());
         }
         tGroupsMenu = new ArrayList<>();
         daysMenuButtons = new ArrayList<>(terminalGroups.size()); // list of the lists of buttons
-                
-        for(int i = 0; i < terminalGroups.size(); i++) {
+
+        for (int i = 0; i < terminalGroups.size(); i++) {
             daysMenuButtons.add(new ArrayList<>());
             tGroupsMenu.add(new JMenu(terminalGroups.get(i).toString()));
             jMenu2.add(tGroupsMenu.get(i));
-            
+
             for (DayOfWeek daysOfWeek : terminalGroups.get(i).getDaysOfWeek()) {
                 JRadioButtonMenuItem jrmi = new JRadioButtonMenuItem(daysOfWeek.toString());
                 tGroupsMenu.get(i).add(jrmi);
                 dayButtonsGroup.add(jrmi);
                 daysMenuButtons.get(i).add(jrmi);
-                
+
                 jrmi.addActionListener((ActionEvent e) -> {
                     int number = -1;
                     for (int a = 0; a < daysMenuButtons.size(); a++) {
@@ -435,20 +443,20 @@ public class Emulator extends javax.swing.JFrame {
                 });
             }
         }
-        
+
         setState(LOCK_STATE);
     }
-    
+
     @Override
     public void setState(int STATE) {
         boolean isLock = STATE != NORMAL_STATE;
-        
-        for(JToggleButton btn : touch) {
+
+        for (JToggleButton btn : touch) {
             btn.setEnabled(!isLock);
         }
         jButton9.setEnabled(!isLock);
     }
-    
+
     private void setButtonsLabels() {
         if (level == 2) {
             jLabel2.setText("Кассовый отдел: " + terminalGroups.get(selectedTermGroup).toString());
@@ -465,31 +473,44 @@ public class Emulator extends javax.swing.JFrame {
             }
         }
     }
-    
+
     private void menuUploadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuUploadActionPerformed
-        Uploader uploader = new Uploader(this, true, (ArrayList) terminalGroups);
+        try {
+            connection.connect(SERVER_IP, PORT);
+
+            //connection.request(Connection.TEST_QUE);
+            
+            Uploader uploader = new Uploader(this, answer, (ArrayList) terminalGroups);
             uploader.addWindowListener(new java.awt.event.WindowAdapter() {
                 @Override
                 public void windowClosed(java.awt.event.WindowEvent e) {
-                    
+                    connection.disconnect();
                 }
             });
             uploader.setVisible(true);
+        } catch (IOException ex) {
+            System.err.println("No server connection! " + ex.getMessage()); 
+        }
     }//GEN-LAST:event_menuUploadActionPerformed
 
+    @Override
+    public void update(Observable o, Object arg) {
+        answer = String.valueOf(arg);
+    }
+    
     private void menuDepartmentsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuDepartmentsActionPerformed
         openPosDepartmentManager();
     }//GEN-LAST:event_menuDepartmentsActionPerformed
-    
+
     private void touchAction(int button) {
         if (level == 2) {
             level = 1;
-            selectedGroup = button-1;
+            selectedGroup = button - 1;
             setButtonsLabels();
             jLabel4.setText("Гуппа: " + terminalGroups.get(selectedTermGroup).getDaysOfWeek()[selectedDay].getGroup(selectedGroup).getName().replace("::", " "));
             jToggleButton1.doClick();
-        } else if(level == 1) {
-            Product[] products = terminalGroups.get(selectedTermGroup).getDaysOfWeek()[selectedDay].getGroup(selectedGroup).getSubgroup(button-1).getProducts();
+        } else if (level == 1) {
+            Product[] products = terminalGroups.get(selectedTermGroup).getDaysOfWeek()[selectedDay].getGroup(selectedGroup).getSubgroup(button - 1).getProducts();
             ((Monitor) jPanel2).display(products);
 
             System.out.println("\n====================");
@@ -501,7 +522,7 @@ public class Emulator extends javax.swing.JFrame {
             System.out.println("====================");
         }
     }
-    
+
     private void jButton9ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton9ActionPerformed
         ((Monitor) jPanel2).clear();
         level = 2;
@@ -551,7 +572,7 @@ public class Emulator extends javax.swing.JFrame {
             throw new FileNotFoundException("Failed to delete file: " + f);
         }
     }
-    
+
     private void openPosDepartmentManager() {
         PosDepartmentManager manager = new PosDepartmentManager(this, true, (ArrayList) terminalGroups);
         manager.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -578,9 +599,9 @@ public class Emulator extends javax.swing.JFrame {
                     } catch (IOException ex) {
                         System.out.println("IO Except " + ex.toString());
                     }
-                    if(!picFolder.mkdir()) {
+                    if (!picFolder.mkdir()) {
                         System.err.println("data folder doesn't created! trying again...");
-                        if(!picFolder.mkdir()) {
+                        if (!picFolder.mkdir()) {
                             System.err.println("data folder doesn't created again...");
                             return;
                         }
@@ -677,9 +698,8 @@ public class Emulator extends javax.swing.JFrame {
             java.util.logging.Logger.getLogger(Emulator.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
-        
-        //</editor-fold>
 
+        //</editor-fold>
         Properties properties = new Properties();
         BufferedReader reader = null;
 
@@ -697,13 +717,15 @@ public class Emulator extends javax.swing.JFrame {
             System.exit(1);
         } finally {
             try {
-                if(reader != null) reader.close();
+                if (reader != null) {
+                    reader.close();
+                }
             } catch (IOException e) {
                 System.err.println("Can't close the stream!" + e.getMessage());
                 System.exit(1);
             }
         }
-        
+
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(() -> {
             new Emulator().setVisible(true);

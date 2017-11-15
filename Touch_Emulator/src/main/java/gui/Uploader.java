@@ -21,41 +21,44 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Observable;
+import java.util.Observer;
 import javax.swing.JOptionPane;
 import models.UploaderTableModel;
 import network.SMBClient;
-import network.ServerCommunicator;
+import network.Connection;
+import network.SMBAuthentication;
 import utils.LoadAnalyzer;
 
 /**
  *
  * @author Ivan
  */
-public class Uploader extends javax.swing.JDialog {
+public class Uploader extends javax.swing.JDialog implements Observer {
+
     //private final LoadAnalyzer la;
-    private final ServerCommunicator communicator;
     private final SMBClient smbClient;
-    
+
     private int progress;
 
     /**
      * Creates new form Uploader
      *
      * @param parent
-     * @param modal
+     * @param answer
      * @param configuration
      */
-    public Uploader(java.awt.Frame parent, boolean modal, ArrayList<TerminalGroup> configuration) {
-        super(parent, modal);
+    public Uploader(java.awt.Frame parent, String answer, ArrayList<TerminalGroup> configuration) {
+        super(parent, true);
         initComponents();
-
+        
         String[] colNames = new String[configuration.size()];
         for (int i = 0; i < colNames.length; i++) {
             colNames[i] = configuration.get(i).toString();
         }
         //la = new LoadAnalyzer(configuration);
         //jTable1.setModel(new UploaderTableModel(colNames, la.getDaysLoad()));
-        
+
         /*
         -> test connection to server demon
         -> get server parameters
@@ -64,12 +67,26 @@ public class Uploader extends javax.swing.JDialog {
         -> restrict uploading if other client connected (optional)
         -> restrict uploading if any day is overloaded
         -> test SMB share available
-        */
+         */
         
-        communicator = new ServerCommunicator();
-        jLabel1.setText("Выгрузка данных на кассы будет произведена в: " + communicator.getLoadTime());
-        smbClient = new SMBClient(Emulator.SERVER_IP, communicator.getSmbAuth());
+        
+        
+        String url = answer.split(" ")[0];
+        String user = answer.split(" ")[1];
+        String pass = answer.split(" ")[2];
+        String time = answer.split(" ")[3];
+        
+        SMBAuthentication smbAuth = new SMBAuthentication(url, user, pass);
+        smbClient = new SMBClient(Emulator.SERVER_IP, smbAuth);
         System.out.println(smbClient.testConnection());
+        jLabel1.setText(String.format("Время выгрузки на кассы: ", time));
+
+        
+    }
+    
+    @Override
+    public void update(Observable o, Object arg) {
+        jLabel1.setText("Выгрузка данных на кассы будет произведена в: " + arg);
     }
 
     /**
@@ -87,7 +104,6 @@ public class Uploader extends javax.swing.JDialog {
         jTable1 = new javax.swing.JTable();
         jLabel1 = new javax.swing.JLabel();
         btnUpload = new javax.swing.JButton();
-        jLabel6 = new javax.swing.JLabel();
         jProgressBar1 = new javax.swing.JProgressBar();
 
         jTextPane2.setEditable(false);
@@ -113,11 +129,6 @@ public class Uploader extends javax.swing.JDialog {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Загрузка параметров на сервер");
         setResizable(false);
-        addWindowListener(new java.awt.event.WindowAdapter() {
-            public void windowClosed(java.awt.event.WindowEvent evt) {
-                formWindowClosed(evt);
-            }
-        });
 
         jLabel1.setText("time");
 
@@ -128,8 +139,6 @@ public class Uploader extends javax.swing.JDialog {
                 btnUploadActionPerformed(evt);
             }
         });
-
-        jLabel6.setForeground(new java.awt.Color(204, 0, 0));
 
         jProgressBar1.setStringPainted(true);
 
@@ -144,10 +153,6 @@ public class Uploader extends javax.swing.JDialog {
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 449, Short.MAX_VALUE)
                         .addComponent(btnUpload, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jLabel6)
-                        .addGap(63, 63, 63))
                     .addComponent(jProgressBar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -160,8 +165,7 @@ public class Uploader extends javax.swing.JDialog {
                     .addComponent(jLabel1))
                 .addGap(18, 18, 18)
                 .addComponent(jProgressBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(12, 12, 12)
-                .addComponent(jLabel6))
+                .addGap(12, 12, 12))
         );
 
         pack();
@@ -187,7 +191,7 @@ public class Uploader extends javax.swing.JDialog {
             }
         }
     }
-    
+
     private void btnUploadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUploadActionPerformed
         // upload to server
         progress = 0;
@@ -199,12 +203,12 @@ public class Uploader extends javax.swing.JDialog {
                 //get local directory
                 File sourseFolder = new File("resources/data/");
                 int col = sourseFolder.listFiles().length;
-                for(File f : sourseFolder.listFiles()) {
+                for (File f : sourseFolder.listFiles()) {
                     recursiveCopy(f);
                     progress += 100 / col;
                     jProgressBar1.setValue(progress);
                 }
-                
+
 //                for (int tGroupNum = 0; tGroupNum < configuration.size(); tGroupNum++) {
 //                    for (int dayNum = 0; dayNum < configuration.get(tGroupNum).getDaysOfWeek().length; dayNum++) {
 //                        try {
@@ -231,24 +235,18 @@ public class Uploader extends javax.swing.JDialog {
 //                        jProgressBar1.setValue(progress);
 //                    }
 //                }
-                
                 jProgressBar1.setValue(100);
                 JOptionPane.showMessageDialog(null, "Данные выгружены на кассовый сервер!", "Информация", JOptionPane.PLAIN_MESSAGE);
                 dispose();
             }
         };
-        
-        task.start();   
-    }//GEN-LAST:event_btnUploadActionPerformed
 
-    private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
-        communicator.shutDown();
-    }//GEN-LAST:event_formWindowClosed
+        task.start();
+    }//GEN-LAST:event_btnUploadActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnUpload;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel6;
     private javax.swing.JProgressBar jProgressBar1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;

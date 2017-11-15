@@ -95,16 +95,16 @@ public class DayTrigger {
                 
                 day = new File(path + "/day" + (dayOfWeek));
                 if (day.exists()) {
-                    TouchDaemon.LOGGER.log(Level.INFO, day.getName() + " exists. Loading...");
+                    TouchDaemon.LOGGER.log(Level.INFO, String.format("%s exists. Loading...", day.getName()));
                     loadToServer(day);
-                    TouchDaemon.LOGGER.log(Level.INFO, "Day " + day.getName() + " uploaded.");
+                    TouchDaemon.LOGGER.log(Level.INFO, String.format("Day %s uploaded!", day.getName()));
                 } else {
-                    TouchDaemon.LOGGER.log(Level.INFO, day.getName() + " not exists.");
+                    TouchDaemon.LOGGER.log(Level.INFO, String.format("%s not exists!", day.getName()));
                 }
                 TouchDaemon.LOGGER.log(Level.INFO, "Waiting for the next upload...\n");
             }
         }, fire.getTime(), 86400000L);
-        LOGGER.log(Level.INFO, "trigger started!\nUpload time: " + firedTime);
+        LOGGER.log(Level.INFO, String.format("trigger started!\nUpload time: %s", firedTime));
     }
     
     public String getInfoStatus() {

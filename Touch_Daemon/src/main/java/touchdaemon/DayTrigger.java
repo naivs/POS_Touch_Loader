@@ -44,9 +44,9 @@ public class DayTrigger {
     private final String path;
     private final boolean parSettings;
     private final boolean refSettings;
-    
+
     private final Timer timer;
-    
+
     private File day;
 
     public DayTrigger(String path, String firedTime, boolean parSettings, boolean refSettings) {
@@ -56,61 +56,25 @@ public class DayTrigger {
         this.refSettings = refSettings;
         timer = new Timer(true);
     }
-    
+
     public void start() {
         Calendar fire = Calendar.getInstance();
         fire.set(Calendar.HOUR_OF_DAY, Integer.parseInt(firedTime.split(":")[0]));
         fire.set(Calendar.MINUTE, Integer.parseInt(firedTime.split(":")[1]));
-        
+
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                int dayOfWeek;
-                // check config on day
-                switch (Calendar.getInstance().get(Calendar.DAY_OF_WEEK)) {
-                    case Calendar.MONDAY:
-                        dayOfWeek = 1;
-                        break;
-                    case Calendar.TUESDAY:
-                        dayOfWeek = 2;
-                        break;
-                    case Calendar.WEDNESDAY:
-                        dayOfWeek = 3;
-                        break;
-                    case Calendar.THURSDAY:
-                        dayOfWeek = 4;
-                        break;
-                    case Calendar.FRIDAY:
-                        dayOfWeek = 5;
-                        break;
-                    case Calendar.SATURDAY:
-                        dayOfWeek = 6;
-                        break;
-                    case Calendar.SUNDAY:
-                        dayOfWeek = 0;
-                        break;
-                    default:
-                        dayOfWeek = 0;
-                }
-                
-                day = new File(path + "/day" + (dayOfWeek));
-                if (day.exists()) {
-                    TouchDaemon.LOGGER.log(Level.INFO, String.format("%s exists. Loading...", day.getName()));
-                    loadToServer(day);
-                    TouchDaemon.LOGGER.log(Level.INFO, String.format("Day %s uploaded!", day.getName()));
-                } else {
-                    TouchDaemon.LOGGER.log(Level.INFO, String.format("%s not exists!", day.getName()));
-                }
-                TouchDaemon.LOGGER.log(Level.INFO, "Waiting for the next upload...\n");
+                upload();
             }
         }, fire.getTime(), 86400000L);
         LOGGER.log(Level.INFO, String.format("trigger started!\nUpload time: %s", firedTime));
     }
-    
+
     public String getInfoStatus() {
         String status = "UPLOAD TIME: " + firedTime + "\n"
                 + "CURRENT DAY: ";
-        
+
         if (day != null) {
             switch (Integer.parseInt(day.getName().substring(day.getName().length() - 1))) {
                 case 0:
@@ -150,7 +114,49 @@ public class DayTrigger {
 
         return status;
     }
-    
+
+    public void upload() {
+        LOGGER.log(Level.INFO, "=== FIRE FIRE FIRE ===");
+
+        int dayOfWeek;
+        // check config on day
+        switch (Calendar.getInstance().get(Calendar.DAY_OF_WEEK)) {
+            case Calendar.MONDAY:
+                dayOfWeek = 1;
+                break;
+            case Calendar.TUESDAY:
+                dayOfWeek = 2;
+                break;
+            case Calendar.WEDNESDAY:
+                dayOfWeek = 3;
+                break;
+            case Calendar.THURSDAY:
+                dayOfWeek = 4;
+                break;
+            case Calendar.FRIDAY:
+                dayOfWeek = 5;
+                break;
+            case Calendar.SATURDAY:
+                dayOfWeek = 6;
+                break;
+            case Calendar.SUNDAY:
+                dayOfWeek = 0;
+                break;
+            default:
+                dayOfWeek = 0;
+        }
+
+        day = new File(path + "/day" + (dayOfWeek));
+        if (day.exists()) {
+            TouchDaemon.LOGGER.log(Level.INFO, String.format("%s exists. Loading...", day.getName()));
+            loadToServer(day);
+            TouchDaemon.LOGGER.log(Level.INFO, String.format("Day %s uploaded!", day.getName()));
+        } else {
+            TouchDaemon.LOGGER.log(Level.INFO, String.format("%s not exists!", day.getName()));
+        }
+        TouchDaemon.LOGGER.log(Level.INFO, "Waiting for the next upload...\n");
+    }
+
     private void copyFile(File source, File dest) throws IOException {
         InputStream input = null;
         OutputStream output = null;
@@ -170,19 +176,19 @@ public class DayTrigger {
             }
         }
     }
-    
+
     private void loadToServer(File loadDay) {
         // load images
         try {
             File[] images = new File(loadDay.getCanonicalPath() + "/cafe/").listFiles();
-            for(File image : images) {
+            for (File image : images) {
                 //Files.copy(image.toPath(), new File(TouchDaemon.IMAGES + image.getName()).toPath(), StandardCopyOption.REPLACE_EXISTING);
                 copyFile(image, new File(TouchDaemon.IMAGES + image.getName()));
             }
         } catch (IOException ex) {
             TouchDaemon.LOGGER.log(Level.SEVERE, "Unable to copy any of ../cafe/image file... ", ex.getMessage());
-        } 
-        
+        }
+
         // load REGPAR.DATs
         FilenameFilter parFilter = new FilenameFilter() {
             @Override
@@ -202,7 +208,7 @@ public class DayTrigger {
                     //Files.copy(dest.toPath(), new File(TouchDaemon.SERVER_PATH_LAN4SRV + dest.getName()).toPath(), StandardCopyOption.REPLACE_EXISTING);
                     copyFile(dest, new File(TouchDaemon.SERVER_PATH_LAN + dest.getName()));
                     copyFile(dest, new File(TouchDaemon.SERVER_PATH_LAN4SRV + dest.getName()));
-                    if(parSettings) {
+                    if (parSettings) {
                         //Files.copy(dest.toPath(), new File(TouchDaemon.HOC_PATH + dest.getName()).toPath(), StandardCopyOption.REPLACE_EXISTING);
                         copyFile(dest, new File(TouchDaemon.HOC_PATH + dest.getName()));
                     }
@@ -211,7 +217,7 @@ public class DayTrigger {
                 }
             }
         }
-        
+
         // load PLUREF.DAT
         FilenameFilter refFilter = new FilenameFilter() {
             @Override
@@ -221,16 +227,16 @@ public class DayTrigger {
         };
         source = loadDay.listFiles(refFilter);
         File pluPef = new File(TouchDaemon.SERVER_PATH + "S_PLUREF.DAT");
-        for(File plurefPart : source) {
+        for (File plurefPart : source) {
             injectToRef(plurefPart, pluPef);
         }
-        
+
         try {
             //Files.copy(pluPef.toPath(), new File(TouchDaemon.SERVER_PATH_LAN + "S_PLUREF.DAT").toPath(), StandardCopyOption.REPLACE_EXISTING);
             //Files.copy(pluPef.toPath(), new File(TouchDaemon.SERVER_PATH_LAN4SRV + "S_PLUREF.DAT").toPath(), StandardCopyOption.REPLACE_EXISTING);
             copyFile(pluPef, new File(TouchDaemon.SERVER_PATH_LAN + "S_PLUREF.DAT"));
             copyFile(pluPef, new File(TouchDaemon.SERVER_PATH_LAN4SRV + "S_PLUREF.DAT"));
-            if(refSettings) {
+            if (refSettings) {
                 //Files.copy(pluPef.toPath(), new File(TouchDaemon.HOC_PATH + "S_PLUREF.DAT").toPath(), StandardCopyOption.REPLACE_EXISTING);
                 copyFile(pluPef, new File(TouchDaemon.HOC_PATH + "S_PLUREF.DAT"));
             }
@@ -243,11 +249,11 @@ public class DayTrigger {
             if (parSettings || refSettings) {
                 File key = new File(TouchDaemon.HOC_PATH + TouchDaemon.WEB_KEYFILE);
                 File web = new File(TouchDaemon.WEB_PATH);
-                
-                for(File f : web.listFiles()) {
+
+                for (File f : web.listFiles()) {
                     f.delete();
                 }
-                
+
                 key.createNewFile();
             }
         } catch (IOException ex) {
@@ -267,7 +273,7 @@ public class DayTrigger {
     public void injectToPar(File source, File dest) {
         String srcData = "";
         String destData = "";
-        
+
         BufferedReader reader = null;
         BufferedWriter writer = null;
 
@@ -290,7 +296,7 @@ public class DayTrigger {
                 TouchDaemon.LOGGER.log(Level.SEVERE, "Stream unable to close...", e.getMessage());
             }
         }
-        
+
         try {
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(dest), "Cp866"));
             String buf;
@@ -298,12 +304,13 @@ public class DayTrigger {
             while (!(buf = reader.readLine()).startsWith("PD")) {
                 destData += buf + "\r\n";
             }
-            
+
             destData += srcData;
-            
+
             while ((buf = reader.readLine()) != null) {
-                if(!buf.startsWith("PD") && !buf.startsWith("PRES"))
+                if (!buf.startsWith("PD") && !buf.startsWith("PRES")) {
                     destData += buf + "\r\n";
+                }
             }
         } catch (IOException e) {
             TouchDaemon.LOGGER.log(Level.SEVERE, "Can't read REGPAR.DAT...", e.getMessage());
@@ -320,7 +327,7 @@ public class DayTrigger {
 
         try {
             writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(dest), "Cp866"));
-                writer.append(destData);
+            writer.append(destData);
         } catch (IOException e) {
             TouchDaemon.LOGGER.log(Level.SEVERE, "IO Error while injecting data to server REGPAR.DAT...", e.getMessage());
         } finally {
@@ -333,20 +340,20 @@ public class DayTrigger {
             }
         }
     }
-    
+
     public void injectToRef(File source, File dest) {
         ArrayList<String> srcData = new ArrayList();
         String destData = "";
-        
+
         BufferedReader reader = null;
         BufferedWriter writer = null;
-        
+
         String startIndex = null, endIndex = null;
 
         try {
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(source), "Cp866"));
             String buf;
-            while((buf = reader.readLine()) != null) {
+            while ((buf = reader.readLine()) != null) {
                 srcData.add(buf);
             }
             startIndex = srcData.get(0).substring(1, 4);
@@ -363,7 +370,7 @@ public class DayTrigger {
                 TouchDaemon.LOGGER.log(Level.SEVERE, "Stream unable to close...", e.getMessage());
             }
         }
-        
+
         try {
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(dest), "Cp866"));
             String buf;
@@ -371,14 +378,15 @@ public class DayTrigger {
             while (Integer.parseInt((buf = reader.readLine()).substring(1, 4)) < Integer.parseInt(startIndex)) {
                 destData += buf + "\r\n";
             }
-            
-            for(String string : srcData) {
+
+            for (String string : srcData) {
                 destData += string + "\r\n";
             }
-            
+
             while ((buf = reader.readLine()) != null) {
-                if(Integer.parseInt(buf.substring(1, 4)) > Integer.parseInt(endIndex))
+                if (Integer.parseInt(buf.substring(1, 4)) > Integer.parseInt(endIndex)) {
                     destData += buf + "\r\n";
+                }
             }
         } catch (IOException e) {
             TouchDaemon.LOGGER.log(Level.SEVERE, "Can't read PLUREF.DAT...", e.getMessage());
@@ -395,7 +403,7 @@ public class DayTrigger {
 
         try {
             writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(dest), "Cp866"));
-                writer.append(destData);
+            writer.append(destData);
         } catch (IOException e) {
             TouchDaemon.LOGGER.log(Level.SEVERE, "IO Error while injecting data to server PLUREF.DAT...", e.getMessage());
         } finally {

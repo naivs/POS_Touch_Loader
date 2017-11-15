@@ -16,6 +16,7 @@
  */
 package net;
 
+import io.ConfigReader;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -24,6 +25,8 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.logging.Level;
+import touchdaemon.DayTrigger;
+import static touchdaemon.TouchDaemon.LOGGER;
 
 /**
  *
@@ -41,12 +44,29 @@ public class Server implements Observer {
     private boolean isRunning;
     
     private final String wellcomeMsg;
+    
+    private final DayTrigger trigger;
 
-    public Server(int port, String wellcomeMsg) {
+    public Server(int port) {
         this.port = port;
         isRunning = false;
         clients = new ArrayList();
-        this.wellcomeMsg = wellcomeMsg;
+        
+        // load settings
+        ConfigReader configReader = new ConfigReader();
+        if (configReader.check()) {
+            LOGGER.log(Level.FINEST, "config read success!");
+        } else {
+            LOGGER.log(Level.SEVERE, "config read fail!");
+            System.exit(1);
+        }
+        
+        wellcomeMsg = configReader.readSharePath() + " "
+                + configReader.readUsername() + " "
+                + configReader.readPassword() + " "
+                + configReader.readLoadTime();
+        trigger = new DayTrigger(configReader.readPath(), configReader.readLoadTime(), configReader.readParSettings(),
+                configReader.readRefSettings());
     }
 
     public void startServer() {
@@ -54,8 +74,11 @@ public class Server implements Observer {
             serverThread = new ServerThread();
             serverThread.start();
             isRunning = true;
-            touchdaemon.TouchDaemon.LOGGER.log(Level.INFO,
+            LOGGER.log(Level.INFO,
                             String.format("Server started on %d port...", port));
+            
+            trigger.start();
+            LOGGER.log(Level.INFO, "Trigger started...");
         }
     }
 
@@ -71,11 +94,16 @@ public class Server implements Observer {
 
     @Override
     public void update(Observable o, Object arg) {
-        clients.remove((ClientThread) o);
+        LOGGER.log(Level.INFO, o.getClass().getName());
+        if(arg.getClass().getName().equals("net.ClientThread")) {
+            clients.remove((ClientThread) o);
+        } else {
+            trigger.upload(); // upload info on POSes
+        }
     }
 
-    public boolean status() {
-        return isRunning;
+    public String status() {
+        return String.format("Сервер онлайн: %b\n%s", isRunning, trigger.getInfoStatus());
     }
     
     private class ServerThread extends Thread {
@@ -96,7 +124,7 @@ public class Server implements Observer {
                     new Thread(clientThread).start();
                 }
             } catch (IOException ex) {
-                touchdaemon.TouchDaemon.LOGGER.log(Level.WARNING,
+                LOGGER.log(Level.WARNING,
                         "Error occured on creating ServerSocket or accepting client connection.",
                         ex);
             }
@@ -106,8 +134,7 @@ public class Server implements Observer {
             try {
                 serverSocket.close();
             } catch (IOException ex) {
-                touchdaemon.TouchDaemon.LOGGER.log(Level.WARNING,
-                        "Unable to close serverSocket.", ex);
+                LOGGER.log(Level.WARNING, "Unable to close serverSocket.", ex);
             }
         }
     }

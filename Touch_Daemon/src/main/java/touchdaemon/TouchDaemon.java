@@ -56,7 +56,6 @@ public class TouchDaemon {
     public static final Logger LOGGER = Logger.getAnonymousLogger().getParent();
     
     private final Server server;
-    private final DayTrigger dayTrigger;
 
     public TouchDaemon() {
         LOGGER.removeHandler(LOGGER.getHandlers()[0]);
@@ -88,30 +87,11 @@ public class TouchDaemon {
             LOGGER.log(Level.WARNING, "logging problem!", e);
         }
 
-        // load settings
-        ConfigReader configReader = new ConfigReader();
-        if (configReader.check()) {
-            LOGGER.log(Level.FINEST, "config read success!");
-        } else {
-            LOGGER.log(Level.SEVERE, "config read fail!");
-            System.exit(1);
-        }
-
         LOGGER.log(Level.INFO, "starting daemon...");
-        String response
-                = configReader.readSharePath() + " "
-                + configReader.readUsername() + " "
-                + configReader.readPassword() + " "
-                + configReader.readLoadTime();
+                
         LOGGER.log(Level.INFO, "server starting...");
-        server = new Server(8080, response);
+        server = new Server(8080);
         server.startServer();
-        //Communicator communicator = new Communicator(configReader.readPort(), response);
-        //communicator.start();
-        LOGGER.log(Level.INFO, "trigger starting...");
-        dayTrigger = new DayTrigger(configReader.readPath(), configReader.readLoadTime(), configReader.readParSettings(),
-                configReader.readRefSettings());
-        dayTrigger.start();
         LOGGER.log(Level.INFO, "Daemon started!\n**************************\n");
 
         // SET TRAY ICON
@@ -125,7 +105,7 @@ public class TouchDaemon {
         itemStatus.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(null, dayTrigger.getInfoStatus(), "Status", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(null, server.status(), "Status", JOptionPane.INFORMATION_MESSAGE);
             }
         });
         trayMenu.add(itemStatus);

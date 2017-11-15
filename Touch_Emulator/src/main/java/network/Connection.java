@@ -22,7 +22,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Observable;
-import java.util.Observer;
 
 /**
  *
@@ -36,42 +35,21 @@ public class Connection extends Observable implements Runnable {
 
     private boolean isConnected;
 
-    private String host;
-    private int port;
-
     /**
      * 0 - get parameters for samba connection 1 - init upload data on POSes 2 -
-     * test connection
+     * test connection 3 - get time of upload data on POSes
      */
     public static final int SMB_PARAM_QUE = 0;
     public static final int UPLOAD_QUE = 1;
     public static final int TEST_QUE = 2;
     public static final int FIRE_TIME_QUE = 3;
 
-    public Connection(Observer observer) {
-        super.addObserver(observer);
+    public Connection() {
         isConnected = false;
-//        // testing connection
-//        String buf = in.readLine();
-//        if (buf.equals("[helo]")) {
-//            System.out.println(Emulator.SERVER_IP + ": connection established...");
-//        } else {
-//            System.out.println(Emulator.SERVER_IP + ": host unreachable.");
-//        }
-//        // sending query
-//        System.out.println("getting data...");
-//        out.println("[get]");
-//        String[] response = in.readLine().split(" "); // [path] [username] [password] [loadTime]
-//        System.out.println(Arrays.toString(response));
-//        smbAuth = new SMBAuthentication(response[0], response[1], response[2]);
-//        loadTime = response[3];
     }
 
     public void connect(String host, int port) throws IOException {
         if (!isConnected) {
-            this.host = host;
-            this.port = port;
-
             socket = new Socket(host, port);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             out = new PrintWriter(socket.getOutputStream(), true);

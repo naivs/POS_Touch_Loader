@@ -37,18 +37,20 @@ import utils.LoadAnalyzer;
 public class Uploader extends javax.swing.JDialog implements Observer {
 
     //private final LoadAnalyzer la;
-    private final SMBClient smbClient;
-
+    private SMBClient smbClient;
+    private final Connection connection;
+    
+    private String answer;
     private int progress;
 
     /**
      * Creates new form Uploader
      *
      * @param parent
-     * @param answer
      * @param configuration
      */
-    public Uploader(java.awt.Frame parent, String answer, ArrayList<TerminalGroup> configuration) {
+    public Uploader(java.awt.Frame parent, 
+            ArrayList<TerminalGroup> configuration) {
         super(parent, true);
         initComponents();
         
@@ -68,8 +70,18 @@ public class Uploader extends javax.swing.JDialog implements Observer {
         -> restrict uploading if any day is overloaded
         -> test SMB share available
          */
-        
-        
+        connection = new Connection();
+        connection.addObserver(Uploader.this);
+        try {
+            connection.connect(Emulator.SERVER_IP, Emulator.PORT);
+        } catch (IOException ex) {
+            
+        }
+    }
+    
+    @Override
+    public void update(Observable o, Object arg) {
+        answer = String.valueOf(arg);
         
         String url = answer.split(" ")[0];
         String user = answer.split(" ")[1];
@@ -79,14 +91,7 @@ public class Uploader extends javax.swing.JDialog implements Observer {
         SMBAuthentication smbAuth = new SMBAuthentication(url, user, pass);
         smbClient = new SMBClient(Emulator.SERVER_IP, smbAuth);
         System.out.println(smbClient.testConnection());
-        jLabel1.setText(String.format("Время выгрузки на кассы: ", time));
-
-        
-    }
-    
-    @Override
-    public void update(Observable o, Object arg) {
-        jLabel1.setText("Выгрузка данных на кассы будет произведена в: " + arg);
+        jLabel1.setText(String.format("Время выгрузки на кассы: %s", time));
     }
 
     /**
@@ -105,6 +110,7 @@ public class Uploader extends javax.swing.JDialog implements Observer {
         jLabel1 = new javax.swing.JLabel();
         btnUpload = new javax.swing.JButton();
         jProgressBar1 = new javax.swing.JProgressBar();
+        jButton1 = new javax.swing.JButton();
 
         jTextPane2.setEditable(false);
         jTextPane2.setBorder(null);
@@ -142,6 +148,13 @@ public class Uploader extends javax.swing.JDialog implements Observer {
 
         jProgressBar1.setStringPainted(true);
 
+        jButton1.setText("На кассы...");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -151,22 +164,30 @@ public class Uploader extends javax.swing.JDialog implements Observer {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 449, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 326, Short.MAX_VALUE)
+                        .addComponent(jButton1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnUpload, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jProgressBar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
+
+        layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {btnUpload, jButton1});
+
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnUpload)
-                    .addComponent(jLabel1))
+                    .addComponent(jLabel1)
+                    .addComponent(jButton1))
                 .addGap(18, 18, 18)
                 .addComponent(jProgressBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(12, 12, 12))
         );
+
+        layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {btnUpload, jButton1});
 
         pack();
         setLocationRelativeTo(null);
@@ -244,8 +265,13 @@ public class Uploader extends javax.swing.JDialog implements Observer {
         task.start();
     }//GEN-LAST:event_btnUploadActionPerformed
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        connection.request(Connection.UPLOAD_QUE);
+    }//GEN-LAST:event_jButton1ActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnUpload;
+    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JProgressBar jProgressBar1;
     private javax.swing.JScrollPane jScrollPane2;

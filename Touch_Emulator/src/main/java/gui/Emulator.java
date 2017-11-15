@@ -54,12 +54,10 @@ import utils.RefGenerator;
  *
  * @author Ivan
  */
-public class Emulator extends javax.swing.JFrame implements Observer {
+public class Emulator extends javax.swing.JFrame {
 
     public static String SERVER_IP;
     public static int PORT;
-    private final Connection connection;
-    private String answer;
 
     public static final int NORMAL_STATE = 0;
     public static final int LOCK_STATE = 1;
@@ -105,8 +103,6 @@ public class Emulator extends javax.swing.JFrame implements Observer {
         touch[7] = jToggleButton8;
 
         update();
-        
-        connection = new Connection(this);
     }
 
     /**
@@ -475,29 +471,10 @@ public class Emulator extends javax.swing.JFrame implements Observer {
     }
 
     private void menuUploadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuUploadActionPerformed
-        try {
-            connection.connect(SERVER_IP, PORT);
-
-            //connection.request(Connection.TEST_QUE);
-            
-            Uploader uploader = new Uploader(this, answer, (ArrayList) terminalGroups);
-            uploader.addWindowListener(new java.awt.event.WindowAdapter() {
-                @Override
-                public void windowClosed(java.awt.event.WindowEvent e) {
-                    connection.disconnect();
-                }
-            });
-            uploader.setVisible(true);
-        } catch (IOException ex) {
-            System.err.println("No server connection! " + ex.getMessage()); 
-        }
+        Uploader uploader = new Uploader(this, (ArrayList) terminalGroups);
+        uploader.setVisible(true);
     }//GEN-LAST:event_menuUploadActionPerformed
 
-    @Override
-    public void update(Observable o, Object arg) {
-        answer = String.valueOf(arg);
-    }
-    
     private void menuDepartmentsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuDepartmentsActionPerformed
         openPosDepartmentManager();
     }//GEN-LAST:event_menuDepartmentsActionPerformed

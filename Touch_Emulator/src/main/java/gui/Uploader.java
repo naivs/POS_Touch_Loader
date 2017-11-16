@@ -24,11 +24,9 @@ import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
 import javax.swing.JOptionPane;
-import models.UploaderTableModel;
 import network.SMBClient;
 import network.Connection;
 import network.SMBAuthentication;
-import utils.LoadAnalyzer;
 
 /**
  *
@@ -39,8 +37,7 @@ public class Uploader extends javax.swing.JDialog implements Observer {
     //private final LoadAnalyzer la;
     private SMBClient smbClient;
     private final Connection connection;
-    
-    private String answer;
+
     private int progress;
 
     /**
@@ -49,11 +46,11 @@ public class Uploader extends javax.swing.JDialog implements Observer {
      * @param parent
      * @param configuration
      */
-    public Uploader(java.awt.Frame parent, 
+    public Uploader(java.awt.Frame parent,
             ArrayList<TerminalGroup> configuration) {
         super(parent, true);
         initComponents();
-        
+
         String[] colNames = new String[configuration.size()];
         for (int i = 0; i < colNames.length; i++) {
             colNames[i] = configuration.get(i).toString();
@@ -75,23 +72,30 @@ public class Uploader extends javax.swing.JDialog implements Observer {
         try {
             connection.connect(Emulator.SERVER_IP, Emulator.PORT);
         } catch (IOException ex) {
-            
+
         }
     }
-    
+
     @Override
     public void update(Observable o, Object arg) {
-        answer = String.valueOf(arg);
-        
-        String url = answer.split(" ")[0];
-        String user = answer.split(" ")[1];
-        String pass = answer.split(" ")[2];
-        String time = answer.split(" ")[3];
-        
-        SMBAuthentication smbAuth = new SMBAuthentication(url, user, pass);
-        smbClient = new SMBClient(Emulator.SERVER_IP, smbAuth);
-        System.out.println(smbClient.testConnection());
-        jLabel1.setText(String.format("Время выгрузки на кассы: %s", time));
+        String answer = String.valueOf(arg);
+
+        if (answer.equals("ok")) {
+            JOptionPane.showMessageDialog(null, "Данные будут выгружены на кассы в течении 5 минут!",
+                    "Информация", JOptionPane.PLAIN_MESSAGE);
+            connection.disconnect();
+            dispose();
+        } else {
+            String url = answer.split(" ")[0];
+            String user = answer.split(" ")[1];
+            String pass = answer.split(" ")[2];
+            String time = answer.split(" ")[3];
+
+            SMBAuthentication smbAuth = new SMBAuthentication(url, user, pass);
+            smbClient = new SMBClient(Emulator.SERVER_IP, smbAuth);
+            System.out.println(smbClient.testConnection());
+            jLabel1.setText(String.format("Время выгрузки на кассы: %s", time));
+        }
     }
 
     /**

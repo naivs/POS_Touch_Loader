@@ -73,6 +73,7 @@ class ClientThread extends Observable implements Runnable {
                         case 1: // <- init upload on POSes
                             setChanged();
                             notifyObservers("text");
+                            out.println();
                             break;
                             
                         case 2: // <- test

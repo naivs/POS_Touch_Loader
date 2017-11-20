@@ -262,6 +262,7 @@ public class Uploader extends javax.swing.JDialog implements Observer {
 //                }
                 jProgressBar1.setValue(100);
                 JOptionPane.showMessageDialog(null, "Данные выгружены на кассовый сервер!", "Информация", JOptionPane.PLAIN_MESSAGE);
+                connection.disconnect();
                 dispose();
             }
         };

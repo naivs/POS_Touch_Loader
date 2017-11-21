@@ -86,12 +86,12 @@ public class TouchDaemon {
             LOGGER.log(Level.WARNING, "logging problem!", e);
         }
 
-        LOGGER.log(Level.INFO, "starting daemon...");
+        //LOGGER.log(Level.INFO, "starting daemon...");
                 
         LOGGER.log(Level.INFO, "server starting...");
         server = new Server(8080);
         server.startServer();
-        LOGGER.log(Level.INFO, "Daemon started!\n**************************\n");
+        LOGGER.log(Level.INFO, "Daemon is running!\n**************************\n");
 
         // SET TRAY ICON
         if (!SystemTray.isSupported()) {

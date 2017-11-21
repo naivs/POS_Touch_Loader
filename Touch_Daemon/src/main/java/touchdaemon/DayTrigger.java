@@ -29,6 +29,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Observable;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
@@ -38,7 +39,7 @@ import static touchdaemon.TouchDaemon.LOGGER;
  *
  * @author Ivan
  */
-public class DayTrigger {
+public class DayTrigger extends Observable {
 
     private final String firedTime;
     private final String path;
@@ -68,7 +69,7 @@ public class DayTrigger {
                 upload(false);
             }
         }, fire.getTime(), 86400000L);
-        LOGGER.log(Level.INFO, String.format("trigger started!\nUpload time: %s", firedTime));
+        LOGGER.log(Level.INFO, String.format("trigger started! Upload time: %s", firedTime));
     }
 
     public String getInfoStatus() {
@@ -116,7 +117,7 @@ public class DayTrigger {
     }
 
     public void upload(boolean isHot) {
-        LOGGER.log(Level.INFO, "=== FIRE FIRE FIRE ===");
+        LOGGER.log(Level.INFO, "Data upload initialized!");
 
         int dayOfWeek;
         // check config on day
@@ -146,15 +147,24 @@ public class DayTrigger {
                 dayOfWeek = 0;
         }
 
-        if(isHot) dayOfWeek--;
-        
+        if (isHot) {
+            dayOfWeek--;
+            setChanged();
+        }
+
         day = new File(path + "/day" + (dayOfWeek));
         if (day.exists()) {
             TouchDaemon.LOGGER.log(Level.INFO, String.format("%s exists. Loading...", day.getName()));
             loadToServer(day);
             TouchDaemon.LOGGER.log(Level.INFO, String.format("Day %s uploaded!", day.getName()));
+            if (isHot) {
+                notifyObservers(0);
+            }
         } else {
             TouchDaemon.LOGGER.log(Level.INFO, String.format("%s not exists!", day.getName()));
+            if (isHot) {
+                notifyObservers(1);
+            }
         }
         TouchDaemon.LOGGER.log(Level.INFO, "Waiting for the next upload...\n");
     }
@@ -252,8 +262,11 @@ public class DayTrigger {
                 File key = new File(TouchDaemon.HOC_PATH + TouchDaemon.WEB_KEYFILE);
                 File web = new File(TouchDaemon.WEB_PATH);
 
-                for (File f : web.listFiles()) {
-                    f.delete();
+                File[] webFiles = web.listFiles();
+                if (webFiles != null) {
+                    for (File f : webFiles) {
+                        f.delete();
+                    }
                 }
 
                 key.createNewFile();

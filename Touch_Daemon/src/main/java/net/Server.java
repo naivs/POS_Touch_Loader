@@ -42,16 +42,16 @@ public class Server implements Observer {
     private final List<ClientThread> clients;
 
     private boolean isRunning;
-    
+
     private final String wellcomeMsg;
-    
+
     private final DayTrigger trigger;
 
     public Server(int port) {
         this.port = port;
         isRunning = false;
         clients = new ArrayList();
-        
+
         // load settings
         ConfigReader configReader = new ConfigReader();
         if (configReader.check()) {
@@ -60,7 +60,7 @@ public class Server implements Observer {
             LOGGER.log(Level.SEVERE, "config read fail!");
             System.exit(1);
         }
-        
+
         wellcomeMsg = configReader.readSharePath() + " "
                 + configReader.readUsername() + " "
                 + configReader.readPassword() + " "
@@ -75,10 +75,9 @@ public class Server implements Observer {
             serverThread.start();
             isRunning = true;
             LOGGER.log(Level.INFO,
-                            String.format("Server started on %d port...", port));
-            
+                    String.format("Server started on %d port!", port));
+            trigger.addObserver(this);
             trigger.start();
-            LOGGER.log(Level.INFO, "Trigger started...");
         }
     }
 
@@ -89,23 +88,54 @@ public class Server implements Observer {
                 client.stop();
             }
             isRunning = false;
+            LOGGER.log(Level.INFO, "Server stoped!");
         }
     }
 
     @Override
     public void update(Observable o, Object arg) {
         LOGGER.log(Level.INFO, o.getClass().getName());
-        if(arg.getClass().getName().equals("net.ClientThread")) {
-            clients.remove((ClientThread) o);
-        } else {
-            trigger.upload(true); // upload info on POSes
+        if (o.getClass().getName().equals("net.ClientThread")) {
+            /*
+            here can be processed following args:
+            0 - remvoe disconneted client
+            1 - init of upload data on POSes
+            */
+            switch (Integer.parseInt(String.valueOf(arg))) {
+                case 0:
+                    clients.remove((ClientThread) o);
+                    break;
+
+                case 1:
+                    trigger.upload(true);
+                    break;
+            }
+        } else if (o.getClass().getName().equals("touchdaemon.DayTrigger")) {
+            /*
+            here can be processed following args:
+            0 - signal of successfull upload data on POSes
+            1 - signal of fail upload
+            */
+            switch(Integer.parseInt(String.valueOf(arg))) {
+                case 0:
+                    if(clients.size() > 0) {
+                        clients.get(0).sendMessage("0");
+                    }
+                    break;
+                    
+                case 1:
+                    if(clients.size() > 0) {
+                        clients.get(0).sendMessage("1");
+                    }
+                    break;
+            }
         }
     }
 
     public String status() {
         return String.format("Сервер онлайн: %b\n%s", isRunning, trigger.getInfoStatus());
     }
-    
+
     private class ServerThread extends Thread {
 
         @Override
@@ -116,7 +146,7 @@ public class Server implements Observer {
                 while (isRunning) {
                     clientSocket = serverSocket.accept();
                     touchdaemon.TouchDaemon.LOGGER.log(Level.INFO,
-                            "Client connected...");
+                            String.format("Client %s:%d connected!", clientSocket.getInetAddress().getHostAddress(), clientSocket.getPort()));
 
                     ClientThread clientThread = new ClientThread(clientSocket, wellcomeMsg, clients.size());
                     clientThread.addObserver(Server.this);

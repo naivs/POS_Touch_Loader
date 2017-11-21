@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 ivan
+ * Copyright (C) 2017 Ivan Naumov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ import static touchdaemon.TouchDaemon.LOGGER;
 
 /**
  *
- * @author ivan
+ * @author Ivan Naumov
  */
 class ClientThread extends Observable implements Runnable {
 
@@ -58,26 +58,19 @@ class ClientThread extends Observable implements Runnable {
         String msg = ""; // will hold message from client
 
         if (clientsCount > 0) {
-            out.println("Server is busy!");
             isRunning = false;
         } else {
-            out.println(wellcomeMsg);
             isRunning = true;
             try {
                 while ((msg = in.readLine()) != null && isRunning) {
                     switch (Integer.parseInt(msg)) {
-                        case 0: // <- get samba parameters
-                            out.println(msg);
+                        case 0: // get connection arguments
+                            out.println(wellcomeMsg);
                             break;
 
-                        case 1: // <- init upload on POSes
+                        case 1: // init upload on POSes
                             setChanged();
-                            notifyObservers("text");
-                            out.println();
-                            break;
-                            
-                        case 2: // <- test
-                            out.println(wellcomeMsg);
+                            notifyObservers(1);
                             break;
                     }
                     LOGGER.log(Level.INFO, String.format("Message from client: %s", msg));
@@ -93,17 +86,23 @@ class ClientThread extends Observable implements Runnable {
         try {
             socket.close();
             setChanged();
-            notifyObservers(this);
+            notifyObservers(0);
             LOGGER.log(Level.INFO,
-                    "Client disconnected...");
+                    String.format("Client %s:%d disconnected!", socket.getInetAddress().getHostAddress(), socket.getPort()));
         } catch (IOException ex) {
             LOGGER.log(Level.WARNING, "Unable to close ClientSocket.", ex);
         }
+    }
+    
+    public void sendMessage(String message) {
+        out.println(message);
     }
 
     public void stop() {
         try {
             socket.close();
+            setChanged();
+            notifyObservers(0);
         } catch (IOException ex) {
             LOGGER.log(Level.WARNING, "Unable to close ClientSocket.", ex);
         }

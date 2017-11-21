@@ -75,7 +75,7 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="1" attributes="0">
                       <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace pref="326" max="32767" attributes="0"/>
+                      <EmptySpace pref="132" max="32767" attributes="0"/>
                       <Component id="jButton1" linkSize="1" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="btnUpload" linkSize="1" min="-2" pref="117" max="-2" attributes="0"/>
@@ -92,10 +92,10 @@
               <EmptySpace max="32767" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="btnUpload" linkSize="2" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="jLabel1" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jLabel1" alignment="3" min="-2" pref="35" max="-2" attributes="0"/>
                   <Component id="jButton1" linkSize="2" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace type="separate" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
               <Component id="jProgressBar1" min="-2" max="-2" attributes="0"/>
               <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
           </Group>
@@ -105,12 +105,14 @@
   <SubComponents>
     <Component class="javax.swing.JLabel" name="jLabel1">
       <Properties>
-        <Property name="text" type="java.lang.String" value="time"/>
+        <Property name="text" type="java.lang.String" value="&#x418;&#x434;&#x435;&#x442; &#x441;&#x43e;&#x435;&#x434;&#x438;&#x43d;&#x435;&#x43d;&#x438;&#x435; &#x441; &#x441;&#x435;&#x440;&#x432;&#x435;&#x440;&#x43e;&#x43c;..."/>
+        <Property name="verticalAlignment" type="int" value="1"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JButton" name="btnUpload">
       <Properties>
         <Property name="text" type="java.lang.String" value="&#x412;&#x44b;&#x433;&#x440;&#x443;&#x437;&#x438;&#x442;&#x44c;"/>
+        <Property name="enabled" type="boolean" value="false"/>
         <Property name="focusPainted" type="boolean" value="false"/>
       </Properties>
       <Events>
@@ -125,6 +127,8 @@
     <Component class="javax.swing.JButton" name="jButton1">
       <Properties>
         <Property name="text" type="java.lang.String" value="&#x41d;&#x430; &#x43a;&#x430;&#x441;&#x441;&#x44b;..."/>
+        <Property name="enabled" type="boolean" value="false"/>
+        <Property name="focusPainted" type="boolean" value="false"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton1ActionPerformed"/>

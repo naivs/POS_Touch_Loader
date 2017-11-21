@@ -51,41 +51,32 @@ public class Uploader extends javax.swing.JDialog implements Observer {
         super(parent, true);
         initComponents();
 
-        String[] colNames = new String[configuration.size()];
-        for (int i = 0; i < colNames.length; i++) {
-            colNames[i] = configuration.get(i).toString();
-        }
+//        String[] colNames = new String[configuration.size()];
+//        for (int i = 0; i < colNames.length; i++) {
+//            colNames[i] = configuration.get(i).toString();
+//        }
         //la = new LoadAnalyzer(configuration);
         //jTable1.setModel(new UploaderTableModel(colNames, la.getDaysLoad()));
-
-        /*
-        -> test connection to server demon
-        -> get server parameters
-        -> get SMB auth data
-        -> restrict uploading if "fire time" close.
-        -> restrict uploading if other client connected (optional)
-        -> restrict uploading if any day is overloaded
-        -> test SMB share available
-         */
         connection = new Connection();
         connection.addObserver(Uploader.this);
+
         try {
             connection.connect(Emulator.SERVER_IP, Emulator.PORT);
         } catch (IOException ex) {
-
+            connection.disconnect();
+            JOptionPane.showMessageDialog(null, "Ошибка соединения с сервером!",
+                    "Ошибка", JOptionPane.ERROR_MESSAGE);
+            Uploader.this.dispose();
         }
+        connection.request(Connection.SMB_PARAM_QUE); // after that await in update()
     }
 
     @Override
     public void update(Observable o, Object arg) {
+        System.out.println(o.getClass().getName());
         String answer = String.valueOf(arg);
 
-        if (answer.equals("ok")) {
-            JOptionPane.showMessageDialog(null, "Данные будут выгружены на кассы в течении 5 минут!",
-                    "Информация", JOptionPane.PLAIN_MESSAGE);
-            connection.disconnect();
-            dispose();
-        } else {
+        if (answer.length() > 1) { // accept connection
             String url = answer.split(" ")[0];
             String user = answer.split(" ")[1];
             String pass = answer.split(" ")[2];
@@ -94,7 +85,29 @@ public class Uploader extends javax.swing.JDialog implements Observer {
             SMBAuthentication smbAuth = new SMBAuthentication(url, user, pass);
             smbClient = new SMBClient(Emulator.SERVER_IP, smbAuth);
             System.out.println(smbClient.testConnection());
-            jLabel1.setText(String.format("Время выгрузки на кассы: %s", time));
+            jLabel1.setText(String.format("<html>\n"
+                    + "<body>Cоединение установлено!\n"
+                    + "Время выгрузки на кассы: %s</body>\n"
+                    + "</html>", time));
+            
+            btnUpload.setEnabled(true);
+            jButton1.setEnabled(true);
+        } else {
+            switch (Integer.parseInt(answer)) {
+                case 0: // successfull upload on POSes
+                    JOptionPane.showMessageDialog(null, "Данные будут выгружены на кассы в течении 5 минут!",
+                            "Информация", JOptionPane.PLAIN_MESSAGE);
+                    connection.disconnect();
+                    dispose();
+                    break;
+
+                case 1: // fail of upload data on POSes
+                    JOptionPane.showMessageDialog(null, "Произошла непредвиденная ошибка!",
+                            "Ошибка", JOptionPane.ERROR_MESSAGE);
+                    connection.disconnect();
+                    dispose();
+                    break;
+            }
         }
     }
 
@@ -140,9 +153,11 @@ public class Uploader extends javax.swing.JDialog implements Observer {
         setTitle("Загрузка параметров на сервер");
         setResizable(false);
 
-        jLabel1.setText("time");
+        jLabel1.setText("Идет соединение с сервером...");
+        jLabel1.setVerticalAlignment(javax.swing.SwingConstants.TOP);
 
         btnUpload.setText("Выгрузить");
+        btnUpload.setEnabled(false);
         btnUpload.setFocusPainted(false);
         btnUpload.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -153,6 +168,8 @@ public class Uploader extends javax.swing.JDialog implements Observer {
         jProgressBar1.setStringPainted(true);
 
         jButton1.setText("На кассы...");
+        jButton1.setEnabled(false);
+        jButton1.setFocusPainted(false);
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
@@ -168,7 +185,7 @@ public class Uploader extends javax.swing.JDialog implements Observer {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 326, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 132, Short.MAX_VALUE)
                         .addComponent(jButton1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnUpload, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -184,9 +201,9 @@ public class Uploader extends javax.swing.JDialog implements Observer {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnUpload)
-                    .addComponent(jLabel1)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton1))
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jProgressBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(12, 12, 12))
         );

@@ -43,8 +43,11 @@ public class Parser {
         Sheet mySheet = wb.getSheetAt(0);
         int k = 1;
         for (int i = 0; i < groupNames.length; i++) {
-            groupNames[i] = mySheet.getRow(0).getCell(k).getStringCellValue().replace("\n", "").trim() 
-                    + "::" + mySheet.getRow(0).getCell(k + 1).getStringCellValue().replace("\n", "").trim();
+            String buf = mySheet.getRow(0).getCell(k).getStringCellValue().replace("\n", "").trim();
+            buf = buf.length() > 14 ? buf.substring(0, 14) : buf;
+            String buf2 = mySheet.getRow(0).getCell(k + 1).getStringCellValue().replace("\n", "").trim();
+            buf2 = buf2.length() > 18 ? buf2.substring(0, 18) : buf2;
+            groupNames[i] = buf + "::" + buf2;
             k += 4;
         }
         return groupNames;
@@ -56,8 +59,10 @@ public class Parser {
         int k = 2;
         for(int i = 0; i < subgroupNames.length; i++) {
             String buf = mySheet.getRow(k).getCell(group * 4).getStringCellValue().replace("\n", "").trim();
-            subgroupNames[i] =  buf.isEmpty() ? (i+1) + ":: " : buf + "::" + 
-                    mySheet.getRow(k + 10).getCell(group * 4).getStringCellValue();
+            buf = buf.length() > 12 ? buf.substring(0, 12) : buf;
+            String buf2 = mySheet.getRow(k + 10).getCell(group * 4).getStringCellValue();
+            buf2 = buf2.length() > 18 ? buf2.substring(0, 18) : buf2;
+            subgroupNames[i] =  buf.isEmpty() ? (i+1) + ":: " : buf + "::" + buf2;
             k += 20;
         }
         return subgroupNames;

@@ -567,44 +567,47 @@ public class Emulator extends javax.swing.JFrame {
                         System.err.println("TransformerException occured while configuration saving! " + ex.getMessage());
                     }
 
-                    File picFolder = new File("resources/data");
+                    File dataFolder = new File("resources/data");
                     try {
-                        delete(picFolder);
+                        delete(dataFolder);
                     } catch (IOException ex) {
                         System.out.println("IO Except " + ex.toString());
                     }
-                    if (!picFolder.mkdir()) {
+                    if (!dataFolder.mkdir()) {
                         System.err.println("data folder doesn't created! trying again...");
-                        if (!picFolder.mkdir()) {
+                        if (!dataFolder.mkdir()) {
                             System.err.println("data folder doesn't created again...");
                             return;
                         }
                     }
 
-                    for (int tGroup = 0; tGroup < terminalGroups.size(); tGroup++) {
-                        for (int day = 0; day < terminalGroups.get(tGroup).getDaysOfWeek().length; day++) {
+                    for (int i = 0; i < terminalGroups.size(); i++) {
+                        TerminalGroup department = terminalGroups.get(i);
+                        
+                        for (int j = 0; j < department.getDaysOfWeek().length; j++) {
+                            DayOfWeek day = department.getDaysOfWeek()[j];
                             // clear pic folder                            
                             // creation day dirs
                             // saving all into it
                             File anotherDay;
-                            if (terminalGroups.get(tGroup).getType() == TerminalGroup.TYPE_ALWAYS) {
+                            if (department.getType() == TerminalGroup.TYPE_ALWAYS) {
                                 Calendar cal = Calendar.getInstance();
                                 cal.setTime(new Date());
-                                anotherDay = new File(picFolder.getPath() + "/day" + (cal.get(Calendar.DAY_OF_WEEK) - 1));
+                                anotherDay = new File(dataFolder.getPath() + "/static");
                             } else {
-                                anotherDay = new File(picFolder.getPath() + "/day" + day);
+                                anotherDay = new File(dataFolder.getPath() + "/day" + j);
                             }
                             anotherDay.mkdir();
 
                             // saving .dat files
-                            ParGenerator pgen = new ParGenerator((ArrayList) terminalGroups, day, tGroup);
+                            ParGenerator pgen = new ParGenerator((ArrayList) terminalGroups, j, i);
                             File regpar = pgen.getFile();
 
-                            RefGenerator rgen = new RefGenerator((ArrayList) terminalGroups, day, tGroup);
+                            RefGenerator rgen = new RefGenerator((ArrayList) terminalGroups, j, i);
                             File pluref = rgen.getFile();
 
                             String terminals = "";
-                            for (String num : terminalGroups.get(tGroup).getTerminalsAsString().split(":")) {
+                            for (String num : department.getTerminalsAsString().split(":")) {
                                 terminals += num + "-";
                             }
                             terminals = terminals.substring(0, terminals.length() - 1);
@@ -618,16 +621,16 @@ public class Emulator extends javax.swing.JFrame {
                             // saving images
                             File cafe = new File(anotherDay.getPath() + "/cafe");
                             cafe.mkdir();
-                            for (int c = 0; c < terminalGroups.get(tGroup).getDaysOfWeek()[day].getGroupCount(); c++) {
-                                for (int d = 0; d < terminalGroups.get(tGroup).getDaysOfWeek()[day].getGroup(c).getSubgroupCount(); d++) {
-                                    Product[] products = terminalGroups.get(tGroup).getDaysOfWeek()[day].getGroup(c).getSubgroup(d).getProducts();
+                            for (int c = 0; c < day.getGroupCount(); c++) {
+                                for (int d = 0; d < day.getGroup(c).getSubgroupCount(); d++) {
+                                    Product[] products = day.getGroup(c).getSubgroup(d).getProducts();
                                     ((Monitor) jPanel2).display(products);
                                     BufferedImage bi = new BufferedImage(jPanel2.getSize().width, jPanel2.getSize().height, BufferedImage.TYPE_INT_ARGB);
                                     Graphics g = bi.createGraphics();
                                     jPanel2.paint(g);
                                     g.dispose();
                                     try {
-                                        File pic = new File(anotherDay.getAbsolutePath() + "/" + cafe.getName() + "/TCH_X" + terminalGroups.get(tGroup).getDaysOfWeek()[day].getGroup(c).getSubgroup(d).getIndex() + ".GIF");
+                                        File pic = new File(anotherDay.getAbsolutePath() + "/" + cafe.getName() + "/TCH_X" + day.getGroup(c).getSubgroup(d).getIndex() + ".GIF");
                                         ImageIO.write(bi, "GIF", pic);
                                     } catch (IOException ex) {
                                         System.out.println(ex.getMessage());

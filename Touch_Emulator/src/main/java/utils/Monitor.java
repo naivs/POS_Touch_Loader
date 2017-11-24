@@ -172,27 +172,28 @@ public class Monitor extends javax.swing.JPanel {
 
     public void display(Product[] products) {
 
+        String rawPlu;
         for (int i = 0; i < products.length; i++) {
-
             //this.products = products;
             if (products[i] != null) {
                 buttonsText[i] = products[i].toString();
-
+                rawPlu = products[i].getPlu().length() > 6 ? products[i].getPlu().substring(0, 6) : products[i].getPlu();
+                
                 // разделение plu строки на разряды для удобного чтения
-                if (products[i].getPlu().length() > 2 && (products[i].getPlu().length() & 1) == 0) {
+                if (rawPlu.length() > 2 && (rawPlu.length() & 1) == 0) {
                     String plu = "";
 
-                    for (int j = 0; j < products[i].getPlu().length(); j++) {
+                    for (int j = 0; j < rawPlu.length(); j++) {
                         if ((j & 1) == 0 && j > 0) {
-                            plu += " " + products[i].getPlu().charAt(j);
+                            plu += " " + rawPlu.charAt(j);
                         } else {
-                            plu += products[i].getPlu().charAt(j);
+                            plu += rawPlu.charAt(j);
                         }
                     }
 
                     buttonsPlu[i] = plu;
                 } else {
-                    buttonsPlu[i] = products[i].getPlu();
+                    buttonsPlu[i] = rawPlu;
                 }
 
                 if (products[i].getPicturePath() != null) {

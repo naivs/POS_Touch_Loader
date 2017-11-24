@@ -166,6 +166,16 @@ public class DayTrigger extends Observable {
                 notifyObservers(1);
             }
         }
+        // load static departments
+        day = new File(path + "/static");
+        if (day.exists()) {
+            TouchDaemon.LOGGER.log(Level.INFO, String.format("%s exists. Loading...", day.getName()));
+            loadToServer(day);
+            TouchDaemon.LOGGER.log(Level.INFO, String.format("Day %s uploaded!", day.getName()));
+        } else {
+            TouchDaemon.LOGGER.log(Level.INFO, String.format("%s not exists!", day.getName()));
+        }
+        
         TouchDaemon.LOGGER.log(Level.INFO, "Waiting for the next upload...\n");
     }
 

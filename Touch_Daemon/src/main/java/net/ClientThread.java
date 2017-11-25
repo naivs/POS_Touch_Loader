@@ -100,6 +100,7 @@ class ClientThread extends Observable implements Runnable {
 
     public void stop() {
         try {
+            isRunning = false;
             socket.close();
             setChanged();
             notifyObservers(0);

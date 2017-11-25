@@ -98,8 +98,8 @@ public class Server implements Observer {
         if (o.getClass().getName().equals("net.ClientThread")) {
             /*
             here can be processed following args:
-            0 - remvoe disconneted client
-            1 - init of upload data on POSes
+            0 - remove disconnected client
+            1 - init upload on POSes
             */
             switch (Integer.parseInt(String.valueOf(arg))) {
                 case 0:
@@ -113,8 +113,8 @@ public class Server implements Observer {
         } else if (o.getClass().getName().equals("touchdaemon.DayTrigger")) {
             /*
             here can be processed following args:
-            0 - signal of successfull upload data on POSes
-            1 - signal of fail upload
+            0 - signal successfull upload on POSes
+            1 - signal fail upload
             */
             switch(Integer.parseInt(String.valueOf(arg))) {
                 case 0:

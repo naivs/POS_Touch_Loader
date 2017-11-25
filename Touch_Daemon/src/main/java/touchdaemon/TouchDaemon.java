@@ -26,6 +26,7 @@ import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.Date;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
@@ -135,13 +136,21 @@ public class TouchDaemon {
     }
 
     public static void main(String[] args) {
+        // protection from double running
+        try {
+            ServerSocket s = new ServerSocket(61321);
+        } catch (IOException ex) {
+            System.err.println(String.format("Was tryed to start another copy! Rejected...\n%s", ex));
+            System.exit(1);
+        }
+        
         try {
             System.in.close();
             System.out.close();
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Unable to close system streams...", e);
         }
-
+        
         TouchDaemon daemon = new TouchDaemon();
     }
 }

@@ -154,14 +154,14 @@ public class DayTrigger extends Observable {
 
         day = new File(path + "/day" + (dayOfWeek));
         if (day.exists()) {
-            TouchDaemon.LOGGER.log(Level.INFO, String.format("%s exists. Loading...", day.getName()));
+            LOGGER.log(Level.INFO, String.format("%s exists. Loading...", day.getName()));
             loadToServer(day);
-            TouchDaemon.LOGGER.log(Level.INFO, String.format("Day %s uploaded!", day.getName()));
+            LOGGER.log(Level.INFO, String.format("Day %s uploaded!", day.getName()));
             if (isHot) {
                 notifyObservers(0);
             }
         } else {
-            TouchDaemon.LOGGER.log(Level.INFO, String.format("%s not exists!", day.getName()));
+            LOGGER.log(Level.INFO, String.format("%s not exists!", day.getName()));
             if (isHot) {
                 notifyObservers(1);
             }
@@ -169,14 +169,14 @@ public class DayTrigger extends Observable {
         // load static departments
         day = new File(path + "/static");
         if (day.exists()) {
-            TouchDaemon.LOGGER.log(Level.INFO, String.format("%s exists. Loading...", day.getName()));
+            LOGGER.log(Level.INFO, String.format("%s exists. Loading...", day.getName()));
             loadToServer(day);
-            TouchDaemon.LOGGER.log(Level.INFO, String.format("Day %s uploaded!", day.getName()));
+            LOGGER.log(Level.INFO, String.format("Day %s uploaded!", day.getName()));
         } else {
-            TouchDaemon.LOGGER.log(Level.INFO, String.format("%s not exists!", day.getName()));
+            LOGGER.log(Level.INFO, String.format("%s not exists!", day.getName()));
         }
         
-        TouchDaemon.LOGGER.log(Level.INFO, "Waiting for the next upload...\n");
+        LOGGER.log(Level.INFO, "Waiting for the next upload...\n");
     }
 
     private void copyFile(File source, File dest) throws IOException {
@@ -208,7 +208,7 @@ public class DayTrigger extends Observable {
                 copyFile(image, new File(TouchDaemon.IMAGES + image.getName()));
             }
         } catch (IOException ex) {
-            TouchDaemon.LOGGER.log(Level.SEVERE, "Unable to copy any of ../cafe/image file... ", ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Unable to copy any of ../cafe/image file... ", ex.getMessage());
         }
 
         // load REGPAR.DATs
@@ -226,16 +226,13 @@ public class DayTrigger extends Observable {
                 File dest = new File(TouchDaemon.SERVER_PATH + name);
                 injectToPar(src, dest);
                 try {
-                    //Files.copy(dest.toPath(), new File(TouchDaemon.SERVER_PATH_LAN + dest.getName()).toPath(), StandardCopyOption.REPLACE_EXISTING);
-                    //Files.copy(dest.toPath(), new File(TouchDaemon.SERVER_PATH_LAN4SRV + dest.getName()).toPath(), StandardCopyOption.REPLACE_EXISTING);
                     copyFile(dest, new File(TouchDaemon.SERVER_PATH_LAN + dest.getName()));
                     copyFile(dest, new File(TouchDaemon.SERVER_PATH_LAN4SRV + dest.getName()));
                     if (parSettings) {
-                        //Files.copy(dest.toPath(), new File(TouchDaemon.HOC_PATH + dest.getName()).toPath(), StandardCopyOption.REPLACE_EXISTING);
                         copyFile(dest, new File(TouchDaemon.HOC_PATH + dest.getName()));
                     }
                 } catch (IOException ex) {
-                    TouchDaemon.LOGGER.log(Level.SEVERE, "Unable to copy REGPAR.DAT file... ", ex.getMessage());
+                    LOGGER.log(Level.SEVERE, "Unable to copy REGPAR.DAT file... ", ex.getMessage());
                 }
             }
         }
@@ -254,16 +251,13 @@ public class DayTrigger extends Observable {
         }
 
         try {
-            //Files.copy(pluPef.toPath(), new File(TouchDaemon.SERVER_PATH_LAN + "S_PLUREF.DAT").toPath(), StandardCopyOption.REPLACE_EXISTING);
-            //Files.copy(pluPef.toPath(), new File(TouchDaemon.SERVER_PATH_LAN4SRV + "S_PLUREF.DAT").toPath(), StandardCopyOption.REPLACE_EXISTING);
             copyFile(pluPef, new File(TouchDaemon.SERVER_PATH_LAN + "S_PLUREF.DAT"));
             copyFile(pluPef, new File(TouchDaemon.SERVER_PATH_LAN4SRV + "S_PLUREF.DAT"));
             if (refSettings) {
-                //Files.copy(pluPef.toPath(), new File(TouchDaemon.HOC_PATH + "S_PLUREF.DAT").toPath(), StandardCopyOption.REPLACE_EXISTING);
                 copyFile(pluPef, new File(TouchDaemon.HOC_PATH + "S_PLUREF.DAT"));
             }
         } catch (IOException ex) {
-            TouchDaemon.LOGGER.log(Level.SEVERE, "Unable to copy PLUREF.DAT file... ", ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Unable to copy PLUREF.DAT file... ", ex.getMessage());
         }
 
         // web load
@@ -278,11 +272,10 @@ public class DayTrigger extends Observable {
                         f.delete();
                     }
                 }
-
                 key.createNewFile();
             }
         } catch (IOException ex) {
-            TouchDaemon.LOGGER.log(Level.WARNING, "I/O Exception while writing files to " + TouchDaemon.HOC_PATH, ex.getMessage());
+            LOGGER.log(Level.WARNING, "I/O Exception while writing files to " + TouchDaemon.HOC_PATH, ex.getMessage());
         }
     }
 
@@ -310,7 +303,7 @@ public class DayTrigger extends Observable {
                 srcData += buf + "\r\n";
             }
         } catch (IOException e) {
-            TouchDaemon.LOGGER.log(Level.SEVERE, "Can't read data for inject...", e.getMessage());
+            LOGGER.log(Level.SEVERE, "Can't read data for inject...", e.getMessage());
             return;
         } finally {
             try {
@@ -318,7 +311,7 @@ public class DayTrigger extends Observable {
                     reader.close();
                 }
             } catch (IOException e) {
-                TouchDaemon.LOGGER.log(Level.SEVERE, "Stream unable to close...", e.getMessage());
+                LOGGER.log(Level.SEVERE, "Stream unable to close...", e.getMessage());
             }
         }
 
@@ -338,7 +331,7 @@ public class DayTrigger extends Observable {
                 }
             }
         } catch (IOException e) {
-            TouchDaemon.LOGGER.log(Level.SEVERE, "Can't read REGPAR.DAT...", e.getMessage());
+            LOGGER.log(Level.SEVERE, "Can't read REGPAR.DAT...", e.getMessage());
             return;
         } finally {
             try {
@@ -346,7 +339,7 @@ public class DayTrigger extends Observable {
                     reader.close();
                 }
             } catch (IOException e) {
-                TouchDaemon.LOGGER.log(Level.SEVERE, "Stream unable to close...", e.getMessage());
+                LOGGER.log(Level.SEVERE, "Stream unable to close...", e.getMessage());
             }
         }
 
@@ -354,14 +347,14 @@ public class DayTrigger extends Observable {
             writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(dest), "Cp866"));
             writer.append(destData);
         } catch (IOException e) {
-            TouchDaemon.LOGGER.log(Level.SEVERE, "IO Error while injecting data to server REGPAR.DAT...", e.getMessage());
+            LOGGER.log(Level.SEVERE, "IO Error while injecting data to server REGPAR.DAT...", e.getMessage());
         } finally {
             try {
                 if (writer != null) {
                     writer.close();
                 }
             } catch (IOException e) {
-                TouchDaemon.LOGGER.log(Level.SEVERE, "Stream unable to close...", e.getMessage());
+                LOGGER.log(Level.SEVERE, "Stream unable to close...", e.getMessage());
             }
         }
     }
@@ -384,7 +377,7 @@ public class DayTrigger extends Observable {
             startIndex = srcData.get(0).substring(1, 4);
             endIndex = srcData.get(srcData.size() - 1).substring(1, 4);
         } catch (IOException e) {
-            TouchDaemon.LOGGER.log(Level.SEVERE, "Can't read data for inject...", e.getMessage());
+            LOGGER.log(Level.SEVERE, "Can't read data for inject...", e.getMessage());
             return;
         } finally {
             try {
@@ -392,7 +385,7 @@ public class DayTrigger extends Observable {
                     reader.close();
                 }
             } catch (IOException e) {
-                TouchDaemon.LOGGER.log(Level.SEVERE, "Stream unable to close...", e.getMessage());
+                LOGGER.log(Level.SEVERE, "Stream unable to close...", e.getMessage());
             }
         }
 
@@ -414,7 +407,7 @@ public class DayTrigger extends Observable {
                 }
             }
         } catch (IOException e) {
-            TouchDaemon.LOGGER.log(Level.SEVERE, "Can't read PLUREF.DAT...", e.getMessage());
+            LOGGER.log(Level.SEVERE, "Can't read PLUREF.DAT...", e.getMessage());
             return;
         } finally {
             try {
@@ -422,7 +415,7 @@ public class DayTrigger extends Observable {
                     reader.close();
                 }
             } catch (IOException e) {
-                TouchDaemon.LOGGER.log(Level.SEVERE, "Stream unable to close...", e.getMessage());
+                LOGGER.log(Level.SEVERE, "Stream unable to close...", e.getMessage());
             }
         }
 
@@ -430,14 +423,14 @@ public class DayTrigger extends Observable {
             writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(dest), "Cp866"));
             writer.append(destData);
         } catch (IOException e) {
-            TouchDaemon.LOGGER.log(Level.SEVERE, "IO Error while injecting data to server PLUREF.DAT...", e.getMessage());
+            LOGGER.log(Level.SEVERE, "IO Error while injecting data to server PLUREF.DAT...", e.getMessage());
         } finally {
             try {
                 if (writer != null) {
                     writer.close();
                 }
             } catch (IOException e) {
-                TouchDaemon.LOGGER.log(Level.SEVERE, "Stream unable to close...", e.getMessage());
+                LOGGER.log(Level.SEVERE, "Stream unable to close...", e.getMessage());
             }
         }
     }

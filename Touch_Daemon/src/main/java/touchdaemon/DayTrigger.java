@@ -148,7 +148,7 @@ public class DayTrigger extends Observable {
         }
 
         if (isHot) {
-            dayOfWeek--;
+            dayOfWeek = dayOfWeek == 0 ? 6 : dayOfWeek - 1;
             setChanged();
         }
 
@@ -175,7 +175,7 @@ public class DayTrigger extends Observable {
         } else {
             LOGGER.log(Level.INFO, String.format("%s not exists!", day.getName()));
         }
-        
+
         LOGGER.log(Level.INFO, "Waiting for the next upload...\n");
     }
 

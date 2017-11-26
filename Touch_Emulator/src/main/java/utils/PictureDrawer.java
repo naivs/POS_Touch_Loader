@@ -32,17 +32,17 @@ import org.apache.commons.text.WordUtils;
  * @author Ivan Naumov
  */
 public class PictureDrawer {
-    
+
     private final File GROUND;
     private BufferedImage SCREEN;
     private static final Font TEXT_FONT = new Font("Franklin Gothic Medium Cond", Font.BOLD, 14);
     private static final Font PLU_FONT = new Font("Franklin Gothic Medium Cond", Font.PLAIN, 15);
-    
+
     public PictureDrawer() {
         ClassLoader classLoader = getClass().getClassLoader();
         GROUND = new File(classLoader.getResource("ground.gif").getFile());
     }
-    
+
     public BufferedImage draw(Subgroup subgroup) {
         SCREEN = new BufferedImage(555, 384, BufferedImage.TYPE_INT_RGB);
         try {
@@ -54,9 +54,9 @@ public class PictureDrawer {
 
         int dx = 111;
         int dy = 96;
-        
+
         int i = 0;
-        
+
         int nameY = 15;
         int pluY = 92;
         int numY = 92;
@@ -102,10 +102,12 @@ public class PictureDrawer {
         graphics.setFont(PLU_FONT);
         graphics.setColor(Color.white);
 
+        if (plu.length() > 6) {
+            plu = plu.substring(0, 6);
+        }
         // разделение plu строки на разряды для удобного чтения
         if (plu.length() > 2 && (plu.length() & 1) == 0) {
             String buf_plu = "";
-
             for (int j = 0; j < plu.length(); j++) {
                 if ((j & 1) == 0 && j > 0) {
                     buf_plu += " " + plu.charAt(j);
@@ -116,7 +118,6 @@ public class PictureDrawer {
 
             plu = buf_plu;
         }
-
         graphics.drawString(plu, (13 - plu.length()) * 8 + x, y);
     }
 

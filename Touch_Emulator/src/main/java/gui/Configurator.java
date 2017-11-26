@@ -34,12 +34,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
-import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -102,10 +100,10 @@ public class Configurator extends javax.swing.JFrame implements Observer {
             showMessage(CLIENT_MESSAGE, "Создание новой конфигурации", PLAIN);
             departments = new ArrayList<>();
         }
-        update();
 
         // connect to server
         connection = new Connection();
+        connection.addObserver(Configurator.this);
         try {
             connection.connect(SERVER_IP, PORT);
             showMessage(SERVER_MESSAGE, "Server IP: " + SERVER_IP + ":" + PORT, PLAIN);
@@ -113,6 +111,8 @@ public class Configurator extends javax.swing.JFrame implements Observer {
         } catch (IOException ex) {
             showMessage(SERVER_MESSAGE, "Нет связи с сервером", WARN);
         }
+
+        update();
     }
 
     @Override
@@ -133,8 +133,6 @@ public class Configurator extends javax.swing.JFrame implements Observer {
 //                    + "<body>Cоединение установлено!\n"
 //                    + "Время выгрузки на кассы: %s</body>\n"
 //                    + "</html>", time));
-            uploadButton.setEnabled(true);
-            dropToPOSesButton.setEnabled(true);
         } else {
             switch (Integer.parseInt(answer)) {
                 case 0: // successfull upload on POSes
@@ -227,9 +225,11 @@ public class Configurator extends javax.swing.JFrame implements Observer {
 
         if (jTable1.getRowCount() < 1) {
             uploadButton.setEnabled(false);
+            dropToPOSesButton.setEnabled(false);
         } else {
             jTable1.setRowSelectionInterval(0, 0);
-            uploadButton.setEnabled(true);
+            uploadButton.setEnabled(connection.isConnected());
+            dropToPOSesButton.setEnabled(connection.isConnected());
         }
     }
 
@@ -427,8 +427,8 @@ public class Configurator extends javax.swing.JFrame implements Observer {
     private void uploadButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_uploadButtonActionPerformed
         int groupsCount = 0;
         for (Department tGrp : departments) {
-            for (int i = 0; i < tGrp.getDaysOfWeek().length; i++) {
-                groupsCount += tGrp.getDaysOfWeek()[i].getGroupCount();
+            for (Day daysOfWeek : tGrp.getDaysOfWeek()) {
+                groupsCount += daysOfWeek.getGroupCount();
             }
         }
         ProgressMonitor preparingProgress = new ProgressMonitor(this, "Подготовка файлов для выгрузки...", groupsCount);
@@ -530,31 +530,6 @@ public class Configurator extends javax.swing.JFrame implements Observer {
                     recursiveCopy(f);
                     uploadProgress.stepUp();
                 }
-
-//                for (int tGroupNum = 0; tGroupNum < departments.size(); tGroupNum++) {
-//                    for (int dayNum = 0; dayNum < departments.get(tGroupNum).getDaysOfWeek().length; dayNum++) {
-//                        try {
-//                            // create day folder
-//                            smbClient.createFolder("day" + dayNum + "/");
-//                            // create cafe folder
-//                            smbClient.createFolder("day" + dayNum + "/cafe/");
-//                            // copy .dat files
-//                            File datFiles = new File("resources/data/day" + dayNum);
-//                            for (File f : datFiles.listFiles((File directory, String fileName) -> fileName.contains(".DAT"))) {
-//                                smbClient.putFile(f, "day" + dayNum + "/" + f.getName());
-//                            }
-//                            // copy images
-//                            for (File img : new File("resources/data/day" + dayNum + "/cafe").listFiles()) {
-//                                smbClient.putFile(img, "day" + dayNum + "/cafe/" + img.getName());
-//                            }
-//                            uploadProgress.stepUp();
-//                        } catch (MalformedURLException ex) {
-//                            System.err.println("Wrong destenation URL. " + ex.getMessage());
-//                        } catch (IOException ex) {
-//                            System.err.println("I/O exception while P_REGPAR.DAT or S_PLUREF.DAT uploading. " + ex.getMessage());
-//                        }
-//                    }
-//                }
                 //communicator.shutDown();
                 JOptionPane.showMessageDialog(null, "Выгрузка завершена!", "Информация", JOptionPane.PLAIN_MESSAGE);
                 uploadProgress.dispose();
@@ -588,7 +563,6 @@ public class Configurator extends javax.swing.JFrame implements Observer {
                 }
             }
         });
-
         JMenuItem loadFromFile = new JMenuItem("Обновить из файла...");
         loadFromFile.addActionListener((ActionEvent e) -> {
             // choose file configuration
@@ -664,7 +638,6 @@ public class Configurator extends javax.swing.JFrame implements Observer {
                 }
             }
         });
-
         JMenuItem removeMenuItem = new JMenuItem("Удалить");
         removeMenuItem.addActionListener((ActionEvent e) -> {
             if (autorization()) {
@@ -685,6 +658,8 @@ public class Configurator extends javax.swing.JFrame implements Observer {
         }
         if (evt.isPopupTrigger() && evt.getComponent() instanceof JTable) {
             JPopupMenu popup = new JPopupMenu();
+            popup.add(loadFromFile);
+            popup.add(new JSeparator());
             popup.add(openMenuItem);
             popup.add(modifyMenuItem);
             popup.add(new JSeparator());

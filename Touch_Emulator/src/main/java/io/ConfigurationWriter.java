@@ -16,7 +16,7 @@
  */
 package io;
 
-import data.DayOfWeek;
+import data.Day;
 import java.io.File;
 import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
@@ -50,7 +50,7 @@ public class ConfigurationWriter {
         }
     }
 
-    public void write(List<data.TerminalGroup> terminalGroups) throws TransformerException {
+    public void write(List<data.Department> terminalGroups) throws TransformerException {
         Element root = doc.createElement("Configuration");
         // terminalGroups
         terminalGroups.stream().map((termGroup) -> {
@@ -61,7 +61,7 @@ public class ConfigurationWriter {
             termGrp.setAttribute("startIndex", termGroup.getStartIndex());
             termGrp.setAttribute("modified", termGroup.getModified());
             // daysOfWeek
-            for (DayOfWeek dayOfWeek : termGroup.getDaysOfWeek()) {
+            for (Day dayOfWeek : termGroup.getDaysOfWeek()) {
                 Element dayElement = doc.createElement("DayOfWeek");
                 dayElement.setAttribute("name", dayOfWeek.toString());
                 // groups

@@ -16,7 +16,7 @@
  */
 package gui;
 
-import data.TerminalGroup;
+import data.Department;
 
 /**
  *
@@ -25,7 +25,7 @@ import data.TerminalGroup;
 public class DepartmentCreator extends javax.swing.JDialog {
     private boolean isModified;
     private final String holdedPOS;
-    private TerminalGroup terminalGroup;
+    private Department terminalGroup;
 
     /**
      * Creates new form DepartmentCreator
@@ -39,22 +39,22 @@ public class DepartmentCreator extends javax.swing.JDialog {
         initComponents();
     }
 
-    public TerminalGroup createDepartment() {
+    public Department createDepartment() {
         setVisible(true);
         if(isModified) {
-            int tGroupType = jRadioButton1.isSelected() ? TerminalGroup.TYPE_ALWAYS : TerminalGroup.TYPE_DAYS;
-            terminalGroup = new TerminalGroup(tGroupType, boxName.getText(), boxTerminals.getText(), jComboBox1.getSelectedItem().toString());
+            int tGroupType = jRadioButton1.isSelected() ? Department.TYPE_ALWAYS : Department.TYPE_DAYS;
+            terminalGroup = new Department(tGroupType, boxName.getText(), boxTerminals.getText(), jComboBox1.getSelectedItem().toString());
         }
         return terminalGroup;
     }
 
-    public boolean editDepartment(TerminalGroup terminalGroup) {
+    public boolean editDepartment(Department terminalGroup) {
         this.terminalGroup = terminalGroup;
         boxName.setText(this.terminalGroup.toString());
         boxTerminals.setText(this.terminalGroup.getTerminalsAsString());
         jComboBox1.setSelectedItem(this.terminalGroup.getStartIndex());
 
-        if (this.terminalGroup.getType() == TerminalGroup.TYPE_ALWAYS) {
+        if (this.terminalGroup.getType() == Department.TYPE_ALWAYS) {
             jRadioButton1.setSelected(true);
         } else {
             jRadioButton2.setSelected(true);
@@ -66,7 +66,7 @@ public class DepartmentCreator extends javax.swing.JDialog {
             this.terminalGroup.setTerminals(boxTerminals.getText());
             this.terminalGroup.setStartIndex(String.valueOf(jComboBox1.getSelectedItem()));
             if(jRadioButton1.isSelected()) {
-                this.terminalGroup.setType(TerminalGroup.TYPE_ALWAYS);
+                this.terminalGroup.setType(Department.TYPE_ALWAYS);
             }
         }
         return isModified;

@@ -32,7 +32,7 @@ public class ParGenerator {
 
     private final ArrayList<String> data;
 
-    public ParGenerator(data.DayOfWeek day) {
+    public ParGenerator(data.Day day) {
         data = new ArrayList();
         
         for (int a = 0; a < day.getGroupCount(); a++) {

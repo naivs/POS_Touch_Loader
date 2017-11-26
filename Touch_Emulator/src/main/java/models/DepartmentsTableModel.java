@@ -16,7 +16,7 @@
  */
 package models;
 
-import data.TerminalGroup;
+import data.Department;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
 
@@ -32,7 +32,7 @@ public class DepartmentsTableModel extends AbstractTableModel {
         "Тип"};
     private final Object[][] data;
     
-    public DepartmentsTableModel(List<TerminalGroup> terminalGroups) {
+    public DepartmentsTableModel(List<Department> terminalGroups) {
         data = new Object[terminalGroups.size()][columnNames.length];
         
         for(int i = 0; i < data.length; i++) {

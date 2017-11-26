@@ -34,7 +34,7 @@ public class RefGenerator {
 
     private final ArrayList<String> data;
 
-    public RefGenerator(data.DayOfWeek day) {
+    public RefGenerator(data.Day day) {
 
         data = new ArrayList();
 

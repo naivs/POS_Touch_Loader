@@ -20,7 +20,7 @@ package data;
  *
  * @author Ivan
  */
-public class TerminalGroup {
+public class Department {
 
     public static final int TYPE_ALWAYS = 0;
     public static final int TYPE_DAYS = 1;
@@ -28,11 +28,11 @@ public class TerminalGroup {
     private int type;
     private String name;
     private String terminals;
-    private DayOfWeek[] daysOfWeek;
+    private Day[] daysOfWeek;
     private String startIndex;
     private String modified;
 
-    public TerminalGroup(int TYPE, String name, String terminals, String startIndex) {
+    public Department(int TYPE, String name, String terminals, String startIndex) {
         this.type = TYPE;
         this.name = name;
         this.terminals = terminals;
@@ -40,22 +40,22 @@ public class TerminalGroup {
         modified = "---";
         
         if (TYPE == TYPE_ALWAYS) {
-            daysOfWeek = new DayOfWeek[1];
-            daysOfWeek[0] = new DayOfWeek("Все дни");
+            daysOfWeek = new Day[1];
+            daysOfWeek[0] = new Day("Все дни");
         } else {
-            daysOfWeek = new DayOfWeek[7];
+            daysOfWeek = new Day[7];
             String[] dNames = {"Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"};
             for (int i = 0; i < dNames.length; i++) {
-                daysOfWeek[i] = new DayOfWeek(dNames[i]);
+                daysOfWeek[i] = new Day(dNames[i]);
             }
         }
     }
 
-    public void setDaysOfWeek(DayOfWeek[] daysOfWeek) {
+    public void setDaysOfWeek(Day[] daysOfWeek) {
         this.daysOfWeek = daysOfWeek;
     }
     
-    public DayOfWeek[] getDaysOfWeek() {
+    public Day[] getDaysOfWeek() {
         return daysOfWeek;
     }
     

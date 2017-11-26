@@ -42,9 +42,9 @@ public class SMBClient {
 
         try {
             share = new SmbFile(SV + ip + smbAuth.getUrl() + "/", auth);
-            message += share.exists() ? "ok" : "false";
-            message += share.canRead() ? "|ok" : "|false";
-            message += share.canWrite() ? "|ok" : "|false";
+            //message += share.exists() ? "ok" : "false";
+            //message += share.canRead() ? "|ok" : "|false";
+            message += share.canWrite() ? "ok" : "false";
         } catch (MalformedURLException | SmbException ex) {
             System.err.println(ex.getMessage());
         }

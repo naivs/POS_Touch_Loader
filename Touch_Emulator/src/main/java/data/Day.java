@@ -25,12 +25,12 @@ import javax.swing.table.DefaultTableModel;
  *
  * @author Ivan
  */
-public class DayOfWeek {
+public class Day {
 
     private final String name;
     private final List<Group> groups;
     
-    public DayOfWeek(String name) {
+    public Day(String name) {
         this.name = name;
         groups = new ArrayList<>();
     }

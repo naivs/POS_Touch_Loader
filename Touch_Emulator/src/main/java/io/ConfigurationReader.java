@@ -19,7 +19,7 @@ package io;
 import data.Group;
 import data.Product;
 import data.Subgroup;
-import data.TerminalGroup;
+import data.Department;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.xml.parsers.DocumentBuilder;
@@ -50,14 +50,14 @@ public class ConfigurationReader {
         }
     }
 
-    public ArrayList<TerminalGroup> read() {
-        ArrayList<TerminalGroup> terminalGroups = new ArrayList();
+    public ArrayList<Department> read() {
+        ArrayList<Department> terminalGroups = new ArrayList();
         NodeList termGrps = doc.getElementsByTagName("TerminalGroup");
 
         for (int a = 0; a < termGrps.getLength(); a++) {
             // terminalGroup
             Element elementA = (Element) termGrps.item(a);
-            TerminalGroup tg = new TerminalGroup(Integer.parseInt(elementA.getAttribute("type")), elementA.getAttribute("name"), elementA.getAttribute("terminals"), elementA.getAttribute("startIndex"));
+            Department tg = new Department(Integer.parseInt(elementA.getAttribute("type")), elementA.getAttribute("name"), elementA.getAttribute("terminals"), elementA.getAttribute("startIndex"));
             tg.setModified(elementA.getAttribute("modified"));
             terminalGroups.add(tg);
 //            // daysOfWeek

@@ -42,8 +42,8 @@ public class Emulator extends javax.swing.JFrame {
 
     private final ButtonGroup dayButtonsGroup;
 
-    private final TerminalGroup terminalGroup;
-    private DayOfWeek selectedDay;
+    private final Department terminalGroup;
+    private Day selectedDay;
     private Group selectedGroup;
 
     private final PictureDrawer pictureDrawer;
@@ -53,7 +53,7 @@ public class Emulator extends javax.swing.JFrame {
      *
      * @param terminalGroup
      */
-    public Emulator(TerminalGroup terminalGroup) {
+    public Emulator(Department terminalGroup) {
         dayButtonsGroup = new ButtonGroup();
         initComponents();
 
@@ -69,7 +69,7 @@ public class Emulator extends javax.swing.JFrame {
         this.terminalGroup = terminalGroup;
         pictureDrawer = new PictureDrawer();
 
-        for (DayOfWeek daysOfWeek : terminalGroup.getDaysOfWeek()) {
+        for (Day daysOfWeek : terminalGroup.getDaysOfWeek()) {
             JRadioButtonMenuItem jrmi = new JRadioButtonMenuItem(daysOfWeek.toString());
             dayButtonsGroup.add(jrmi);
             jMenu2.add(jrmi);

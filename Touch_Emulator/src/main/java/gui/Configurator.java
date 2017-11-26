@@ -16,11 +16,11 @@
  */
 package gui;
 
-import data.DayOfWeek;
+import data.Day;
 import data.Group;
 import data.Product;
 import data.Subgroup;
-import data.TerminalGroup;
+import data.Department;
 import excel.Parser;
 import io.ConfigurationReader;
 import io.ConfigurationWriter;
@@ -41,6 +41,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Properties;
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
@@ -52,8 +54,9 @@ import javax.swing.JTable;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.xml.transform.TransformerException;
 import models.DepartmentsTableModel;
+import network.Connection;
+import network.SMBAuthentication;
 import network.SMBClient;
-import network.ServerCommunicator;
 import org.xml.sax.SAXException;
 import utils.IndexDispatcher;
 import utils.ParGenerator;
@@ -64,10 +67,12 @@ import utils.RefGenerator;
  *
  * @author ivan
  */
-public class Configurator extends javax.swing.JFrame {
+public class Configurator extends javax.swing.JFrame implements Observer {
 
     public static String SERVER_IP;
     public static int PORT;
+    public Connection connection;
+    public SMBClient smbClient;
 
     public static final int CLIENT_MESSAGE = 0;
     public static final int SERVER_MESSAGE = 1;
@@ -76,7 +81,7 @@ public class Configurator extends javax.swing.JFrame {
     public static final int WARN = 1;
     public static final int CRIT = 2;
 
-    private List<TerminalGroup> terminalGroups;
+    private List<Department> departments;
 
     private final IndexDispatcher idisp = new IndexDispatcher();
 
@@ -84,27 +89,72 @@ public class Configurator extends javax.swing.JFrame {
         initComponents();
 
         try {
-            terminalGroups = new ConfigurationReader().read();
+            departments = new ConfigurationReader().read();
             showMessage(CLIENT_MESSAGE, "Конфигурация открыта", PLAIN);
         } catch (SAXException e) {
             // empty or corrupted
             System.err.println(e.getMessage() + "\nФайл: \"resources/configuration.xml\" пуст или поврежден. Будет создана новая конфигурация");
             showMessage(CLIENT_MESSAGE, "\"configuration.xml\" пуст или поврежден", WARN);
-            terminalGroups = new ArrayList<>();
+            departments = new ArrayList<>();
         } catch (IOException e) {
             // no file
             System.err.println(e.getMessage() + "\nФайл: \"resources/configuration.xml\" не найден. Будет создана новая конфигурация");
-            terminalGroups = new ArrayList<>();
+            showMessage(CLIENT_MESSAGE, "Создание новой конфигурации", PLAIN);
+            departments = new ArrayList<>();
         }
         update();
-        showMessage(SERVER_MESSAGE, "Server IP: " + SERVER_IP + ":" + PORT, PLAIN);
+
+        // connect to server
+        connection = new Connection();
+        try {
+            connection.connect(SERVER_IP, PORT);
+            showMessage(SERVER_MESSAGE, "Server IP: " + SERVER_IP + ":" + PORT, PLAIN);
+            connection.request(Connection.SMB_PARAM_QUE);
+        } catch (IOException ex) {
+            showMessage(SERVER_MESSAGE, "Нет связи с сервером", WARN);
+        }
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        String answer = String.valueOf(arg);
+
+        if (answer.length() > 1) { // SMB parameters
+            String url = answer.split(" ")[0];
+            String user = answer.split(" ")[1];
+            String pass = answer.split(" ")[2];
+            String time = answer.split(" ")[3];
+
+            SMBAuthentication smbAuth = new SMBAuthentication(url, user, pass);
+            smbClient = new SMBClient(SERVER_IP, smbAuth);
+            System.out.println(smbClient.testConnection());
+            showMessage(SERVER_MESSAGE, "Соединение установлено", PLAIN);
+//            jLabel1.setText(String.format("<html>\n"
+//                    + "<body>Cоединение установлено!\n"
+//                    + "Время выгрузки на кассы: %s</body>\n"
+//                    + "</html>", time));
+            uploadButton.setEnabled(true);
+            dropToPOSesButton.setEnabled(true);
+        } else {
+            switch (Integer.parseInt(answer)) {
+                case 0: // successfull upload on POSes
+                    JOptionPane.showMessageDialog(null, "Данные будут выгружены на кассы в течении 5 минут!",
+                            "Информация", JOptionPane.PLAIN_MESSAGE);
+                    break;
+
+                case 1: // fail of upload data on POSes
+                    JOptionPane.showMessageDialog(null, "Произошла непредвиденная ошибка!",
+                            "Ошибка", JOptionPane.ERROR_MESSAGE);
+                    break;
+            }
+        }
     }
 
     private void openDepartment(java.awt.event.MouseEvent evt) {
         JTable table = (JTable) evt.getSource();
         Point p = evt.getPoint();
         int row = table.rowAtPoint(p);
-        TerminalGroup department = terminalGroups.get(row);
+        Department department = departments.get(row);
         if (!department.getModified().equals("---")) {
             new Emulator(department).setVisible(true);
         } else {
@@ -173,7 +223,7 @@ public class Configurator extends javax.swing.JFrame {
     }
 
     private void update() {
-        jTable1.setModel(new DepartmentsTableModel(terminalGroups));
+        jTable1.setModel(new DepartmentsTableModel(departments));
 
         if (jTable1.getRowCount() < 1) {
             uploadButton.setEnabled(false);
@@ -185,11 +235,31 @@ public class Configurator extends javax.swing.JFrame {
 
     private void saveXMLConfiguration() {
         try {
-            new ConfigurationWriter().write(terminalGroups);
+            new ConfigurationWriter().write(departments);
             showMessage(CLIENT_MESSAGE, "Конфигурация обновлена!", PLAIN);
         } catch (TransformerException ex) {
             System.err.println("TransformerException occured while configuration saving! " + ex.getMessage());
             showMessage(CLIENT_MESSAGE, "Ошибка записи данных!", CRIT);
+        }
+    }
+
+    private void recursiveCopy(File file) {
+        String name = file.getPath().substring(15);
+        if (file.isDirectory()) {
+            //System.out.println("create smb folder: " + file.getPath().substring(15));
+            smbClient.createFolder(name);
+            for (File fl : file.listFiles()) {
+                recursiveCopy(fl);
+            }
+        } else {
+            try {
+                //System.out.println(file.getPath() + " -> " + file.getPath().substring(15));
+                smbClient.putFile(file, file.getPath().substring(15));
+            } catch (MalformedURLException ex) {
+                System.err.println("Wrong destenation URL. " + ex.getMessage());
+            } catch (IOException ex) {
+                System.err.println("I/O exception while P_REGPAR.DAT or S_PLUREF.DAT uploading. " + ex.getMessage());
+            }
         }
     }
 
@@ -216,11 +286,17 @@ public class Configurator extends javax.swing.JFrame {
         setTitle("Touch Configurator");
         setMaximumSize(new java.awt.Dimension(1280, 1024));
         setMinimumSize(new java.awt.Dimension(715, 364));
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosed(java.awt.event.WindowEvent evt) {
+                formWindowClosed(evt);
+            }
+        });
 
         jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         jPanel1.setLayout(new java.awt.GridLayout(1, 0));
 
         addButton.setText("Новый отдел...");
+        addButton.setFocusPainted(false);
         addButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 addButtonActionPerformed(evt);
@@ -229,6 +305,8 @@ public class Configurator extends javax.swing.JFrame {
         jPanel1.add(addButton);
 
         uploadButton.setText("Загрузить все на сервер");
+        uploadButton.setEnabled(false);
+        uploadButton.setFocusPainted(false);
         uploadButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 uploadButtonActionPerformed(evt);
@@ -237,6 +315,8 @@ public class Configurator extends javax.swing.JFrame {
         jPanel1.add(uploadButton);
 
         dropToPOSesButton.setText("Сброс данных на кассы...");
+        dropToPOSesButton.setEnabled(false);
+        dropToPOSesButton.setFocusPainted(false);
         dropToPOSesButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 dropToPOSesButtonActionPerformed(evt);
@@ -319,15 +399,15 @@ public class Configurator extends javax.swing.JFrame {
     private void addButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addButtonActionPerformed
         if (autorization()) {
             String holdedPOS = "";
-            for (TerminalGroup buf : terminalGroups) {
+            for (Department buf : departments) {
                 holdedPOS += ":" + buf.getTerminalsAsString();
             }
             DepartmentCreator dc = new DepartmentCreator(this, holdedPOS);
-            TerminalGroup tg = dc.createDepartment();
+            Department tg = dc.createDepartment();
 
             if (tg != null) {
                 boolean contains = false;
-                for (TerminalGroup element : terminalGroups) {
+                for (Department element : departments) {
                     if (element.toString().equals(tg.toString())) {
                         contains = true;
                         showMessage(CLIENT_MESSAGE, "Отдел с таким имененм уже существует!", WARN);
@@ -336,7 +416,7 @@ public class Configurator extends javax.swing.JFrame {
                 }
 
                 if (!contains) {
-                    terminalGroups.add(tg);
+                    departments.add(tg);
                     saveXMLConfiguration();
                     update();
                 }
@@ -345,25 +425,8 @@ public class Configurator extends javax.swing.JFrame {
     }//GEN-LAST:event_addButtonActionPerformed
 
     private void uploadButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_uploadButtonActionPerformed
-        ServerCommunicator communicator;
-        SMBClient smbClient;
-
-        try {
-            communicator = new ServerCommunicator();
-            smbClient = new SMBClient(SERVER_IP, communicator.getSmbAuth());
-            System.out.println(smbClient.testConnection());
-        } catch (UnknownHostException ex) {
-            System.err.println("Unknown host " + Configurator.SERVER_IP);
-            showMessage(SERVER_MESSAGE, "Некорректный сетевой адрес...", WARN);
-            return;
-        } catch (IOException ex) {
-            System.err.println("I/O Socket error. " + ex.getMessage());
-            showMessage(SERVER_MESSAGE, "Сервер офлайн...", WARN);
-            return;
-        }
-
         int groupsCount = 0;
-        for (TerminalGroup tGrp : terminalGroups) {
+        for (Department tGrp : departments) {
             for (int i = 0; i < tGrp.getDaysOfWeek().length; i++) {
                 groupsCount += tGrp.getDaysOfWeek()[i].getGroupCount();
             }
@@ -372,35 +435,36 @@ public class Configurator extends javax.swing.JFrame {
         Thread generateThread = new Thread() {
             @Override
             public void run() {
-                File picFolder = new File("resources/data");
+                File dataFolder = new File("resources/data");
                 try {
-                    delete(picFolder);
+                    delete(dataFolder); // <- recursive deleting
                 } catch (IOException ex) {
                     System.out.println("IO Except " + ex.toString());
                 }
-                if (!picFolder.mkdir()) {
+                if (!dataFolder.mkdir()) {
                     System.err.println("data folder doesn't created! trying again...");
-                    if (!picFolder.mkdir()) {
+                    if (!dataFolder.mkdir()) {
                         System.err.println("data folder doesn't created again...");
                         //return false;
                     }
                 }
 
-                for (int i = 0; i < terminalGroups.size(); i++) {
-                    if (!terminalGroups.get(i).getModified().equals("---")) {
-                        TerminalGroup department = terminalGroups.get(i);
+                for (int i = 0; i < departments.size(); i++) {
+                    if (!departments.get(i).getModified().equals("---")) {
+                        Department department = departments.get(i);
                         for (int j = 0; j < department.getDaysOfWeek().length; j++) {
-                            DayOfWeek day = department.getDaysOfWeek()[j];
+                            Day day = department.getDaysOfWeek()[j];
                             // clear pic folder                            
                             // creation day dirs
                             // saving all into it
                             File anotherDay;
-                            if (department.getType() == TerminalGroup.TYPE_ALWAYS) {
-                                Calendar calendar = Calendar.getInstance();
-                                calendar.setTime(new Date());
-                                anotherDay = new File(picFolder.getPath() + "/day" + (calendar.get(Calendar.DAY_OF_WEEK) - 1));
+                            if (department.getType() == Department.TYPE_ALWAYS) {
+                                //Calendar calendar = Calendar.getInstance();
+                                //calendar.setTime(new Date());
+                                //anotherDay = new File(dataFolder.getPath() + "/day" + (calendar.get(Calendar.DAY_OF_WEEK) - 1));
+                                anotherDay = new File(dataFolder.getPath() + "/static");
                             } else {
-                                anotherDay = new File(picFolder.getPath() + "/day" + j);
+                                anotherDay = new File(dataFolder.getPath() + "/day" + j);
                             }
                             anotherDay.mkdir();
 
@@ -409,7 +473,7 @@ public class Configurator extends javax.swing.JFrame {
                             File pluref = new RefGenerator(day).getFile();
 
                             String terminals = "";
-                            for (String num : terminalGroups.get(i).getTerminalsAsString().split(":")) {
+                            for (String num : departments.get(i).getTerminalsAsString().split(":")) {
                                 terminals += num + "-";
                             }
                             terminals = terminals.substring(0, terminals.length() - 1);
@@ -451,7 +515,7 @@ public class Configurator extends javax.swing.JFrame {
         preparingProgress.setVisible(true);
 
         int days = 0;
-        for (TerminalGroup tGrp : terminalGroups) {
+        for (Department tGrp : departments) {
             days += tGrp.getDaysOfWeek().length;
         }
         ProgressMonitor uploadProgress = new ProgressMonitor(this, "Загрузка данных на сервер...", days);
@@ -460,31 +524,38 @@ public class Configurator extends javax.swing.JFrame {
             public void run() {
                 smbClient.clearShare();
 
-                for (int tGroupNum = 0; tGroupNum < terminalGroups.size(); tGroupNum++) {
-                    for (int dayNum = 0; dayNum < terminalGroups.get(tGroupNum).getDaysOfWeek().length; dayNum++) {
-                        try {
-                            // create day folder
-                            smbClient.createFolder("day" + dayNum + "/");
-                            // create cafe folder
-                            smbClient.createFolder("day" + dayNum + "/cafe/");
-                            // copy .dat files
-                            File datFiles = new File("resources/data/day" + dayNum);
-                            for (File f : datFiles.listFiles((File directory, String fileName) -> fileName.contains(".DAT"))) {
-                                smbClient.putFile(f, "day" + dayNum + "/" + f.getName());
-                            }
-                            // copy images
-                            for (File img : new File("resources/data/day" + dayNum + "/cafe").listFiles()) {
-                                smbClient.putFile(img, "day" + dayNum + "/cafe/" + img.getName());
-                            }
-                            uploadProgress.stepUp();
-                        } catch (MalformedURLException ex) {
-                            System.err.println("Wrong destenation URL. " + ex.getMessage());
-                        } catch (IOException ex) {
-                            System.err.println("I/O exception while P_REGPAR.DAT or S_PLUREF.DAT uploading. " + ex.getMessage());
-                        }
-                    }
+                //get local directory
+                File sourseFolder = new File("resources/data/");
+                for (File f : sourseFolder.listFiles()) {
+                    recursiveCopy(f);
+                    uploadProgress.stepUp();
                 }
-                communicator.shutDown();
+
+//                for (int tGroupNum = 0; tGroupNum < departments.size(); tGroupNum++) {
+//                    for (int dayNum = 0; dayNum < departments.get(tGroupNum).getDaysOfWeek().length; dayNum++) {
+//                        try {
+//                            // create day folder
+//                            smbClient.createFolder("day" + dayNum + "/");
+//                            // create cafe folder
+//                            smbClient.createFolder("day" + dayNum + "/cafe/");
+//                            // copy .dat files
+//                            File datFiles = new File("resources/data/day" + dayNum);
+//                            for (File f : datFiles.listFiles((File directory, String fileName) -> fileName.contains(".DAT"))) {
+//                                smbClient.putFile(f, "day" + dayNum + "/" + f.getName());
+//                            }
+//                            // copy images
+//                            for (File img : new File("resources/data/day" + dayNum + "/cafe").listFiles()) {
+//                                smbClient.putFile(img, "day" + dayNum + "/cafe/" + img.getName());
+//                            }
+//                            uploadProgress.stepUp();
+//                        } catch (MalformedURLException ex) {
+//                            System.err.println("Wrong destenation URL. " + ex.getMessage());
+//                        } catch (IOException ex) {
+//                            System.err.println("I/O exception while P_REGPAR.DAT or S_PLUREF.DAT uploading. " + ex.getMessage());
+//                        }
+//                    }
+//                }
+                //communicator.shutDown();
                 JOptionPane.showMessageDialog(null, "Выгрузка завершена!", "Информация", JOptionPane.PLAIN_MESSAGE);
                 uploadProgress.dispose();
             }
@@ -507,11 +578,11 @@ public class Configurator extends javax.swing.JFrame {
         modifyMenuItem.addActionListener((ActionEvent e) -> {
             if (autorization()) {
                 String holdedPOS = "";
-                for (TerminalGroup buf : terminalGroups) {
+                for (Department buf : departments) {
                     holdedPOS += ":" + buf.getTerminalsAsString();
                 }
                 DepartmentCreator dc = new DepartmentCreator(this, holdedPOS);
-                if (dc.editDepartment(terminalGroups.get(rowindex))) {
+                if (dc.editDepartment(departments.get(rowindex))) {
                     saveXMLConfiguration();
                     update();
                 }
@@ -531,7 +602,7 @@ public class Configurator extends javax.swing.JFrame {
                     Parser parser = new Parser(file);
 
                     // reading all products
-                    DayOfWeek[] days = terminalGroups.get(jTable1.getSelectedRow()).getDaysOfWeek();
+                    Day[] days = departments.get(jTable1.getSelectedRow()).getDaysOfWeek();
 
                     for (int i = 0; i < days.length; i++) {
                         // groups name reading. It same for any day.
@@ -561,7 +632,7 @@ public class Configurator extends javax.swing.JFrame {
 
                             for (int s = 0; s < subgroups.length; s++) {
                                 subgroups[s] = new Subgroup(subgroupsNames[s],
-                                        idisp.getNextFreeIndex(i, Integer.parseInt(terminalGroups.get(jTable1.getSelectedRow()).getStartIndex().substring(1))));
+                                        idisp.getNextFreeIndex(i, Integer.parseInt(departments.get(jTable1.getSelectedRow()).getStartIndex().substring(1))));
                             }
 
                             for (int g = 0; g < products.size(); g++) {
@@ -580,7 +651,7 @@ public class Configurator extends javax.swing.JFrame {
                         }
                     }
 
-                    terminalGroups.get(jTable1.getSelectedRow()).setModified(Calendar.getInstance().getTime().toString());
+                    departments.get(jTable1.getSelectedRow()).setModified(Calendar.getInstance().getTime().toString());
                     showMessage(CLIENT_MESSAGE, "Загружен файл: " + file.getCanonicalPath(), PLAIN);
                     saveXMLConfiguration();
                     update();
@@ -598,11 +669,11 @@ public class Configurator extends javax.swing.JFrame {
         removeMenuItem.addActionListener((ActionEvent e) -> {
             if (autorization()) {
                 int response = JOptionPane.showConfirmDialog(this,
-                        terminalGroups.get(rowindex).toString() + "\nУдалить этот кассовый отдел?",
+                        departments.get(rowindex).toString() + "\nУдалить этот кассовый отдел?",
                         "Удаление отдела",
                         JOptionPane.OK_CANCEL_OPTION);
                 if (response == JOptionPane.OK_OPTION) {
-                    terminalGroups.remove(rowindex);
+                    departments.remove(rowindex);
                     saveXMLConfiguration();
                     update();
                 }
@@ -629,8 +700,12 @@ public class Configurator extends javax.swing.JFrame {
     }//GEN-LAST:event_jTable1MouseClicked
 
     private void dropToPOSesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dropToPOSesButtonActionPerformed
-
+        connection.request(Connection.UPLOAD_QUE);
     }//GEN-LAST:event_dropToPOSesButtonActionPerformed
+
+    private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
+        connection.disconnect();
+    }//GEN-LAST:event_formWindowClosed
 
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
@@ -657,30 +732,17 @@ public class Configurator extends javax.swing.JFrame {
         //</editor-fold>
         //</editor-fold>
 
-        Properties properties = new Properties();
-        BufferedReader reader = null;
-
-        try {
-            reader = new BufferedReader(new InputStreamReader(new FileInputStream("touchLoader.conf")));
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("touchLoader.conf")));) {
+            Properties properties = new Properties();
             properties.load(reader);
             SERVER_IP = properties.getProperty("serverIP");
             PORT = Integer.parseInt(properties.getProperty("port"));
-            //System.out.println("Server IP: " + SERVER_IP + ":" + PORT);
         } catch (FileNotFoundException e) {
             System.err.println("File touchDaemon.conf is not found! " + e.getMessage());
             System.exit(1);
         } catch (IOException e) {
             System.err.println("Other IO Exception." + e.getMessage());
             System.exit(1);
-        } finally {
-            try {
-                if (reader != null) {
-                    reader.close();
-                }
-            } catch (IOException e) {
-                System.err.println("Can't close the stream!" + e.getMessage());
-                System.exit(1);
-            }
         }
 
         /* Create and display the form */

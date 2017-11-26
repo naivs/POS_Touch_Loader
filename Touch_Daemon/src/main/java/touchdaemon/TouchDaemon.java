@@ -16,7 +16,6 @@
  */
 package touchdaemon;
 
-import io.ConfigReader;
 import java.awt.AWTException;
 import java.awt.Image;
 import java.awt.MenuItem;
@@ -27,6 +26,7 @@ import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.Date;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
@@ -34,17 +34,17 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
-import net.Communicator;
+import net.Server;
 
 /**
  *
  * @author Ivan
  */
 public class TouchDaemon {
-    
+
     public static final String APPLICATION_NAME = "Touch Daemon";
-    public static final String ICON_STR = "icon32x32.png";
-    
+    public static final String ICON_STR = "icon.png";
+
     public static final String SERVER_PATH = "c:/Server/";
     public static final String SERVER_PATH_LAN = SERVER_PATH + "lan/";
     public static final String SERVER_PATH_LAN4SRV = SERVER_PATH + "lan4srv/";
@@ -52,24 +52,24 @@ public class TouchDaemon {
     public static final String WEB_PATH = "c:/web/mtxwm/gm/hoc/par/web/";
     public static final String HOC_PATH = "c:/web/mtxwm/gm/hoc/par/";
     public static final String WEB_KEYFILE = "ASRPARAM.CTL";
-    
+
     public static final Logger LOGGER = Logger.getAnonymousLogger().getParent();
     
-    private final DayTrigger dayTrigger;
-    
+    private final Server server;
+
     public TouchDaemon() {
         LOGGER.removeHandler(LOGGER.getHandlers()[0]);
-        
+
         Formatter formatter = new Formatter() {
             @Override
             public String format(LogRecord arg0) {
                 StringBuilder b = new StringBuilder();
                 b.append(new Date());
                 b.append(" ");
-                b.append(arg0.getSourceClassName());
-                b.append(" ");
-                b.append(arg0.getSourceMethodName());
-                b.append(" ");
+//                b.append(arg0.getSourceClassName());
+//                b.append(" ");
+//                b.append(arg0.getSourceMethodName());
+//                b.append(" ");
                 b.append(arg0.getLevel());
                 b.append(" ");
                 b.append(arg0.getMessage());
@@ -77,11 +77,6 @@ public class TouchDaemon {
                 return b.toString();
             }
         };
-        
-        //ConsoleHandler ch = new ConsoleHandler();
-        //ch.setLevel(Level.ALL);
-        //ch.setFormatter(formatter);
-        //LOGGER.addHandler(ch);
         
         try {
             FileHandler fh = new FileHandler("touchdaemon.log");
@@ -92,53 +87,34 @@ public class TouchDaemon {
             LOGGER.log(Level.WARNING, "logging problem!", e);
         }
 
-        // load settings
-        ConfigReader configReader = new ConfigReader();
-        if (configReader.check()) {
-            LOGGER.log(Level.FINEST, "config read success!");
-        } else {
-            LOGGER.log(Level.SEVERE, "config read fail!");
-            System.exit(1);
-        }
-        
-        LOGGER.log(Level.INFO, "starting daemon...");
-        String response
-                = configReader.readSharePath() + " "
-                + configReader.readUsername() + " "
-                + configReader.readPassword() + " "
-                + configReader.readLoadTime();
-        LOGGER.log(Level.INFO, "communicator starting...");
-        Communicator communicator = new Communicator(configReader.readPort(), response);
-        communicator.start();
-        LOGGER.log(Level.INFO, "trigger starting...");
-        dayTrigger = new DayTrigger(configReader.readPath(), configReader.readLoadTime(), configReader.readParSettings(),
-                configReader.readRefSettings());
-        dayTrigger.start();
-        LOGGER.log(Level.INFO, "Daemon started!\n**************************\n");
-        
-        setTrayIcon();
-    }
-    
-    private void setTrayIcon() {
+        //LOGGER.log(Level.INFO, "starting daemon...");
+                
+        LOGGER.log(Level.INFO, "server starting...");
+        server = new Server(8080);
+        server.startServer();
+        LOGGER.log(Level.INFO, "Daemon is running!\n**************************\n");
+
+        // SET TRAY ICON
         if (!SystemTray.isSupported()) {
             LOGGER.log(Level.WARNING, "System Tray is not supported on that OS!");
             return;
         }
         PopupMenu trayMenu = new PopupMenu();
-        
+
         MenuItem itemStatus = new MenuItem("Status");
         itemStatus.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(null, dayTrigger.getInfoStatus(), "Status", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(null, server.status(), "Status", JOptionPane.INFORMATION_MESSAGE);
             }
         });
         trayMenu.add(itemStatus);
-        
+
         MenuItem itemExit = new MenuItem("Exit");
         itemExit.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                server.stopServer();
                 System.exit(0);
             }
         });
@@ -158,15 +134,19 @@ public class TouchDaemon {
         trayIcon.displayMessage(APPLICATION_NAME, "Application started!",
                 TrayIcon.MessageType.INFO);
     }
-    
-    static private void daemonize() throws IOException {
-        System.in.close();
-        System.out.close();
-    }
-    
+
     public static void main(String[] args) {
+        // protection from double running
         try {
-            daemonize();
+            ServerSocket s = new ServerSocket(61321);
+        } catch (IOException ex) {
+            System.err.println(String.format("Was tryed to start another copy! Rejected...\n%s", ex));
+            System.exit(1);
+        }
+        
+        try {
+            System.in.close();
+            System.out.close();
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Unable to close system streams...", e);
         }

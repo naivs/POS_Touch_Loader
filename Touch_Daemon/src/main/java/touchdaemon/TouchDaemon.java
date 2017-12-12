@@ -27,12 +27,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.util.Date;
-import java.util.logging.FileHandler;
-import java.util.logging.Formatter;
 import java.util.logging.Level;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import net.Server;
 
@@ -52,44 +47,14 @@ public class TouchDaemon {
     public static final String WEB_PATH = "c:/web/mtxwm/gm/hoc/par/web/";
     public static final String HOC_PATH = "c:/web/mtxwm/gm/hoc/par/";
     public static final String WEB_KEYFILE = "ASRPARAM.CTL";
-
-    public static final Logger LOGGER = Logger.getAnonymousLogger().getParent();
     
     private final Server server;
 
     public TouchDaemon() {
-        LOGGER.removeHandler(LOGGER.getHandlers()[0]);
-
-        Formatter formatter = new Formatter() {
-            @Override
-            public String format(LogRecord arg0) {
-                StringBuilder b = new StringBuilder();
-                b.append(new Date());
-                b.append(" ");
-//                b.append(arg0.getSourceClassName());
-//                b.append(" ");
-//                b.append(arg0.getSourceMethodName());
-//                b.append(" ");
-                b.append(arg0.getLevel());
-                b.append(" ");
-                b.append(arg0.getMessage());
-                b.append(System.getProperty("line.separator"));
-                return b.toString();
-            }
-        };
-        
-        try {
-            FileHandler fh = new FileHandler("touchdaemon.log");
-            fh.setFormatter(formatter);
-            fh.setLevel(Level.ALL);
-            LOGGER.addHandler(fh);
-        } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "logging problem!", e);
-        }
-
+        SimpleLogger.getInstance().log(0, IMAGES);
         //LOGGER.log(Level.INFO, "starting daemon...");
                 
-        LOGGER.log(Level.INFO, "server starting...");
+        LoggerService.log(Level.INFO, "server starting...");
         server = new Server(8080);
         server.startServer();
         LOGGER.log(Level.INFO, "Daemon is running!\n**************************\n");

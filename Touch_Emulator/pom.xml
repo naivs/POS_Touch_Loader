@@ -70,7 +70,7 @@
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
                             <classpathLayoutType>simple</classpathLayoutType>
-                            <mainClass>gui.Emulator</mainClass>
+                            <mainClass>gui.Configurator</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

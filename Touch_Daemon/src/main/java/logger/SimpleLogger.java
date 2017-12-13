@@ -33,8 +33,10 @@ public class SimpleLogger implements CustomLogger {
     private Logger logger; 
 
     public SimpleLogger() {
-        logger.getAnonymousLogger().getParent();
+        logger = Logger.getAnonymousLogger().getParent();
 
+        logger.removeHandler(logger.getHandlers()[0]);
+        
         Formatter formatter = new Formatter() {
             @Override
             public String format(LogRecord arg0) {

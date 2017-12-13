@@ -27,9 +27,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.util.logging.Level;
 import javax.swing.JOptionPane;
+import logger.CustomLogger;
 import net.Server;
+import services.LoggerService;
 
 /**
  *
@@ -51,17 +52,14 @@ public class TouchDaemon {
     private final Server server;
 
     public TouchDaemon() {
-        SimpleLogger.getInstance().log(0, IMAGES);
-        //LOGGER.log(Level.INFO, "starting daemon...");
-                
-        LoggerService.log(Level.INFO, "server starting...");
+        LoggerService.getLogger().log(CustomLogger.INFO, "server starting...");
         server = new Server(8080);
         server.startServer();
-        LOGGER.log(Level.INFO, "Daemon is running!\n**************************\n");
+        LoggerService.getLogger().log(CustomLogger.INFO, "Daemon is running!\n**************************\n");
 
         // SET TRAY ICON
         if (!SystemTray.isSupported()) {
-            LOGGER.log(Level.WARNING, "System Tray is not supported on that OS!");
+            LoggerService.getLogger().log(CustomLogger.WARN, "System Tray is not supported on that OS!");
             return;
         }
         PopupMenu trayMenu = new PopupMenu();
@@ -93,7 +91,7 @@ public class TouchDaemon {
         try {
             tray.add(trayIcon);
         } catch (AWTException e) {
-            LOGGER.log(Level.WARNING, "Tray icon not shown...", e);
+            LoggerService.getLogger().log(CustomLogger.WARN, "Tray icon not shown...", e);
         }
 
         trayIcon.displayMessage(APPLICATION_NAME, "Application started!",
@@ -113,7 +111,7 @@ public class TouchDaemon {
             System.in.close();
             System.out.close();
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Unable to close system streams...", e);
+            LoggerService.getLogger().log(CustomLogger.CRIT, "Unable to close system streams...", e);
         }
         
         TouchDaemon daemon = new TouchDaemon();

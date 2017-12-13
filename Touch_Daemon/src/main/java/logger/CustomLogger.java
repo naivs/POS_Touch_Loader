@@ -14,28 +14,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package services;
-
-import logger.CustomLogger;
-import logger.SimpleLogger;
+package logger;
 
 /**
  *
  * @author Ivan Naumov
  */
-public class LoggerService {
+public interface CustomLogger {
     
-    private static CustomLogger logger;
+    static int DEBUG = 0;
+    static int INFO = 1;
+    static int WARN = 2;
+    static int CRIT = 3;
     
-    private LoggerService() {
-        logger = new SimpleLogger();
-    }
-    
-    public static CustomLogger getLogger() {
-        if(logger == null) {
-            new LoggerService();
-        }
-        
-        return logger;
-    }
+    void log(int LEVEL, String message);
+
+    void log(int LEVEL, String message, Throwable t);
+
+    void setLevel(int LEVEL);
 }

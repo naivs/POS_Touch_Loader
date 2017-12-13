@@ -16,14 +16,14 @@
  */
 package io;
 
-import touchdaemon.TouchDaemon;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Properties;
-import java.util.logging.Level;
+import logger.CustomLogger;
+import services.LoggerService;
 
 /**
  *
@@ -51,14 +51,14 @@ public class ConfigReader {
             refSettings = properties.getProperty("ref_backup").equals("true");
             port = Integer.parseInt(properties.getProperty("port"));
         } catch (FileNotFoundException e) {
-            TouchDaemon.LOGGER.log(Level.SEVERE, "File touchDaemon.conf is not found!", e);
+            LoggerService.getLogger().log(CustomLogger.CRIT, "File touchDaemon.conf is not found!", e);
         } catch (IOException e) {
-            TouchDaemon.LOGGER.log(Level.SEVERE, "Other IO Exception.", e);
+            LoggerService.getLogger().log(CustomLogger.CRIT, "Other IO Exception.", e);
         } finally {
             try {
                 if(reader != null) reader.close();
             } catch (IOException e) {
-                TouchDaemon.LOGGER.log(Level.SEVERE, "Can't close the stream!", e);
+                LoggerService.getLogger().log(CustomLogger.CRIT, "Can't close the stream!", e);
             }
         }
     }

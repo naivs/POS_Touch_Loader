@@ -23,19 +23,17 @@ import java.util.logging.Formatter;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
-import services.LoggerService;
 
 /**
  *
  * @author Ivan Naumov
  */
-public class SimpleLogger implements LoggerService {
+public class SimpleLogger implements CustomLogger {
 
-    private static LoggerService simpleLogger;
-    private Logger logger;
+    private Logger logger; 
 
-    private SimpleLogger() {
-        logger = Logger.getAnonymousLogger().getParent();
+    public SimpleLogger() {
+        logger.getAnonymousLogger().getParent();
 
         Formatter formatter = new Formatter() {
             @Override
@@ -63,14 +61,6 @@ public class SimpleLogger implements LoggerService {
         } catch (IOException e) {
             logger.log(Level.WARNING, "logging problem!", e);
         }
-    }
-
-    public static LoggerService getInstance() {
-        if (simpleLogger == null) {
-            simpleLogger = new SimpleLogger();
-        }
-
-        return simpleLogger;
     }
 
     @Override

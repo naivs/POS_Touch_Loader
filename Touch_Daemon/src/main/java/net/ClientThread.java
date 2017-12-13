@@ -22,8 +22,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Observable;
-import java.util.logging.Level;
-import static touchdaemon.TouchDaemon.LOGGER;
+import logger.CustomLogger;
+import services.LoggerService;
 
 /**
  *
@@ -49,7 +49,7 @@ class ClientThread extends Observable implements Runnable {
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             out = new PrintWriter(socket.getOutputStream(), true);
         } catch (IOException ex) {
-            LOGGER.log(Level.WARNING, "Unable to get streams from socket.", ex);
+            LoggerService.getLogger().log(CustomLogger.WARN, "Unable to get streams from socket.", ex);
         }
     }
 
@@ -73,11 +73,11 @@ class ClientThread extends Observable implements Runnable {
                             notifyObservers(1);
                             break;
                     }
-                    LOGGER.log(Level.INFO, String.format("Message from client: %s", msg));
+                    LoggerService.getLogger().log(CustomLogger.INFO, String.format("Message from client: %s", msg));
                 }
                 isRunning = false;
             } catch (IOException ex) {
-                LOGGER.log(Level.WARNING, "IOException in client loop.", ex);
+                LoggerService.getLogger().log(CustomLogger.WARN, "IOException in client loop.", ex);
                 isRunning = false;
             }
         }
@@ -87,10 +87,10 @@ class ClientThread extends Observable implements Runnable {
             socket.close();
             setChanged();
             notifyObservers(0);
-            LOGGER.log(Level.INFO,
+            LoggerService.getLogger().log(CustomLogger.INFO,
                     String.format("Client %s:%d disconnected!", socket.getInetAddress().getHostAddress(), socket.getPort()));
         } catch (IOException ex) {
-            LOGGER.log(Level.WARNING, "Unable to close ClientSocket.", ex);
+            LoggerService.getLogger().log(CustomLogger.WARN, "Unable to close ClientSocket.", ex);
         }
     }
     
@@ -105,7 +105,7 @@ class ClientThread extends Observable implements Runnable {
             setChanged();
             notifyObservers(0);
         } catch (IOException ex) {
-            LOGGER.log(Level.WARNING, "Unable to close ClientSocket.", ex);
+            LoggerService.getLogger().log(CustomLogger.WARN, "Unable to close ClientSocket.", ex);
         }
     }
 }

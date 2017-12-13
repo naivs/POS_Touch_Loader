@@ -24,9 +24,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.logging.Level;
+import logger.CustomLogger;
+import services.LoggerService;
 import touchdaemon.DayTrigger;
-import static touchdaemon.TouchDaemon.LOGGER;
 
 /**
  *
@@ -55,9 +55,9 @@ public class Server implements Observer {
         // load settings
         ConfigReader configReader = new ConfigReader();
         if (configReader.check()) {
-            LOGGER.log(Level.FINEST, "config read success!");
+            LoggerService.getLogger().log(CustomLogger.INFO, "config read success!");
         } else {
-            LOGGER.log(Level.SEVERE, "config read fail!");
+            LoggerService.getLogger().log(CustomLogger.CRIT, "config read fail!");
             System.exit(1);
         }
 
@@ -74,7 +74,7 @@ public class Server implements Observer {
             serverThread = new ServerThread();
             serverThread.start();
             isRunning = true;
-            LOGGER.log(Level.INFO,
+            LoggerService.getLogger().log(CustomLogger.INFO,
                     String.format("Server started on %d port!", port));
             trigger.addObserver(this);
             trigger.start();
@@ -88,13 +88,13 @@ public class Server implements Observer {
                 client.stop();
             }
             isRunning = false;
-            LOGGER.log(Level.INFO, "Server stoped!");
+            LoggerService.getLogger().log(CustomLogger.INFO, "Server stoped!");
         }
     }
 
     @Override
     public void update(Observable o, Object arg) {
-        LOGGER.log(Level.INFO, o.getClass().getName());
+        LoggerService.getLogger().log(CustomLogger.INFO, o.getClass().getName());
         if (o.getClass().getName().equals("net.ClientThread")) {
             /*
             here can be processed following args:
@@ -145,7 +145,7 @@ public class Server implements Observer {
 
                 while (isRunning) {
                     clientSocket = serverSocket.accept();
-                    touchdaemon.TouchDaemon.LOGGER.log(Level.INFO,
+                    LoggerService.getLogger().log(CustomLogger.INFO,
                             String.format("Client %s:%d connected!", clientSocket.getInetAddress().getHostAddress(), clientSocket.getPort()));
 
                     ClientThread clientThread = new ClientThread(clientSocket, wellcomeMsg, clients.size());
@@ -154,7 +154,7 @@ public class Server implements Observer {
                     new Thread(clientThread).start();
                 }
             } catch (IOException ex) {
-                LOGGER.log(Level.WARNING,
+                LoggerService.getLogger().log(CustomLogger.WARN,
                         "Error occured on creating ServerSocket or accepting client connection.",
                         ex);
             }
@@ -164,7 +164,7 @@ public class Server implements Observer {
             try {
                 serverSocket.close();
             } catch (IOException ex) {
-                LOGGER.log(Level.WARNING, "Unable to close serverSocket.", ex);
+                LoggerService.getLogger().log(CustomLogger.WARN, "Unable to close serverSocket.", ex);
             }
         }
     }

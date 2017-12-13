@@ -263,6 +263,134 @@ public class Configurator extends javax.swing.JFrame implements Observer {
         }
     }
 
+    private void popUp(java.awt.event.MouseEvent evt) {
+        JTable table = (JTable) evt.getSource();
+        Point p = evt.getPoint();
+        int rowindex = table.rowAtPoint(p);
+        jTable1.setRowSelectionInterval(rowindex, rowindex);
+
+        JMenuItem openMenuItem = new JMenuItem("Открыть");
+        openMenuItem.addActionListener((ActionEvent e) -> {
+            openDepartment(evt);
+        });
+        JMenuItem modifyMenuItem = new JMenuItem("Изменить");
+        modifyMenuItem.addActionListener((ActionEvent e) -> {
+            if (autorization()) {
+                String holdedPOS = "";
+                for (Department buf : departments) {
+                    holdedPOS += ":" + buf.getTerminalsAsString();
+                }
+                DepartmentCreator dc = new DepartmentCreator(this, holdedPOS);
+                if (dc.editDepartment(departments.get(rowindex))) {
+                    saveXMLConfiguration();
+                    update();
+                }
+            }
+        });
+        JMenuItem loadFromFile = new JMenuItem("Обновить из файла...");
+        loadFromFile.addActionListener((ActionEvent e) -> {
+            // choose file configuration
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setCurrentDirectory(new java.io.File("./"));
+            fileChooser.setFileFilter(new FileNameExtensionFilter("Файлы Microsoft Excel 2007*", "xlsx"));
+
+            if (fileChooser.showDialog(this, "Открыть файл Excel...") == JFileChooser.APPROVE_OPTION) {
+                File file = new File(fileChooser.getSelectedFile().getAbsolutePath());
+                try {
+                    Parser parser = new Parser(file);
+
+                    // reading all products
+                    Day[] days = departments.get(jTable1.getSelectedRow()).getDaysOfWeek();
+
+                    for (int i = 0; i < days.length; i++) {
+                        // groups name reading. It same for any day.
+                        Group[] groups = new Group[8];
+
+                        int k = 0;
+                        for (String name : parser.getGroupsNames()) {
+                            groups[k] = new Group(name);
+                            k++;
+                        }
+
+                        for (int j = 0; j < groups.length; j++) {
+                            ArrayList<Product> products = new ArrayList();
+
+                            for (String name : parser.getProducts(i, j)) {
+                                products.add(new Product(name.split("::")[1], name.split("::")[0], ""));
+                            }
+
+                            Subgroup[] subgroups;
+                            if (products.size() % 20 > 0) {
+                                subgroups = new Subgroup[(products.size() / 20) + 1];
+                            } else {
+                                subgroups = new Subgroup[products.size() / 20];
+                            }
+
+                            String[] subgroupsNames = parser.getSubgroupNames(i, j);
+
+                            for (int s = 0; s < subgroups.length; s++) {
+                                subgroups[s] = new Subgroup(subgroupsNames[s],
+                                        idisp.getNextFreeIndex(i, Integer.parseInt(departments.get(jTable1.getSelectedRow()).getStartIndex().substring(1))));
+                            }
+
+                            for (int g = 0; g < products.size(); g++) {
+                                subgroups[g / 20].addProduct(products.get(g));
+                            }
+                            // =====================
+
+                            for (Subgroup sgrp : subgroups) {
+                                groups[j].addSubgroup(sgrp);
+                            }
+                        }
+
+                        days[i].deleteAllGroups();
+                        for (Group grp : groups) {
+                            days[i].addGroup(grp);
+                        }
+                    }
+
+                    departments.get(jTable1.getSelectedRow()).setModified(Calendar.getInstance().getTime().toString());
+                    showMessage(CLIENT_MESSAGE, "Загружен файл: " + file.getCanonicalPath(), PLAIN);
+                    saveXMLConfiguration();
+                    update();
+                } catch (FileNotFoundException ex) {
+                    System.err.println("File not found");
+                    showMessage(CLIENT_MESSAGE, "Файл " + file.getName() + " не найден!", CRIT);
+                } catch (IOException ex) {
+                    System.err.println("Other IO Exception");
+                    showMessage(CLIENT_MESSAGE, "Ошибка ввода/вывода!", CRIT);
+                }
+            }
+        });
+        JMenuItem removeMenuItem = new JMenuItem("Удалить");
+        removeMenuItem.addActionListener((ActionEvent e) -> {
+            if (autorization()) {
+                int response = JOptionPane.showConfirmDialog(this,
+                        departments.get(rowindex).toString() + "\nУдалить этот кассовый отдел?",
+                        "Удаление отдела",
+                        JOptionPane.OK_CANCEL_OPTION);
+                if (response == JOptionPane.OK_OPTION) {
+                    departments.remove(rowindex);
+                    saveXMLConfiguration();
+                    update();
+                }
+            }
+        });
+
+        if (rowindex < 0) {
+            return;
+        }
+
+        JPopupMenu popup = new JPopupMenu();
+        popup.add(loadFromFile);
+        popup.add(new JSeparator());
+        popup.add(openMenuItem);
+        popup.add(modifyMenuItem);
+        popup.add(new JSeparator());
+        popup.add(removeMenuItem);
+        popup.show(evt.getComponent(), evt.getX(), evt.getY());
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -329,6 +457,9 @@ public class Configurator extends javax.swing.JFrame implements Observer {
         jTable1.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mousePressed(java.awt.event.MouseEvent evt) {
                 jTable1MousePressed(evt);
+            }
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                jTable1MouseReleased(evt);
             }
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jTable1MouseClicked(evt);
@@ -540,131 +671,8 @@ public class Configurator extends javax.swing.JFrame implements Observer {
     }//GEN-LAST:event_uploadButtonActionPerformed
 
     private void jTable1MousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MousePressed
-        JTable table = (JTable) evt.getSource();
-        Point p = evt.getPoint();
-        int rowindex = table.rowAtPoint(p);
-        jTable1.setRowSelectionInterval(rowindex, rowindex);
-
-        JMenuItem openMenuItem = new JMenuItem("Открыть");
-        openMenuItem.addActionListener((ActionEvent e) -> {
-            openDepartment(evt);
-        });
-        JMenuItem modifyMenuItem = new JMenuItem("Изменить");
-        modifyMenuItem.addActionListener((ActionEvent e) -> {
-            if (autorization()) {
-                String holdedPOS = "";
-                for (Department buf : departments) {
-                    holdedPOS += ":" + buf.getTerminalsAsString();
-                }
-                DepartmentCreator dc = new DepartmentCreator(this, holdedPOS);
-                if (dc.editDepartment(departments.get(rowindex))) {
-                    saveXMLConfiguration();
-                    update();
-                }
-            }
-        });
-        JMenuItem loadFromFile = new JMenuItem("Обновить из файла...");
-        loadFromFile.addActionListener((ActionEvent e) -> {
-            // choose file configuration
-            JFileChooser fileChooser = new JFileChooser();
-            fileChooser.setCurrentDirectory(new java.io.File("./"));
-            fileChooser.setFileFilter(new FileNameExtensionFilter("Файлы Microsoft Excel 2007*", "xlsx"));
-
-            if (fileChooser.showDialog(this, "Открыть файл Excel...") == JFileChooser.APPROVE_OPTION) {
-                File file = new File(fileChooser.getSelectedFile().getAbsolutePath());
-                try {
-                    Parser parser = new Parser(file);
-
-                    // reading all products
-                    Day[] days = departments.get(jTable1.getSelectedRow()).getDaysOfWeek();
-
-                    for (int i = 0; i < days.length; i++) {
-                        // groups name reading. It same for any day.
-                        Group[] groups = new Group[8];
-
-                        int k = 0;
-                        for (String name : parser.getGroupsNames()) {
-                            groups[k] = new Group(name);
-                            k++;
-                        }
-
-                        for (int j = 0; j < groups.length; j++) {
-                            ArrayList<Product> products = new ArrayList();
-
-                            for (String name : parser.getProducts(i, j)) {
-                                products.add(new Product(name.split("::")[1], name.split("::")[0], ""));
-                            }
-
-                            Subgroup[] subgroups;
-                            if (products.size() % 20 > 0) {
-                                subgroups = new Subgroup[(products.size() / 20) + 1];
-                            } else {
-                                subgroups = new Subgroup[products.size() / 20];
-                            }
-
-                            String[] subgroupsNames = parser.getSubgroupNames(i, j);
-
-                            for (int s = 0; s < subgroups.length; s++) {
-                                subgroups[s] = new Subgroup(subgroupsNames[s],
-                                        idisp.getNextFreeIndex(i, Integer.parseInt(departments.get(jTable1.getSelectedRow()).getStartIndex().substring(1))));
-                            }
-
-                            for (int g = 0; g < products.size(); g++) {
-                                subgroups[g / 20].addProduct(products.get(g));
-                            }
-                            // =====================
-
-                            for (Subgroup sgrp : subgroups) {
-                                groups[j].addSubgroup(sgrp);
-                            }
-                        }
-
-                        days[i].deleteAllGroups();
-                        for (Group grp : groups) {
-                            days[i].addGroup(grp);
-                        }
-                    }
-
-                    departments.get(jTable1.getSelectedRow()).setModified(Calendar.getInstance().getTime().toString());
-                    showMessage(CLIENT_MESSAGE, "Загружен файл: " + file.getCanonicalPath(), PLAIN);
-                    saveXMLConfiguration();
-                    update();
-                } catch (FileNotFoundException ex) {
-                    System.err.println("File not found");
-                    showMessage(CLIENT_MESSAGE, "Файл " + file.getName() + " не найден!", CRIT);
-                } catch (IOException ex) {
-                    System.err.println("Other IO Exception");
-                    showMessage(CLIENT_MESSAGE, "Ошибка ввода/вывода!", CRIT);
-                }
-            }
-        });
-        JMenuItem removeMenuItem = new JMenuItem("Удалить");
-        removeMenuItem.addActionListener((ActionEvent e) -> {
-            if (autorization()) {
-                int response = JOptionPane.showConfirmDialog(this,
-                        departments.get(rowindex).toString() + "\nУдалить этот кассовый отдел?",
-                        "Удаление отдела",
-                        JOptionPane.OK_CANCEL_OPTION);
-                if (response == JOptionPane.OK_OPTION) {
-                    departments.remove(rowindex);
-                    saveXMLConfiguration();
-                    update();
-                }
-            }
-        });
-
-        if (rowindex < 0) {
-            return;
-        }
         if (evt.isPopupTrigger() && evt.getComponent() instanceof JTable) {
-            JPopupMenu popup = new JPopupMenu();
-            popup.add(loadFromFile);
-            popup.add(new JSeparator());
-            popup.add(openMenuItem);
-            popup.add(modifyMenuItem);
-            popup.add(new JSeparator());
-            popup.add(removeMenuItem);
-            popup.show(evt.getComponent(), evt.getX(), evt.getY());
+            popUp(evt);
         }
     }//GEN-LAST:event_jTable1MousePressed
 
@@ -681,6 +689,12 @@ public class Configurator extends javax.swing.JFrame implements Observer {
     private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
         connection.disconnect();
     }//GEN-LAST:event_formWindowClosed
+
+    private void jTable1MouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseReleased
+        if (evt.isPopupTrigger() && evt.getComponent() instanceof JTable) {
+            popUp(evt);
+        }
+    }//GEN-LAST:event_jTable1MouseReleased
 
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */

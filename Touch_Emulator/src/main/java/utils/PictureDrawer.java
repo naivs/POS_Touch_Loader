@@ -39,8 +39,8 @@ public class PictureDrawer {
     private static final Font PLU_FONT = new Font("Franklin Gothic Medium Cond", Font.PLAIN, 15);
 
     public PictureDrawer() {
-        ClassLoader classLoader = getClass().getClassLoader();
-        GROUND = new File(classLoader.getResource("ground.gif").getFile());
+        //ClassLoader classLoader = getClass().getClassLoader();
+        GROUND = new File("resources/ground.gif");
     }
 
     public BufferedImage draw(Subgroup subgroup) {

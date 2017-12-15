@@ -78,7 +78,7 @@ public class Emulator extends javax.swing.JFrame {
                 Enumeration elements = dayButtonsGroup.getElements();
                 int number = 0;
                 while (elements.hasMoreElements()) {
-                    if(((AbstractButton) elements.nextElement()).equals((AbstractButton) e.getSource())) {
+                    if (((AbstractButton) elements.nextElement()).equals((AbstractButton) e.getSource())) {
                         break;
                     }
                     number++;
@@ -291,10 +291,12 @@ public class Emulator extends javax.swing.JFrame {
         jPanel1Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jToggleButton1, jToggleButton2, jToggleButton3, jToggleButton4, jToggleButton5, jToggleButton6, jToggleButton7, jToggleButton8});
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Ассортимент"));
-        jPanel3.setToolTipText("");
 
         jPanel2.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED));
+        jPanel2.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        jPanel2.setFocusable(false);
         jPanel2.setPreferredSize(new java.awt.Dimension(555, 384));
+        jPanel2.setRequestFocusEnabled(false);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);

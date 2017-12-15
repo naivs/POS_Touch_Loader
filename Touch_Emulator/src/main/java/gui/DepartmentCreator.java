@@ -166,7 +166,7 @@ public class DepartmentCreator extends javax.swing.JDialog {
                         .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.TRAILING))
                     .addComponent(jRadioButton2)
                     .addComponent(jRadioButton1))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(7, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -198,7 +198,7 @@ public class DepartmentCreator extends javax.swing.JDialog {
 
         getContentPane().add(jPanel1, java.awt.BorderLayout.NORTH);
 
-        setSize(new java.awt.Dimension(311, 268));
+        setSize(new java.awt.Dimension(322, 295));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 

@@ -19,6 +19,7 @@ package utils;
 import data.Product;
 import data.Subgroup;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -35,7 +36,7 @@ public class PictureDrawer {
 
     private final File GROUND;
     private BufferedImage SCREEN;
-    private static final Font TEXT_FONT = new Font("Franklin Gothic Medium Cond", Font.BOLD, 14);
+    private static final Font TEXT_FONT = new Font("Franklin Gothic Medium Cond", Font.PLAIN, 16);
     private static final Font PLU_FONT = new Font("Franklin Gothic Medium Cond", Font.PLAIN, 15);
 
     public PictureDrawer() {
@@ -81,8 +82,6 @@ public class PictureDrawer {
             numY += dy;
         }
 
-        //ImageIO.write(SCREEN, "GIF", file);
-        //SCREEN.createGraphics().dispose();
         return SCREEN;
     }
 
@@ -93,9 +92,13 @@ public class PictureDrawer {
 
         for (String out : WordUtils.wrap(text, 14, "\n", true).split("\n")) {
             graphics.drawString(out, (14 - out.length()) * 3 + x, y);
-            y += 12;
+            y += 20;
         }
     }
+    
+//    private Dimension centerText() {
+//        
+//    }
 
     private void drawPlu(String plu, int x, int y) {
         Graphics2D graphics = SCREEN.createGraphics();

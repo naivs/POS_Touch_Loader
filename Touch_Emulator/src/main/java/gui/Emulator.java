@@ -117,7 +117,7 @@ public class Emulator extends javax.swing.JFrame {
             jToggleButton1.doClick();
         } else if (level == 1) {
             Subgroup subgroup = selectedGroup.getSubgroup(button - 1);
-            jPanel2.getGraphics().drawImage(pictureDrawer.draw(subgroup), 0, 0, null);
+            jPanel2.getGraphics().drawImage(pictureDrawer.draw(subgroup.getProducts()), 0, 0, null);
 
 //            System.out.println("\n====================");
 //            for (Product product : subgroup.getProducts()) {

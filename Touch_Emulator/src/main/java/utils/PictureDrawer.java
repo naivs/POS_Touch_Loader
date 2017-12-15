@@ -17,7 +17,6 @@
 package utils;
 
 import data.Product;
-import data.Subgroup;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -39,71 +38,92 @@ public class PictureDrawer {
     private static final Font TEXT_FONT = new Font("Franklin Gothic Medium Cond", Font.PLAIN, 16);
     private static final Font PLU_FONT = new Font("Franklin Gothic Medium Cond", Font.PLAIN, 15);
 
+    private final int cellNameSizeX = 109;
+    private final int cellNameSizeY = 76;
+    private final Dimension cellTextPosition = new Dimension(15, 14); //need's calculate depends on font size
+    private final Dimension cellPLUPosition = new Dimension(10, 92);
+    private final Dimension cellNumberPosition = new Dimension(4, 92);
+
+    private final int stepX = 111;
+    private final int stepY = 96;
+
+    private Product[] products;
+
     public PictureDrawer() {
         //ClassLoader classLoader = getClass().getClassLoader();
         GROUND = new File("resources/ground.gif");
     }
 
-    public BufferedImage draw(Subgroup subgroup) {
+    public BufferedImage draw(Product[] products) {
+        this.products = products;
         SCREEN = new BufferedImage(555, 384, BufferedImage.TYPE_INT_RGB);
+        //graphic settings
+        Graphics2D graphics = SCREEN.createGraphics();
+
         try {
             SCREEN.createGraphics().drawImage(ImageIO.read(GROUND), 0, 0, null);
         } catch (IOException ex) {
             System.err.println("Can't read \"ground.gif\"." + ex.getMessage());
         }
-        Product[] products = subgroup.getProducts();
 
-        int dx = 111;
-        int dy = 96;
+        for (int i = 0; i < products.length; i++) {
+            if (!products[i].getName().trim().equals("")) {
+                //drawing product text
+                graphics.setFont(TEXT_FONT);
+                graphics.setColor(Color.black);
+                drawText(i, graphics);
 
-        int i = 0;
+                //drawing product plu
+                graphics.setFont(PLU_FONT);
+                graphics.setColor(Color.white);
+                drawPlu(i, graphics);
 
-        int nameY = 15;
-        int pluY = 92;
-        int numY = 92;
-        for (int y = 0; y < 4; y++) {
-            int nameX = 5;
-            int pluX = 10;
-            int numX = 2;
-            for (int x = 0; x < 5; x++) {
-                if (products[i] != null) {
-                    drawName(products[i].getName(), nameX, nameY);
-                    drawPlu(products[i].getPlu(), pluX, pluY);
-                    drawNumber(String.valueOf(i + 1), numX, numY);
-
-                    i++;
-                }
-                nameX += dx;
-                pluX += dx;
-                numX += dx;
+                //drawing cell number
+                graphics.setColor(Color.black);
+                drawNumber(i, graphics);
             }
-            nameY += dy;
-            pluY += dy;
-            numY += dy;
         }
 
+        graphics.dispose();
         return SCREEN;
     }
 
-    private void drawName(String text, int x, int y) {
-        Graphics2D graphics = SCREEN.createGraphics();
-        graphics.setFont(TEXT_FONT);
-        graphics.setColor(Color.black);
+    private void drawText(int productNum, Graphics2D graphics) {
+        int interval = 20; //in pixels
 
-        for (String out : WordUtils.wrap(text, 14, "\n", true).split("\n")) {
-            graphics.drawString(out, (14 - out.length()) * 3 + x, y);
-            y += 20;
+        String[] lines = WordUtils.wrap(products[productNum].getName(), 14, "\n", true).split("\n");
+
+        //get longest line in text
+        int longestLine = 0;
+        for (String out : lines) {
+            if (longestLine < out.length()) {
+                longestLine = out.length();
+            }
+        }
+
+        StringBuilder string;
+
+        int x = (productNum % 4) * stepX + (int) cellTextPosition.getWidth();
+        int y = (productNum / 4) * stepY + (int) cellTextPosition.getHeight();
+
+        //center and print strings
+        for (String out : lines) {
+            int leftSpace = (longestLine - out.length()) / 2;
+
+            string = new StringBuilder(longestLine);
+            while (leftSpace > 0) {
+                string.append(" ");
+                leftSpace--;
+            }
+            string.append(out);
+
+            graphics.drawString(string.toString(), x, y);
+            y += interval;
         }
     }
-    
-//    private Dimension centerText() {
-//        
-//    }
 
-    private void drawPlu(String plu, int x, int y) {
-        Graphics2D graphics = SCREEN.createGraphics();
-        graphics.setFont(PLU_FONT);
-        graphics.setColor(Color.white);
+    private void drawPlu(int productNum, Graphics2D graphics) {
+        String plu = products[productNum].getPlu();
 
         if (plu.length() > 6) {
             plu = plu.substring(0, 6);
@@ -121,13 +141,17 @@ public class PictureDrawer {
 
             plu = buf_plu;
         }
+
+        int x = (productNum % 4) * stepX + (int) cellPLUPosition.getWidth();
+        int y = (productNum / 4) * stepY + (int) cellPLUPosition.getHeight();
+
         graphics.drawString(plu, (13 - plu.length()) * 8 + x, y);
     }
 
-    private void drawNumber(String number, int x, int y) {
-        Graphics2D graphics = SCREEN.createGraphics();
-        graphics.setFont(PLU_FONT);
-        graphics.setColor(Color.black);
-        graphics.drawString(number, x, y);
+    private void drawNumber(int productNum, Graphics2D graphics) {
+        int x = (productNum % 4) * stepX + (int) cellNumberPosition.getWidth();
+        int y = (productNum / 4) * stepY + (int) cellNumberPosition.getHeight();
+
+        graphics.drawString(String.valueOf(productNum + 1), x, y);
     }
 }

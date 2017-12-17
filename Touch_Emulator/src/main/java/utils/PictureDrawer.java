@@ -21,6 +21,9 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.font.FontRenderContext;
+import java.awt.font.TextLayout;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -40,7 +43,7 @@ public class PictureDrawer {
 
     private final int cellNameSizeX = 109;
     private final int cellNameSizeY = 76;
-    private final Dimension cellTextPosition = new Dimension(15, 14); //need's calculate depends on font size
+    private final Dimension cellTextPadding = new Dimension(0, 0);
     private final Dimension cellPLUPosition = new Dimension(10, 92);
     private final Dimension cellNumberPosition = new Dimension(4, 92);
 
@@ -89,37 +92,29 @@ public class PictureDrawer {
     }
 
     private void drawText(int productNum, Graphics2D graphics) {
-        int interval = 20; //in pixels
+        int interval = 4; //in pixels
+        float startX = (productNum % 4) * stepX + (float) cellTextPadding.getWidth();
+        float startY = (productNum / 4) * stepY + (float) cellTextPadding.getHeight();
 
         String[] lines = WordUtils.wrap(products[productNum].getName(), 14, "\n", true).split("\n");
 
-        //get longest line in text
-        int longestLine = 0;
+        int ySize = (lines.length - 1) * interval;
         for (String out : lines) {
-            if (longestLine < out.length()) {
-                longestLine = out.length();
-            }
+            ySize += Math.round(test1(out).getHeight());
         }
-
-        StringBuilder string;
-
-        int x = (productNum % 4) * stepX + (int) cellTextPosition.getWidth();
-        int y = (productNum / 4) * stepY + (int) cellTextPosition.getHeight();
+        startY += (cellNameSizeY - ySize) / 2 + Math.round(test1(lines[0]).getHeight());
 
         //center and print strings
         for (String out : lines) {
-            int leftSpace = (longestLine - out.length()) / 2;
-
-            string = new StringBuilder(longestLine);
-            while (leftSpace > 0) {
-                string.append(" ");
-                leftSpace--;
-            }
-            string.append(out);
-
-            graphics.drawString(string.toString(), x, y);
-            y += interval;
+            float x = startX + (cellNameSizeX - Math.round(test1(out).getWidth())) / 2;
+            graphics.drawString(out, x, startY);
+            startY += interval + Math.round(test1(out).getHeight());
         }
+    }
+    
+    private static Rectangle2D test1(String text) {
+        TextLayout tl = new TextLayout(text, TEXT_FONT, new FontRenderContext(null, true, true));
+        return tl.getBounds();
     }
 
     private void drawPlu(int productNum, Graphics2D graphics) {

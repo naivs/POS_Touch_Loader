@@ -93,8 +93,8 @@ public class PictureDrawer {
 
     private void drawText(int productNum, Graphics2D graphics) {
         int interval = 4; //in pixels
-        float startX = (productNum % 4) * stepX + (float) cellTextPadding.getWidth();
-        float startY = (productNum / 4) * stepY + (float) cellTextPadding.getHeight();
+        float startX = (productNum % 5) * stepX + (float) cellTextPadding.getWidth();
+        float startY = (productNum / 5) * stepY + (float) cellTextPadding.getHeight();
 
         String[] lines = WordUtils.wrap(products[productNum].getName(), 14, "\n", true).split("\n");
 
@@ -137,15 +137,15 @@ public class PictureDrawer {
             plu = buf_plu;
         }
 
-        int x = (productNum % 4) * stepX + (int) cellPLUPosition.getWidth();
-        int y = (productNum / 4) * stepY + (int) cellPLUPosition.getHeight();
+        int x = (productNum % 5) * stepX + (int) cellPLUPosition.getWidth();
+        int y = (productNum / 5) * stepY + (int) cellPLUPosition.getHeight();
 
         graphics.drawString(plu, (13 - plu.length()) * 8 + x, y);
     }
 
     private void drawNumber(int productNum, Graphics2D graphics) {
-        int x = (productNum % 4) * stepX + (int) cellNumberPosition.getWidth();
-        int y = (productNum / 4) * stepY + (int) cellNumberPosition.getHeight();
+        int x = (productNum % 5) * stepX + (int) cellNumberPosition.getWidth();
+        int y = (productNum / 5) * stepY + (int) cellNumberPosition.getHeight();
 
         graphics.drawString(String.valueOf(productNum + 1), x, y);
     }

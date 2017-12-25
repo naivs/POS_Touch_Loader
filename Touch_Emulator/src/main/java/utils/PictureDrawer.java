@@ -117,7 +117,7 @@ public class PictureDrawer {
         return tl.getBounds();
     }
 
-    private void drawPlu(int productNum, Graphics2D graphics) {
+    private void drawPlu(int productNum, Graphics2D graphics) { 
         String plu = products[productNum].getPlu();
 
         if (plu.length() > 6) {

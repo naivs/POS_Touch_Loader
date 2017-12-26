@@ -295,71 +295,86 @@ public class Configurator extends javax.swing.JFrame implements Observer {
             fileChooser.setFileFilter(new FileNameExtensionFilter("Файлы Microsoft Excel 2007*", "xlsx"));
 
             if (fileChooser.showDialog(this, "Открыть файл Excel...") == JFileChooser.APPROVE_OPTION) {
-                File file = new File(fileChooser.getSelectedFile().getAbsolutePath());
-                try {
-                    Parser parser = new Parser(file);
 
-                    // reading all products
-                    Day[] days = departments.get(jTable1.getSelectedRow()).getDaysOfWeek();
+                ProgressMonitor preparingProgress = new ProgressMonitor(this, "Разбор таблиц...", 100);
+                Thread thread = new Thread() {
+                    @Override
+                    public void run() {
+                        File file = new File(fileChooser.getSelectedFile().getAbsolutePath());
+                        try {
+                            Parser parser = new Parser(file);
 
-                    for (int i = 0; i < days.length; i++) {
-                        // groups name reading. It same for any day.
-                        Group[] groups = new Group[8];
+                            // reading all products
+                            Day[] days = departments.get(jTable1.getSelectedRow()).getDaysOfWeek();
 
-                        int k = 0;
-                        for (String name : parser.getGroupsNames()) {
-                            groups[k] = new Group(name);
-                            k++;
-                        }
+                            for (int i = 0; i < days.length; i++) {
+                                // groups name reading. It same for any day.
+                                Group[] groups = new Group[8];
 
-                        for (int j = 0; j < groups.length; j++) {
-                            ArrayList<Product> products = new ArrayList();
+                                int k = 0;
+                                for (String name : parser.getGroupsNames()) {
+                                    groups[k] = new Group(name);
+                                    k++;
+                                }
 
-                            for (String name : parser.getProducts(i, j)) {
-                                products.add(new Product(name.split("::")[1], name.split("::")[0], ""));
+                                for (int j = 0; j < groups.length; j++) {
+                                    ArrayList<Product> products = new ArrayList();
+
+                                    for (String name : parser.getProducts(i, j)) {
+                                        products.add(new Product(name.split("::")[1], name.split("::")[0], ""));
+                                    }
+
+                                    Subgroup[] subgroups;
+                                    if (products.size() % 20 > 0) {
+                                        subgroups = new Subgroup[(products.size() / 20) + 1];
+                                    } else {
+                                        subgroups = new Subgroup[products.size() / 20];
+                                    }
+
+                                    String[] subgroupsNames = parser.getSubgroupNames(i, j);
+
+                                    for (int s = 0; s < subgroups.length; s++) {
+                                        subgroups[s] = new Subgroup(subgroupsNames[s],
+                                                idisp.getNextFreeIndex(i, Integer.parseInt(departments.get(jTable1.getSelectedRow()).getStartIndex().substring(1))));
+                                    }
+
+                                    for (int g = 0; g < products.size(); g++) {
+                                        subgroups[g / 20].addProduct(products.get(g));
+                                    }
+                                    // =====================
+
+                                    for (Subgroup sgrp : subgroups) {
+                                        groups[j].addSubgroup(sgrp);
+                                    }
+                                    
+                                    //updating progress bar
+                                    preparingProgress.set(((i + 1) * (j + 1) * 100) / (days.length * groups.length));
+                                }
+
+                                days[i].deleteAllGroups();
+                                for (Group grp : groups) {
+                                    days[i].addGroup(grp);
+                                }
                             }
 
-                            Subgroup[] subgroups;
-                            if (products.size() % 20 > 0) {
-                                subgroups = new Subgroup[(products.size() / 20) + 1];
-                            } else {
-                                subgroups = new Subgroup[products.size() / 20];
-                            }
-
-                            String[] subgroupsNames = parser.getSubgroupNames(i, j);
-
-                            for (int s = 0; s < subgroups.length; s++) {
-                                subgroups[s] = new Subgroup(subgroupsNames[s],
-                                        idisp.getNextFreeIndex(i, Integer.parseInt(departments.get(jTable1.getSelectedRow()).getStartIndex().substring(1))));
-                            }
-
-                            for (int g = 0; g < products.size(); g++) {
-                                subgroups[g / 20].addProduct(products.get(g));
-                            }
-                            // =====================
-
-                            for (Subgroup sgrp : subgroups) {
-                                groups[j].addSubgroup(sgrp);
-                            }
-                        }
-
-                        days[i].deleteAllGroups();
-                        for (Group grp : groups) {
-                            days[i].addGroup(grp);
+                            departments.get(jTable1.getSelectedRow()).setModified(Calendar.getInstance().getTime().toString());
+                            showMessage(CLIENT_MESSAGE, "Загружен файл: " + file.getCanonicalPath(), PLAIN);
+                            saveXMLConfiguration();
+                            preparingProgress.dispose();
+                            update();
+                            interrupt();
+                        } catch (FileNotFoundException ex) {
+                            System.err.println("File not found");
+                            showMessage(CLIENT_MESSAGE, "Файл " + file.getName() + " не найден!", CRIT);
+                        } catch (IOException ex) {
+                            System.err.println("Other IO Exception");
+                            showMessage(CLIENT_MESSAGE, "Ошибка ввода/вывода!", CRIT);
                         }
                     }
-
-                    departments.get(jTable1.getSelectedRow()).setModified(Calendar.getInstance().getTime().toString());
-                    showMessage(CLIENT_MESSAGE, "Загружен файл: " + file.getCanonicalPath(), PLAIN);
-                    saveXMLConfiguration();
-                    update();
-                } catch (FileNotFoundException ex) {
-                    System.err.println("File not found");
-                    showMessage(CLIENT_MESSAGE, "Файл " + file.getName() + " не найден!", CRIT);
-                } catch (IOException ex) {
-                    System.err.println("Other IO Exception");
-                    showMessage(CLIENT_MESSAGE, "Ошибка ввода/вывода!", CRIT);
-                }
+                };
+                
+                thread.start();
+                preparingProgress.setVisible(true);
             }
         });
         JMenuItem removeMenuItem = new JMenuItem("Удалить");

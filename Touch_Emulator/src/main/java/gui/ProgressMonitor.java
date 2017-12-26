@@ -51,6 +51,10 @@ public class ProgressMonitor extends javax.swing.JDialog {
             jProgressBar1.setValue(currentProgress);
         }
     }
+    
+    public void set(int value) {
+        jProgressBar1.setValue(value);
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.

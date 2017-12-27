@@ -733,7 +733,7 @@ public class Configurator extends javax.swing.JFrame implements Observer {
         //</editor-fold>
         //</editor-fold>
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("touchLoader.conf")));) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("touchLoader.conf")))) {
             Properties properties = new Properties();
             properties.load(reader);
             SERVER_IP = properties.getProperty("serverIP");

@@ -640,7 +640,7 @@ public class Configurator extends javax.swing.JFrame implements Observer {
                                     if (subgroup.getProductCount() != 0) {
                                         try {
                                             File pic = new File(anotherDay.getAbsolutePath() + "/" + cafe.getName() + "/TCH_X" + subgroup.getIndex() + ".GIF");
-                                            ImageIO.write(new PictureDrawer().draw(subgroup.getProducts()), "GIF", pic);
+                                            ImageIO.write(new PictureDrawer().getImage(subgroup.getProducts()), "GIF", pic);
                                         } catch (IOException ex) {
                                             System.err.println(ex.getMessage());
                                         }

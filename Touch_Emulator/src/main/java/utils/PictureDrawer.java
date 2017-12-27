@@ -20,6 +20,7 @@ import data.Product;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
@@ -28,13 +29,15 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
+import javax.swing.JPanel;
 import org.apache.commons.text.WordUtils;
+import org.omg.CORBA.ORBPackage.InconsistentTypeCode;
 
 /**
  *
  * @author Ivan Naumov
  */
-public class PictureDrawer {
+public class PictureDrawer extends JPanel {
 
     private final File GROUND;
     private BufferedImage SCREEN;
@@ -57,7 +60,24 @@ public class PictureDrawer {
         GROUND = new File("resources/ground.gif");
     }
 
-    public BufferedImage draw(Product[] products) {
+    public void show(Product[] products) {
+        this.products = products;
+        Graphics graphics = this.getGraphics();
+        graphics.drawImage(getImage(products), 0, 0, this);
+        graphics.dispose();
+    }
+    
+    public void clear() {
+        Graphics graphics = this.getGraphics();
+        try {
+            graphics.drawImage(ImageIO.read(GROUND), 0, 0, this);
+        } catch (IOException ex) {
+            System.err.println("Can't read \"ground.gif\"." + ex.getMessage());
+        }
+        graphics.dispose();
+    }
+    
+    public BufferedImage getImage(Product[] products) {
         this.products = products;
         SCREEN = new BufferedImage(555, 384, BufferedImage.TYPE_INT_RGB);
         //graphic settings

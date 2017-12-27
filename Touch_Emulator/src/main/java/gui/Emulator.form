@@ -295,6 +295,9 @@
             </Property>
             <Property name="requestFocusEnabled" type="boolean" value="false"/>
           </Properties>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new PictureDrawer()"/>
+          </AuxValues>
 
           <Layout>
             <DimensionLayout dim="0">

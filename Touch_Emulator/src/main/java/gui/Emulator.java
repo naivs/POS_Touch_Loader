@@ -18,10 +18,7 @@ package gui;
 
 import data.*;
 import java.awt.event.ActionEvent;
-import java.io.File;
-import java.io.IOException;
 import java.util.Enumeration;
-import javax.imageio.ImageIO;
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
 import javax.swing.JRadioButtonMenuItem;
@@ -46,8 +43,6 @@ public class Emulator extends javax.swing.JFrame {
     private Day selectedDay;
     private Group selectedGroup;
 
-    private final PictureDrawer pictureDrawer;
-
     /**
      * Creates new form Emulator
      *
@@ -67,7 +62,6 @@ public class Emulator extends javax.swing.JFrame {
         touch[7] = jToggleButton8;
 
         this.terminalGroup = terminalGroup;
-        pictureDrawer = new PictureDrawer();
 
         for (Day daysOfWeek : terminalGroup.getDaysOfWeek()) {
             JRadioButtonMenuItem jrmi = new JRadioButtonMenuItem(daysOfWeek.toString());
@@ -117,7 +111,8 @@ public class Emulator extends javax.swing.JFrame {
             jToggleButton1.doClick();
         } else if (level == 1) {
             Subgroup subgroup = selectedGroup.getSubgroup(button - 1);
-            jPanel2.getGraphics().drawImage(pictureDrawer.draw(subgroup.getProducts()), 0, 0, null);
+            ((PictureDrawer) jPanel2).show(subgroup.getProducts());
+//jPanel2.getGraphics().drawImage(pictureDrawer.draw(subgroup.getProducts()), 0, 0, null);
 
 //            System.out.println("\n====================");
 //            for (Product product : subgroup.getProducts()) {
@@ -126,14 +121,6 @@ public class Emulator extends javax.swing.JFrame {
 //                }
 //            }
 //            System.out.println("====================");
-        }
-    }
-
-    private void resetImage() {
-        try {
-            jPanel2.getGraphics().drawImage(ImageIO.read(new File(getClass().getClassLoader().getResource("ground.gif").getFile())), 0, 0, null);
-        } catch (IOException ex) {
-            System.err.println("Can't read \"ground.gif\"." + ex.getMessage());
         }
     }
 
@@ -157,7 +144,7 @@ public class Emulator extends javax.swing.JFrame {
         jToggleButton7 = new javax.swing.JToggleButton();
         jToggleButton8 = new javax.swing.JToggleButton();
         jPanel3 = new javax.swing.JPanel();
-        jPanel2 = new javax.swing.JPanel();
+        jPanel2 = new PictureDrawer();
         jButton9 = new javax.swing.JButton();
         jPanel4 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
@@ -416,7 +403,7 @@ public class Emulator extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton9ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton9ActionPerformed
-        resetImage();
+        ((PictureDrawer) jPanel2).clear();
         level = 2;
         setButtonsLabels();
         buttonGroup1.clearSelection();

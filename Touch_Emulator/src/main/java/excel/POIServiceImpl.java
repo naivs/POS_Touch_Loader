@@ -23,7 +23,6 @@ import java.io.IOException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
@@ -34,6 +33,8 @@ public class POIServiceImpl implements XLSXService {
 
     private final int xGroup = 2;
     private final int yGroup = 1;
+    private final int xSubgroup = 1;
+    private final int ySubgroup = 3;
     private final int xProdPlu = 3;
     private final int yProdPlu = 3;
     private final int xProdName = 4;
@@ -66,50 +67,98 @@ public class POIServiceImpl implements XLSXService {
 
     @Override
     public boolean isSubgroupEmpty(int day, int group, int subgroup) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        boolean isEmpty = false;
+        for(int i = 0; i < 20; i++) {
+            if(isProductEmpty(day, group, subgroup, i)) {
+                isEmpty = true;
+            }
+        }
+        return isEmpty;
     }
 
     @Override
     public boolean isProductEmpty(int day, int group, int subgroup, int product) {
-        if(workbook.getSheetAt(day).get)
+        return (readProductName(day, group, subgroup, product).equals("") &&
+                readProductPlu(day, group, subgroup, product) == 0);
     }
 
     @Override
     public String[] getGroupNames(int day, int group) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        String[] names = new String[8];
+        for(int i = 0; i < names.length; i++) {
+            Cell cellFirst = workbook.getSheetAt(day).getRow(xGroup + group * dx).getCell(yGroup);
+            Cell cellSecond = workbook.getSheetAt(day).getRow(xGroup + group * dx + 1).getCell(yGroup);
+            
+            if(cellFirst.getCellTypeEnum() == CellType.STRING ||
+                    cellFirst.getCellTypeEnum() == CellType.BLANK) {
+                names[i] = cellFirst.getStringCellValue().trim();
+            }
+            
+            if(cellSecond.getCellTypeEnum() == CellType.STRING ||
+                    cellFirst.getCellTypeEnum() == CellType.BLANK) {
+                names[i] += "::" + cellSecond.getStringCellValue().trim();
+            }
+        }
+        return names;
     }
 
     @Override
     public String[] getSubgroupNames(int day, int group, int subgroup) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        String[] names = new String[8];
+        for(int i = 0; i < names.length; i++) {
+            Cell cellFirst = workbook.getSheetAt(day).getRow(xSubgroup + subgroup * dx).getCell(ySubgroup);
+            Cell cellSecond = workbook.getSheetAt(day).getRow(xSubgroup + subgroup * dx).getCell(ySubgroup + 1);
+            
+            if(cellFirst.getCellTypeEnum() == CellType.STRING ||
+                    cellFirst.getCellTypeEnum() == CellType.BLANK) {
+                names[i] = cellFirst.getStringCellValue().trim();
+            }
+            
+            if(cellSecond.getCellTypeEnum() == CellType.STRING ||
+                    cellFirst.getCellTypeEnum() == CellType.BLANK) {
+                names[i] += "::" + cellSecond.getStringCellValue().trim();
+            }
+        }
+        return names;
     }
 
     @Override
     public String[] getProductNames(int day, int group, int subgroup) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        String[] names = new String[20];
+        for(int i = 0; i < names.length; i++) {
+            names[0] = readProductName(day, group, subgroup, i);
+        }
+        return names;
     }
 
     @Override
     public int[] getProductPlu(int day, int group, int subgroup) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        int[] plus = new int[20];
+        for(int i = 0; i < plus.length; i++) {
+            plus[0] = readProductPlu(day, group, subgroup, i);
+        }
+        return plus;
     }
-    
-    private Class readCellContent(int sheet, int x, int y) {
-        XSSFCell cell = workbook.getSheetAt(sheet).getRow(x).getCell(y);
-        
-        CellType cellType = cell.getCellTypeEnum();
-        switch (cellType) {
-                    case CellType.
-                        System.out.print(cell.getStringCellValue() + "\t");
-                        break;
-                    case Cell.CELL_TYPE_NUMERIC:
-                        System.out.print(cell.getNumericCellValue() + "\t");
-                        break;
-                    case Cell.CELL_TYPE_BOOLEAN:
-                        System.out.print(cell.getBooleanCellValue() + "\t");
-                        break;
-                    default:
 
-                    }
+    @Override
+    public String readProductName(int day, int group, int subgroup, int product) {
+        Cell cell = workbook.getSheetAt(day).getRow(xProdName + group * dx).getCell(yProdName + subgroup * dy + product);
+        if (cell.getCellTypeEnum() != CellType.STRING || 
+                cell.getCellTypeEnum() == CellType.BLANK) {
+            return "";
+        } else {
+            return cell.getStringCellValue().trim();
+        }
+    }
+
+    @Override
+    public int readProductPlu(int day, int group, int subgroup, int product) {
+        Cell cell = workbook.getSheetAt(day).getRow(xProdPlu + group * dx).getCell(yProdPlu + subgroup * dy + product);
+        if (cell.getCellTypeEnum() != CellType.NUMERIC || 
+                cell.getCellTypeEnum() == CellType.BLANK) {
+            return 0;
+        } else {
+            return (int) cell.getNumericCellValue();
+        }
     }
 }

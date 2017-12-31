@@ -39,4 +39,8 @@ public interface XLSXService {
     String[] getProductNames(int day, int group, int subgroup);
     
     int[] getProductPlu(int day, int group, int subgroup);
+    
+    String readProductName(int day, int group, int subgroup, int product);
+    
+    int readProductPlu(int day, int group, int subgroup, int product);
 }

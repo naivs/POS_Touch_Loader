@@ -16,84 +16,13 @@
  */
 package data;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import javax.swing.table.DefaultTableModel;
-
 /**
  *
  * @author Ivan
  */
-public class Day {
+public class Day extends Group {
 
-    private final String name;
-    private final List<Group> groups;
-    
-    public Day(String name) {
-        this.name = name;
-        groups = new ArrayList<>();
-    }
-
-    public void addGroup(Group group) {
-        groups.add(group);
-    }
-    
-    public void addAllGroups(Group[] groups) {
-        this.groups.addAll(Arrays.asList(groups));
-    }
-
-    public void removeGroup(int group) {
-        groups.remove(group);
-    }
-    
-    public void deleteAllGroups() {
-        groups.clear();
-    }
-
-    public String[] getGroupsAsStringArray() {
-        String[] grp = new String[8];
-        Arrays.fill(grp, "");
-        
-        for (int i = 0; i < groups.size(); i++) {
-                grp[i] = groups.get(i).toString();
-        }
-        return grp;
-    }
-
-    public DefaultTableModel getGroupsAsTableModel() {
-        DefaultTableModel dtm = new DefaultTableModel(8, 1);
-
-        int i = 0;
-        for (Group grp : groups) {
-
-            if (grp != null) {
-                dtm.setValueAt(grp.toString(), i, 0);
-            }
-            i++;
-        }
-
-        return dtm;
-    }
-
-    public int getGroupCount() {
-        return groups.size();
-    }
-
-    public Group getGroup(int index) {
-        return groups.get(index);
-    }
-
-    public Group getGroup(String name) {
-        return groups.get(groups.indexOf(name));
-    }
-    
-    public int getGroupNumber(String name) {
-        return groups.indexOf(name);
-    }
-
-    @Override
-    public String toString() {
-        return name;
+    public Day(String name, int number) {
+        super(name, number);
     }
 }

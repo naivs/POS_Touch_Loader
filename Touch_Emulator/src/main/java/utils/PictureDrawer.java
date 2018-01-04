@@ -16,6 +16,7 @@
  */
 package utils;
 
+import data.Component;
 import data.Product;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -28,10 +29,10 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import org.apache.commons.text.WordUtils;
-import org.omg.CORBA.ORBPackage.InconsistentTypeCode;
 
 /**
  *
@@ -53,14 +54,14 @@ public class PictureDrawer extends JPanel {
     private final int stepX = 111;
     private final int stepY = 96;
 
-    private Product[] products;
+    private List<Component> products;
 
     public PictureDrawer() {
         //ClassLoader classLoader = getClass().getClassLoader();
         GROUND = new File("resources/ground.gif");
     }
 
-    public void show(Product[] products) {
+    public void show(List<Component> products) {
         this.products = products;
         Graphics graphics = this.getGraphics();
         graphics.drawImage(getImage(products), 0, 0, this);
@@ -77,7 +78,7 @@ public class PictureDrawer extends JPanel {
         graphics.dispose();
     }
     
-    public BufferedImage getImage(Product[] products) {
+    public BufferedImage getImage(List<Component> products) {
         this.products = products;
         SCREEN = new BufferedImage(555, 384, BufferedImage.TYPE_INT_RGB);
         //graphic settings
@@ -89,8 +90,8 @@ public class PictureDrawer extends JPanel {
             System.err.println("Can't read \"ground.gif\"." + ex.getMessage());
         }
 
-        for (int i = 0; i < products.length; i++) {
-            if (!products[i].getName().trim().equals("")) {
+        for (int i = 0; i < products.size(); i++) {
+            if (!products.get(i).getName().trim().equals("")) {
                 //drawing product text
                 graphics.setFont(TEXT_FONT);
                 graphics.setColor(Color.black);
@@ -116,7 +117,7 @@ public class PictureDrawer extends JPanel {
         float startX = (productNum % 5) * stepX + (float) cellTextPadding.getWidth();
         float startY = (productNum / 5) * stepY + (float) cellTextPadding.getHeight();
 
-        String[] lines = WordUtils.wrap(products[productNum].getName(), 14, "\n", true).split("\n");
+        String[] lines = WordUtils.wrap(products.get(productNum).getName(), 14, "\n", true).split("\n");
 
         int ySize = (lines.length - 1) * interval;
         for (String out : lines) {
@@ -138,7 +139,7 @@ public class PictureDrawer extends JPanel {
     }
 
     private void drawPlu(int productNum, Graphics2D graphics) { 
-        String plu = products[productNum].getPlu();
+        String plu = String.valueOf(((Product) products.get(productNum)).getPlu());
 
         if (plu.length() > 6) {
             plu = plu.substring(0, 6);

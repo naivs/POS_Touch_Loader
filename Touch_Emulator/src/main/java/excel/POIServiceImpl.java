@@ -31,46 +31,52 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  */
 public class POIServiceImpl implements XLSXService {
 
-    private final int xGroup = 2;
-    private final int yGroup = 1;
-    private final int xSubgroup = 1;
-    private final int ySubgroup = 3;
-    private final int xProdPlu = 3;
-    private final int yProdPlu = 3;
-    private final int xProdName = 4;
-    private final int yProdName = 3;
-    
-    private final int dx = 4;
-    private final int dy = 21;
-    
+    private final int xGroup = 1;
+    private final int yGroup = 0;
+    private final int xSubgroup = 0;
+    private final int ySubgroup = 2;
+    private final int xProdPlu = 2;
+    private final int yProdPlu = 2;
+    private final int xProdName = 3;
+    private final int yProdName = 2;
+
     private final Workbook workbook;
-    
+
     public POIServiceImpl(File file) throws FileNotFoundException, IOException {
         workbook = new XSSFWorkbook(new FileInputStream(file));
     }
 
     @Override
-    public boolean isStatic() {
-        int daysCount = workbook.getNumberOfSheets();
-        return daysCount > 1;
-    }
-
-    @Override
     public boolean isDayEmpty(int day) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        boolean isEmpty = true;
+        for (int i = 0; i < 8; i++) {
+            if (!isGroupEmpty(day, i)) {
+                isEmpty = false;
+                break;
+            }
+        }
+        return isEmpty;
     }
 
     @Override
     public boolean isGroupEmpty(int day, int group) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        boolean isEmpty = true;
+        for (int i = 0; i < 8; i++) {
+            if (!isSubgroupEmpty(day, group, i)) {
+                isEmpty = false;
+                break;
+            }
+        }
+        return isEmpty;
     }
 
     @Override
     public boolean isSubgroupEmpty(int day, int group, int subgroup) {
-        boolean isEmpty = false;
-        for(int i = 0; i < 20; i++) {
-            if(isProductEmpty(day, group, subgroup, i)) {
-                isEmpty = true;
+        boolean isEmpty = true;
+        for (int i = 0; i < 20; i++) {
+            if (!isProductEmpty(day, group, subgroup, i)) {
+                isEmpty = false;
+                break;
             }
         }
         return isEmpty;
@@ -78,24 +84,37 @@ public class POIServiceImpl implements XLSXService {
 
     @Override
     public boolean isProductEmpty(int day, int group, int subgroup, int product) {
-        return (readProductName(day, group, subgroup, product).equals("") &&
-                readProductPlu(day, group, subgroup, product) == 0);
+        return (readProductName(day, group, subgroup, product).equals("")
+                && readProductPlu(day, group, subgroup, product) == 0);
     }
 
     @Override
-    public String[] getGroupNames(int day, int group) {
+    public String[] getDayNames() {
+        int count = workbook.getNumberOfSheets();
+        String[] names = (count > 1 && count < 7) ? new String[1] : new String[7];
+
+        for (int i = 0; i < names.length; i++) {
+            names[i] = workbook.getSheetAt(i).getSheetName();
+        }
+        return names;
+    }
+
+    @Override
+    public String[] getGroupNames(int day) {
+        int dx = 4;
+
         String[] names = new String[8];
-        for(int i = 0; i < names.length; i++) {
-            Cell cellFirst = workbook.getSheetAt(day).getRow(xGroup + group * dx).getCell(yGroup);
-            Cell cellSecond = workbook.getSheetAt(day).getRow(xGroup + group * dx + 1).getCell(yGroup);
-            
-            if(cellFirst.getCellTypeEnum() == CellType.STRING ||
-                    cellFirst.getCellTypeEnum() == CellType.BLANK) {
+        for (int i = 0; i < names.length; i++) {
+            Cell cellFirst = workbook.getSheetAt(day).getRow(yGroup).getCell(xGroup + i * dx);
+            Cell cellSecond = workbook.getSheetAt(day).getRow(yGroup).getCell(xGroup + i * dx + 1);
+
+            if (cellFirst.getCellTypeEnum() == CellType.STRING
+                    || cellFirst.getCellTypeEnum() == CellType.BLANK) {
                 names[i] = cellFirst.getStringCellValue().trim();
             }
-            
-            if(cellSecond.getCellTypeEnum() == CellType.STRING ||
-                    cellFirst.getCellTypeEnum() == CellType.BLANK) {
+
+            if (cellSecond.getCellTypeEnum() == CellType.STRING
+                    || cellFirst.getCellTypeEnum() == CellType.BLANK) {
                 names[i] += "::" + cellSecond.getStringCellValue().trim();
             }
         }
@@ -103,19 +122,22 @@ public class POIServiceImpl implements XLSXService {
     }
 
     @Override
-    public String[] getSubgroupNames(int day, int group, int subgroup) {
+    public String[] getSubgroupNames(int day, int group) {
+        int dx = 4;
+        int dy = 20;
+
         String[] names = new String[8];
-        for(int i = 0; i < names.length; i++) {
-            Cell cellFirst = workbook.getSheetAt(day).getRow(xSubgroup + subgroup * dx).getCell(ySubgroup);
-            Cell cellSecond = workbook.getSheetAt(day).getRow(xSubgroup + subgroup * dx).getCell(ySubgroup + 1);
-            
-            if(cellFirst.getCellTypeEnum() == CellType.STRING ||
-                    cellFirst.getCellTypeEnum() == CellType.BLANK) {
+        for (int i = 0; i < names.length; i++) {
+            Cell cellFirst = workbook.getSheetAt(day).getRow(ySubgroup + i * dy).getCell(xSubgroup + group * dx);
+            Cell cellSecond = workbook.getSheetAt(day).getRow(ySubgroup + i * dy + 10).getCell(xSubgroup + group * dx);
+
+            if (cellFirst.getCellTypeEnum() == CellType.STRING
+                    || cellFirst.getCellTypeEnum() == CellType.BLANK) {
                 names[i] = cellFirst.getStringCellValue().trim();
             }
-            
-            if(cellSecond.getCellTypeEnum() == CellType.STRING ||
-                    cellFirst.getCellTypeEnum() == CellType.BLANK) {
+
+            if (cellSecond.getCellTypeEnum() == CellType.STRING
+                    || cellFirst.getCellTypeEnum() == CellType.BLANK) {
                 names[i] += "::" + cellSecond.getStringCellValue().trim();
             }
         }
@@ -125,8 +147,8 @@ public class POIServiceImpl implements XLSXService {
     @Override
     public String[] getProductNames(int day, int group, int subgroup) {
         String[] names = new String[20];
-        for(int i = 0; i < names.length; i++) {
-            names[0] = readProductName(day, group, subgroup, i);
+        for (int i = 0; i < names.length; i++) {
+            names[i] = readProductName(day, group, subgroup, i);
         }
         return names;
     }
@@ -134,17 +156,20 @@ public class POIServiceImpl implements XLSXService {
     @Override
     public int[] getProductPlu(int day, int group, int subgroup) {
         int[] plus = new int[20];
-        for(int i = 0; i < plus.length; i++) {
-            plus[0] = readProductPlu(day, group, subgroup, i);
+        for (int i = 0; i < plus.length; i++) {
+            plus[i] = readProductPlu(day, group, subgroup, i);
         }
         return plus;
     }
 
     @Override
     public String readProductName(int day, int group, int subgroup, int product) {
-        Cell cell = workbook.getSheetAt(day).getRow(xProdName + group * dx).getCell(yProdName + subgroup * dy + product);
-        if (cell.getCellTypeEnum() != CellType.STRING || 
-                cell.getCellTypeEnum() == CellType.BLANK) {
+        int dx = 4;
+        int dy = 20;
+
+        Cell cell = workbook.getSheetAt(day).getRow(yProdName + subgroup * dy + product).getCell(xProdName + group * dx);
+        if (cell.getCellTypeEnum() != CellType.STRING
+                || cell.getCellTypeEnum() == CellType.BLANK) {
             return "";
         } else {
             return cell.getStringCellValue().trim();
@@ -153,12 +178,26 @@ public class POIServiceImpl implements XLSXService {
 
     @Override
     public int readProductPlu(int day, int group, int subgroup, int product) {
-        Cell cell = workbook.getSheetAt(day).getRow(xProdPlu + group * dx).getCell(yProdPlu + subgroup * dy + product);
-        if (cell.getCellTypeEnum() != CellType.NUMERIC || 
-                cell.getCellTypeEnum() == CellType.BLANK) {
+        int dx = 4;
+        int dy = 20;
+        
+        Cell cell = workbook.getSheetAt(day).getRow(yProdPlu + subgroup * dy + product).getCell(xProdPlu + group * dx);
+        if (cell.getCellTypeEnum() != CellType.NUMERIC
+                || cell.getCellTypeEnum() == CellType.BLANK) {
             return 0;
         } else {
             return (int) cell.getNumericCellValue();
+        }
+    }
+
+    @Override
+    @SuppressWarnings("CallToPrintStackTrace")
+    public void close() {
+        try {
+            workbook.close();
+        } catch (IOException ex) {
+            System.err.println("Unable to close stream.");
+            ex.printStackTrace();
         }
     }
 }

@@ -20,83 +20,30 @@ package data;
  *
  * @author Ivan
  */
-public class Department {
+public class Department extends Subgroup {
 
-    public static final int TYPE_ALWAYS = 0;
-    public static final int TYPE_DAYS = 1;
-    
-    private int type;
-    private String name;
     private String terminals;
-    private Day[] daysOfWeek;
-    private String startIndex;
     private String modified;
-
-    public Department(int TYPE, String name, String terminals, String startIndex) {
-        this.type = TYPE;
-        this.name = name;
-        this.terminals = terminals;
-        this.startIndex = startIndex;
-        modified = "---";
-        
-        if (TYPE == TYPE_ALWAYS) {
-            daysOfWeek = new Day[1];
-            daysOfWeek[0] = new Day("Все дни");
-        } else {
-            daysOfWeek = new Day[7];
-            String[] dNames = {"Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"};
-            for (int i = 0; i < dNames.length; i++) {
-                daysOfWeek[i] = new Day(dNames[i]);
-            }
-        }
-    }
-
-    public void setDaysOfWeek(Day[] daysOfWeek) {
-        this.daysOfWeek = daysOfWeek;
-    }
     
-    public Day[] getDaysOfWeek() {
-        return daysOfWeek;
+    public Department(String name, String terminals, int startIndex, int number) {
+        super(name, startIndex, number);
+        this.terminals = terminals;
+        modified = "---";
     }
     
     public String getModified() {
         return modified;
     }
-
-    public void setModified(String modified) {
-        this.modified = modified;
-    }
     
     public String getTerminalsAsString() {
         return terminals;
     }
-    
-    public String getStartIndex() {
-        return startIndex;
-    }
 
-    public int getType() {
-        return type;
-    }
-    
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setType(int type) {
-        this.type = type;
+    public void setModified(String modified) {
+        this.modified = modified;
     }
 
     public void setTerminals(String terminals) {
         this.terminals = terminals;
-    }
-
-    public void setStartIndex(String startIndex) {
-        this.startIndex = startIndex;
-    }
-    
-    @Override
-    public String toString() {
-        return name;
     }
 }

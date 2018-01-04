@@ -35,7 +35,7 @@ public class ParGenerator {
     public ParGenerator(data.Day day) {
         data = new ArrayList();
         
-        for (int a = 0; a < day.getGroupCount(); a++) {
+        for (int a = 0; a < day.getComponentsCount(); a++) {
             generateSubgroupBlock(day.getGroup(a), a);
         }
 
@@ -45,7 +45,7 @@ public class ParGenerator {
     private void generateSubgroupBlock(Group group, int groupNumber) {
         StringBuilder subgroupString;
 
-        for (int i = 0; i < group.getSubgroupCount(); i++) {
+        for (int i = 0; i < group.getComponentsCount(); i++) {
             subgroupString = new StringBuilder("PD0__:LIST:            *___:                  ");
             String name1, name2, index;
 

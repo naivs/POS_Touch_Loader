@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Ivan Naumov
+ * Copyright (C) 2017 ivan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,20 +20,34 @@ package data;
  *
  * @author ivan
  */
-public class Subgroup extends Group {
+public abstract class Component {
     
-    private int index;
+    private String name;
+    private int number;
     
-    public Subgroup(String name, int index, int number) {
-        super(name, number);
-        this.index = index;
+    Component(String name, int number) {
+        this.name = name;
+        this.number = number;
     }
     
-    public int getIndex() {
-        return index;
+    public String getName() {
+        return name;
     }
     
-    public void setIndex(int index) {
-        this.index = index;
+    public int getNumber() {
+        return number;
     }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    public void setNumber(int number) {
+        this.number = number;
+    }
+    
+    @Override
+    public String toString() {
+        return name;
+    };
 }

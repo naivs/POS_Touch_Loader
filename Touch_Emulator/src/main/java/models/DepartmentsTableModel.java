@@ -39,7 +39,7 @@ public class DepartmentsTableModel extends AbstractTableModel {
             data[i][0] = terminalGroups.get(i).toString();
             data[i][1] = terminalGroups.get(i).getTerminalsAsString();
             data[i][2] = terminalGroups.get(i).getModified();
-            data[i][3] = terminalGroups.get(i).getType() == 0 ? "Постоянный ассортимент" : "По дням недели";
+            data[i][3] = terminalGroups.get(i).getComponentsCount() < 7 ? "Постоянный ассортимент" : "По дням недели";
         }
     }
     

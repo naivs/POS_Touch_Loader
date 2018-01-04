@@ -16,6 +16,16 @@
  */
 package excel;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -28,38 +38,104 @@ import static org.junit.Assert.*;
  * @author Ivan Naumov
  */
 public class POIServiceImplTest {
-    
-    public POIServiceImplTest() {
-    }
-    
-    @BeforeClass
-    public static void setUpClass() {
-    }
-    
-    @AfterClass
-    public static void tearDownClass() {
-    }
-    
-    @Before
-    public void setUp() {
-    }
-    
-    @After
-    public void tearDown() {
+
+    private static File tableFile;
+    private XLSXService instance;
+
+    private static final String sheetName = "Понедельник";
+    /*
+        the first part must be have max 14 symbols
+        the second part must be have max 18 symbols
+        divides by "::"
+     */
+    private static final String groupName = "Завтраки БлиныFFF::Вареники Пельмени FFF";
+    /*
+        the first part must be have max 12 symbols
+        the second part must be have max 18 symbols
+        divides by "::"
+     */
+    private static final String subgroupName = "СвежевыжатыеFFF::соки              FFF";
+    private static final String productName = "Сливочный торт";
+    private static final int productPlu = 112233;
+    //for EAN-13 test
+    private static final long ean_13Plu = 1234567891234L;
+
+    @SuppressWarnings("CallToPrintStackTrace")
+    private XLSXService getServiceInstance() {
+        try {
+            instance = new POIServiceImpl(tableFile);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        return instance;
     }
 
-    /**
-     * Test of isStatic method, of class POIServiceImpl.
-     */
+    @BeforeClass
+    @SuppressWarnings("CallToPrintStackTrace")
+    public static void setUpClass() {
+        tableFile = new File("test.xlsx");
+
+        try {
+            tableFile.createNewFile();
+            Workbook workbook = new XSSFWorkbook();
+            Cell cell1;
+            Cell cell2;
+            //create sheet
+            workbook.createSheet(sheetName);
+            Sheet sheet = workbook.getSheetAt(0);
+            //create groups
+            cell1 = sheet.createRow(0).createCell(1, CellType.STRING);
+            cell2 = sheet.createRow(0).createCell(2, CellType.STRING);
+            cell1.setCellValue(groupName.split("::")[0]);
+            cell1.setCellValue(groupName.split("::")[1]);
+            cell1 = sheet.createRow(0).createCell(29, CellType.STRING);
+            cell2 = sheet.createRow(0).createCell(30, CellType.STRING);
+            cell1.setCellValue(groupName.split("::")[0]);
+            cell1.setCellValue(groupName.split("::")[1]);
+            //create subgroups
+            cell1 = sheet.createRow(2).createCell(0, CellType.STRING);
+            cell2 = sheet.createRow(3).createCell(0, CellType.STRING);
+            cell1.setCellValue(subgroupName.split("::")[0]);
+            cell1.setCellValue(subgroupName.split("::")[1]);
+            cell1 = sheet.createRow(16).createCell(28, CellType.STRING);
+            cell2 = sheet.createRow(17).createCell(28, CellType.STRING);
+            cell1.setCellValue(subgroupName.split("::")[0]);
+            cell1.setCellValue(subgroupName.split("::")[1]);
+            //create products
+            cell1 = sheet.createRow(2).createCell(0, CellType.NUMERIC);
+            cell2 = sheet.createRow(3).createCell(0, CellType.STRING);
+            
+            workbook.write(new FileOutputStream(tableFile));
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    @AfterClass
+    @SuppressWarnings("CallToPrintStackTrace")
+    public static void tearDownClass() {
+        System.out.print("test file delete...          ");
+        String result = tableFile.delete() ? "[OK]" : "[fail]";
+        System.out.println(result);
+    }
+
+    @Before
+    @SuppressWarnings("CallToPrintStackTrace")
+    public void setUp() {
+        instance = getServiceInstance();
+    }
+
+    @After
+    public void tearDown() {
+        instance.close();
+    }
+
     @Test
     public void testIsStatic() {
         System.out.println("isStatic");
-        POIServiceImpl instance = null;
-        boolean expResult = false;
-        boolean result = instance.isStatic();
+        boolean expResult = true;
+        boolean result = !(instance.getDayNames().length > 1);
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
     }
 
     /**
@@ -194,5 +270,5 @@ public class POIServiceImplTest {
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
-    
+
 }

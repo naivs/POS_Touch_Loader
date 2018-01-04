@@ -22,8 +22,6 @@ package excel;
  */
 public interface XLSXService {
     
-    boolean isStatic();
-    
     boolean isDayEmpty(int day);
     
     boolean isGroupEmpty(int day, int group);
@@ -32,9 +30,11 @@ public interface XLSXService {
     
     boolean isProductEmpty(int day, int group, int subgroup, int product);
     
-    String[] getGroupNames(int day, int group);
+    String[] getDayNames();
     
-    String[] getSubgroupNames(int day, int group, int subgroup);
+    String[] getGroupNames(int day);
+    
+    String[] getSubgroupNames(int day, int group);
     
     String[] getProductNames(int day, int group, int subgroup);
     
@@ -43,4 +43,6 @@ public interface XLSXService {
     String readProductName(int day, int group, int subgroup, int product);
     
     int readProductPlu(int day, int group, int subgroup, int product);
+    
+    void close();
 }

@@ -19,6 +19,7 @@ package gui;
 import data.*;
 import java.awt.event.ActionEvent;
 import java.util.Enumeration;
+import java.util.List;
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
 import javax.swing.JRadioButtonMenuItem;
@@ -39,16 +40,16 @@ public class Emulator extends javax.swing.JFrame {
 
     private final ButtonGroup dayButtonsGroup;
 
-    private final Department terminalGroup;
+    private final Department department;
     private Day selectedDay;
     private Group selectedGroup;
 
     /**
      * Creates new form Emulator
      *
-     * @param terminalGroup
+     * @param department
      */
-    public Emulator(Department terminalGroup) {
+    public Emulator(Department department) {
         dayButtonsGroup = new ButtonGroup();
         initComponents();
 
@@ -61,10 +62,10 @@ public class Emulator extends javax.swing.JFrame {
         touch[6] = jToggleButton7;
         touch[7] = jToggleButton8;
 
-        this.terminalGroup = terminalGroup;
+        this.department = department;
 
-        for (Day daysOfWeek : terminalGroup.getDaysOfWeek()) {
-            JRadioButtonMenuItem jrmi = new JRadioButtonMenuItem(daysOfWeek.toString());
+        for (Component day : department.getComponents()) {
+            JRadioButtonMenuItem jrmi = new JRadioButtonMenuItem(day.toString());
             dayButtonsGroup.add(jrmi);
             jMenu2.add(jrmi);
 
@@ -77,7 +78,7 @@ public class Emulator extends javax.swing.JFrame {
                     }
                     number++;
                 }
-                selectedDay = terminalGroup.getDaysOfWeek()[number];
+                selectedDay = (Day) department.getComponent(number);
                 level = 2;
                 buttonGroup1.clearSelection();
                 setButtonsLabels();
@@ -87,17 +88,17 @@ public class Emulator extends javax.swing.JFrame {
 
     private void setButtonsLabels() {
         if (level == 2) {
-            jLabel2.setText("Кассовый отдел: " + terminalGroup.toString());
+            jLabel2.setText("Кассовый отдел: " + department.toString());
             jLabel3.setText("День: " + selectedDay.toString());
             jLabel4.setText("");
-            String[] groupNames = selectedDay.getGroupsAsStringArray();
+            List<Component> groups = selectedDay.getComponents();
             for (int i = 0; i < touch.length; i++) {
-                touch[i].setText("<html>" + groupNames[i].replaceAll("::", "<br>") + "</html>");
+                touch[i].setText("<html>" + groups.get(i).getName().replaceAll("::", "<br>") + "</html>");
             }
         } else {
-            String[] subgroupNames = selectedGroup.getSubgroupsAsStringArray();
-            for (int i = 0; i < subgroupNames.length; i++) {
-                touch[i].setText("<html>" + subgroupNames[i].replaceAll("::", "<br>") + "</html>");
+            List<Component> subgroups = selectedGroup.getComponents();
+            for (int i = 0; i < subgroups.size(); i++) {
+                touch[i].setText("<html>" + subgroups.get(i).getName().replaceAll("::", "<br>") + "</html>");
             }
         }
     }
@@ -105,13 +106,13 @@ public class Emulator extends javax.swing.JFrame {
     private void touchAction(int button) {
         if (level == 2) {
             level = 1;
-            selectedGroup = selectedDay.getGroup(button - 1);
+            selectedGroup = (Group) selectedDay.getComponent(button - 1);
             setButtonsLabels();
             jLabel4.setText("Гуппа: " + selectedGroup.getName().replace("::", " "));
             jToggleButton1.doClick();
         } else if (level == 1) {
-            Subgroup subgroup = selectedGroup.getSubgroup(button - 1);
-            ((PictureDrawer) jPanel2).show(subgroup.getProducts());
+            Subgroup subgroup = (Subgroup) selectedGroup.getComponent(button - 1);
+            ((PictureDrawer) jPanel2).show(subgroup.getComponents());
 //jPanel2.getGraphics().drawImage(pictureDrawer.draw(subgroup.getProducts()), 0, 0, null);
 
 //            System.out.println("\n====================");

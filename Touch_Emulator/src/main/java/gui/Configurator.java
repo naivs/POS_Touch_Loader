@@ -16,14 +16,14 @@
  */
 package gui;
 
+import data.Component;
 import data.Day;
 import data.Group;
 import data.Product;
 import data.Subgroup;
 import data.Department;
-import excel.Parser;
-import io.ConfigurationReader;
-import io.ConfigurationWriter;
+import excel.POIServiceImpl;
+import excel.XLSXService;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
@@ -50,16 +50,16 @@ import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.xml.transform.TransformerException;
 import models.DepartmentsTableModel;
 import network.Connection;
 import network.SMBAuthentication;
 import network.SMBClient;
-import org.xml.sax.SAXException;
 import utils.IndexDispatcher;
 import utils.ParGenerator;
 import utils.PictureDrawer;
 import utils.RefGenerator;
+import xml.DOMService;
+import xml.SerializationService;
 
 /**
  *
@@ -80,20 +80,19 @@ public class Configurator extends javax.swing.JFrame implements Observer {
     public static final int CRIT = 2;
 
     private List<Department> departments;
+    
+    private SerializationService xmlSerializer;
 
     private final IndexDispatcher idisp = new IndexDispatcher();
 
     public Configurator() {
         initComponents();
-
+        
+        xmlSerializer = new DOMService();
+        
         try {
-            departments = new ConfigurationReader().read();
+            departments = xmlSerializer.deserialize(new File("resources/configuration.xml"));
             showMessage(CLIENT_MESSAGE, "Конфигурация открыта", PLAIN);
-        } catch (SAXException e) {
-            // empty or corrupted
-            System.err.println(e.getMessage() + "\nФайл: \"resources/configuration.xml\" пуст или поврежден. Будет создана новая конфигурация");
-            showMessage(CLIENT_MESSAGE, "\"configuration.xml\" пуст или поврежден", WARN);
-            departments = new ArrayList<>();
         } catch (IOException e) {
             // no file
             System.err.println(e.getMessage() + "\nФайл: \"resources/configuration.xml\" не найден. Будет создана новая конфигурация");
@@ -234,13 +233,15 @@ public class Configurator extends javax.swing.JFrame implements Observer {
     }
 
     private void saveXMLConfiguration() {
-        try {
-            new ConfigurationWriter().write(departments);
-            showMessage(CLIENT_MESSAGE, "Конфигурация обновлена!", PLAIN);
-        } catch (TransformerException ex) {
-            System.err.println("TransformerException occured while configuration saving! " + ex.getMessage());
-            showMessage(CLIENT_MESSAGE, "Ошибка записи данных!", CRIT);
-        }
+//        try {
+//            new ConfigurationWriter().write(departments);
+//            showMessage(CLIENT_MESSAGE, "Конфигурация обновлена!", PLAIN);
+//        } catch (TransformerException ex) {
+//            System.err.println("TransformerException occured while configuration saving! " + ex.getMessage());
+//            showMessage(CLIENT_MESSAGE, "Ошибка записи данных!", CRIT);
+//        }
+        
+        xmlSerializer.serialize(departments, new File("resources/configuration.xml"));
     }
 
     private void recursiveCopy(File file) {
@@ -302,61 +303,64 @@ public class Configurator extends javax.swing.JFrame implements Observer {
                     public void run() {
                         File file = new File(fileChooser.getSelectedFile().getAbsolutePath());
                         try {
-                            Parser parser = new Parser(file);
+                            XLSXService xlsxService = new POIServiceImpl(file);
+                            Department department = departments.get(jTable1.getSelectedRow());
 
-                            // reading all products
-                            Day[] days = departments.get(jTable1.getSelectedRow()).getDaysOfWeek();
+                            //reading table
+                            //recreate department
+                            department = new Department(department.getName(),
+                                    department.getTerminalsAsString(),
+                                    department.getIndex(),
+                                    department.getNumber());
 
-                            for (int i = 0; i < days.length; i++) {
-                                // groups name reading. It same for any day.
-                                Group[] groups = new Group[8];
-
-                                int k = 0;
-                                for (String name : parser.getGroupsNames()) {
-                                    groups[k] = new Group(name);
-                                    k++;
-                                }
-
-                                for (int j = 0; j < groups.length; j++) {
-                                    ArrayList<Product> products = new ArrayList();
-
-                                    for (String name : parser.getProducts(i, j)) {
-                                        products.add(new Product(name.split("::")[1], name.split("::")[0], ""));
-                                    }
-
-                                    Subgroup[] subgroups;
-                                    if (products.size() % 20 > 0) {
-                                        subgroups = new Subgroup[(products.size() / 20) + 1];
-                                    } else {
-                                        subgroups = new Subgroup[products.size() / 20];
-                                    }
-
-                                    String[] subgroupsNames = parser.getSubgroupNames(i, j);
-
-                                    for (int s = 0; s < subgroups.length; s++) {
-                                        subgroups[s] = new Subgroup(subgroupsNames[s],
-                                                idisp.getNextFreeIndex(i, Integer.parseInt(departments.get(jTable1.getSelectedRow()).getStartIndex().substring(1))));
-                                    }
-
-                                    for (int g = 0; g < products.size(); g++) {
-                                        subgroups[g / 20].addProduct(products.get(g));
-                                    }
-                                    // =====================
-
-                                    for (Subgroup sgrp : subgroups) {
-                                        groups[j].addSubgroup(sgrp);
-                                    }
+                            //days creation
+                            String[] dayNames = xlsxService.getDayNames();
+                            for (int a = 0; a < dayNames.length; a++) {
+                                //if day is no empty
+                                if (!xlsxService.isDayEmpty(a)) {
+                                    Day day = new Day(dayNames[a], a);
+                                    department.addComponent(day);
                                     
-                                    //updating progress bar
-                                    preparingProgress.set(((i + 1) * (j + 1) * 100) / (days.length * groups.length));
-                                }
-
-                                days[i].deleteAllGroups();
-                                for (Group grp : groups) {
-                                    days[i].addGroup(grp);
+                                    //groups creation
+                                    String[] groupNames = xlsxService.getGroupNames(a);
+                                    for (int b = 0; b < groupNames.length; b++) {
+                                        //if group is no empty
+                                        if (!xlsxService.isGroupEmpty(a, b)) {
+                                            Group group = new Group(groupNames[b], b);
+                                            day.addComponent(group);
+                                            
+                                            //subgroup creation
+                                            String[] subgroupNames = xlsxService.getSubgroupNames(a, b);
+                                            for(int c = 0; c < subgroupNames.length; c++) {
+                                                //if subgroup is no empty
+                                                if (!xlsxService.isSubgroupEmpty(a, b, c)) {
+                                                    int index = idisp.getNextFreeIndex(a, departments.get(jTable1.getSelectedRow()).getIndex());
+                                                    Subgroup subgroup = new Subgroup(subgroupNames[c], index, c);
+                                                    group.addComponent(subgroup);
+                                                    
+                                                    //product creation
+                                                    String[] productNames = xlsxService.getProductNames(a, b, c);
+                                                    int[] productPlu = xlsxService.getProductPlu(a, b, c);
+                                                    for(int d = 0; d < productNames.length; d++) {
+                                                        //if product is no empty
+                                                        if (!xlsxService.isProductEmpty(a, b, c, d)) {
+                                                            Product product = new Product(productNames[d], productPlu[d], d);
+                                                            subgroup.addComponent(product);
+                                                            
+                                                            //updating progress bar
+                                                            int max = dayNames.length * groupNames.length * subgroupNames.length * productNames.length;
+                                                            int current = (a + 1) * (b + 1) * (c + 1) * (d + 1);
+                                                            preparingProgress.set(current * 100 / max);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             }
 
+                            departments.set(jTable1.getSelectedRow(), department);
                             departments.get(jTable1.getSelectedRow()).setModified(Calendar.getInstance().getTime().toString());
                             showMessage(CLIENT_MESSAGE, "Загружен файл: " + file.getCanonicalPath(), PLAIN);
                             saveXMLConfiguration();
@@ -372,7 +376,7 @@ public class Configurator extends javax.swing.JFrame implements Observer {
                         }
                     }
                 };
-                
+
                 thread.start();
                 preparingProgress.setVisible(true);
             }
@@ -549,7 +553,7 @@ public class Configurator extends javax.swing.JFrame implements Observer {
                 holdedPOS += ":" + buf.getTerminalsAsString();
             }
             DepartmentCreator dc = new DepartmentCreator(this, holdedPOS);
-            Department tg = dc.createDepartment();
+            Department tg = dc.createDepartment(departments.size());
 
             if (tg != null) {
                 boolean contains = false;
@@ -573,8 +577,8 @@ public class Configurator extends javax.swing.JFrame implements Observer {
     private void uploadButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_uploadButtonActionPerformed
         int groupsCount = 0;
         for (Department tGrp : departments) {
-            for (Day daysOfWeek : tGrp.getDaysOfWeek()) {
-                groupsCount += daysOfWeek.getGroupCount();
+            for (Component day : tGrp.getComponents()) {
+                groupsCount += ((Day) day).getComponentsCount();
             }
         }
         ProgressMonitor preparingProgress = new ProgressMonitor(this, "Подготовка файлов для выгрузки...", groupsCount);
@@ -598,13 +602,13 @@ public class Configurator extends javax.swing.JFrame implements Observer {
                 for (int i = 0; i < departments.size(); i++) {
                     if (!departments.get(i).getModified().equals("---")) {
                         Department department = departments.get(i);
-                        for (int j = 0; j < department.getDaysOfWeek().length; j++) {
-                            Day day = department.getDaysOfWeek()[j];
+                        for (int j = 0; j < department.getComponentsCount(); j++) {
+                            Day day = (Day) department.getComponent(j);
                             // clear pic folder                            
                             // creation day dirs
                             // saving all into it
                             File anotherDay;
-                            if (department.getType() == Department.TYPE_ALWAYS) {
+                            if (department.getComponentsCount() > 1) {
                                 //Calendar calendar = Calendar.getInstance();
                                 //calendar.setTime(new Date());
                                 //anotherDay = new File(dataFolder.getPath() + "/day" + (calendar.get(Calendar.DAY_OF_WEEK) - 1));
@@ -633,14 +637,14 @@ public class Configurator extends javax.swing.JFrame implements Observer {
                             // saving images
                             File cafe = new File(anotherDay.getPath() + "/cafe");
                             cafe.mkdir();
-                            for (int c = 0; c < day.getGroupCount(); c++) {
-                                Group group = day.getGroup(c);
-                                for (int d = 0; d < group.getSubgroupCount(); d++) {
-                                    Subgroup subgroup = group.getSubgroup(d);
-                                    if (subgroup.getProductCount() != 0) {
+                            for (int c = 0; c < day.getComponentsCount(); c++) {
+                                Group group = (Group) day.getComponent(c);
+                                for (int d = 0; d < group.getComponentsCount(); d++) {
+                                    Subgroup subgroup = (Subgroup) group.getComponent(d);
+                                    if (subgroup.getComponentsCount() != 0) {
                                         try {
                                             File pic = new File(anotherDay.getAbsolutePath() + "/" + cafe.getName() + "/TCH_X" + subgroup.getIndex() + ".GIF");
-                                            ImageIO.write(new PictureDrawer().getImage(subgroup.getProducts()), "GIF", pic);
+                                            ImageIO.write(new PictureDrawer().getImage(subgroup.getComponents()), "GIF", pic);
                                         } catch (IOException ex) {
                                             System.err.println(ex.getMessage());
                                         }
@@ -662,7 +666,7 @@ public class Configurator extends javax.swing.JFrame implements Observer {
 
         int days = 0;
         for (Department tGrp : departments) {
-            days += tGrp.getDaysOfWeek().length;
+            days += tGrp.getComponentsCount();
         }
         ProgressMonitor uploadProgress = new ProgressMonitor(this, "Загрузка данных на сервер...", days);
         Thread uploadingThread = new Thread() {
@@ -729,10 +733,9 @@ public class Configurator extends javax.swing.JFrame implements Observer {
         }
         //</editor-fold>
         //</editor-fold>
-        
-        //</editor-fold>
-        //</editor-fold>
 
+        //</editor-fold>
+        //</editor-fold>
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("touchLoader.conf")))) {
             Properties properties = new Properties();
             properties.load(reader);

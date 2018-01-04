@@ -39,11 +39,11 @@ public class DepartmentCreator extends javax.swing.JDialog {
         initComponents();
     }
 
-    public Department createDepartment() {
+    public Department createDepartment(int number) {
         setVisible(true);
         if(isModified) {
-            int tGroupType = jRadioButton1.isSelected() ? Department.TYPE_ALWAYS : Department.TYPE_DAYS;
-            terminalGroup = new Department(tGroupType, boxName.getText(), boxTerminals.getText(), jComboBox1.getSelectedItem().toString());
+            int index = jComboBox1.getSelectedItem().toString().equals("---") ? 0 : Integer.parseInt(jComboBox1.getSelectedItem().toString());
+            terminalGroup = new Department(boxName.getText(), boxTerminals.getText(), index, number);
         }
         return terminalGroup;
     }
@@ -52,22 +52,16 @@ public class DepartmentCreator extends javax.swing.JDialog {
         this.terminalGroup = terminalGroup;
         boxName.setText(this.terminalGroup.toString());
         boxTerminals.setText(this.terminalGroup.getTerminalsAsString());
-        jComboBox1.setSelectedItem(this.terminalGroup.getStartIndex());
+        String index = this.terminalGroup.getIndex() == 0 ? "---" : String.valueOf(this.terminalGroup.getIndex());
+        jComboBox1.setSelectedItem(index);
 
-        if (this.terminalGroup.getType() == Department.TYPE_ALWAYS) {
-            jRadioButton1.setSelected(true);
-        } else {
-            jRadioButton2.setSelected(true);
-        }
         setVisible(true);
         
         if(isModified) {
             this.terminalGroup.setName(boxName.getText());
             this.terminalGroup.setTerminals(boxTerminals.getText());
-            this.terminalGroup.setStartIndex(String.valueOf(jComboBox1.getSelectedItem()));
-            if(jRadioButton1.isSelected()) {
-                this.terminalGroup.setType(Department.TYPE_ALWAYS);
-            }
+            int index1 = jComboBox1.getSelectedItem().toString().equals("---") ? 0 : Integer.parseInt(jComboBox1.getSelectedItem().toString());
+            this.terminalGroup.setIndex(index1);
         }
         return isModified;
     }
@@ -81,7 +75,6 @@ public class DepartmentCreator extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        buttonGroup1 = new javax.swing.ButtonGroup();
         jPanel1 = new javax.swing.JPanel();
         jComboBox1 = new javax.swing.JComboBox<>();
         jLabel1 = new javax.swing.JLabel();
@@ -92,8 +85,6 @@ public class DepartmentCreator extends javax.swing.JDialog {
         btnOk = new javax.swing.JButton();
         btnCancel = new javax.swing.JButton();
         jLabel5 = new javax.swing.JLabel();
-        jRadioButton1 = new javax.swing.JRadioButton();
-        jRadioButton2 = new javax.swing.JRadioButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Кассовый отдел");
@@ -102,7 +93,7 @@ public class DepartmentCreator extends javax.swing.JDialog {
 
         jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { " ---", "*001", "*101", "*201", "*311", "*401", "*501", "*601" }));
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { " ---", "001", "101", "201", "301", "401", "501", "601" }));
         jComboBox1.setFocusable(false);
 
         jLabel1.setText("Название");
@@ -136,36 +127,24 @@ public class DepartmentCreator extends javax.swing.JDialog {
 
         jLabel5.setForeground(new java.awt.Color(255, 0, 0));
 
-        buttonGroup1.add(jRadioButton1);
-        jRadioButton1.setSelected(true);
-        jRadioButton1.setText("Один ассортимент");
-        jRadioButton1.setFocusable(false);
-
-        buttonGroup1.add(jRadioButton2);
-        jRadioButton2.setText("По дням недели");
-        jRadioButton2.setFocusable(false);
-
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(boxName, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 295, Short.MAX_VALUE)
-                        .addComponent(jLabel1)
-                        .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel2)
-                        .addComponent(jLabel3)
-                        .addComponent(boxTerminals, javax.swing.GroupLayout.Alignment.TRAILING)
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                            .addComponent(btnOk)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(btnCancel))
-                        .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.TRAILING))
-                    .addComponent(jRadioButton2)
-                    .addComponent(jRadioButton1))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(boxName, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 295, Short.MAX_VALUE)
+                    .addComponent(jLabel1)
+                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel2)
+                    .addComponent(jLabel3)
+                    .addComponent(boxTerminals, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addComponent(btnOk)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnCancel))
+                    .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addContainerGap(7, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
@@ -183,11 +162,7 @@ public class DepartmentCreator extends javax.swing.JDialog {
                 .addComponent(jLabel3)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jRadioButton1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jRadioButton2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 74, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnCancel)
                     .addComponent(btnOk))
@@ -226,14 +201,11 @@ public class DepartmentCreator extends javax.swing.JDialog {
     private javax.swing.JTextField boxTerminals;
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnOk;
-    private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JRadioButton jRadioButton1;
-    private javax.swing.JRadioButton jRadioButton2;
     // End of variables declaration//GEN-END:variables
 }

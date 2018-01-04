@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Ivan Naumov
+ * Copyright (C) 2018 ivan
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,26 +14,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package data;
+package xml;
+
+import data.Department;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
 /**
  *
  * @author ivan
  */
-public class Subgroup extends Group {
+public interface SerializationService {
     
-    private int index;
+    void serialize(List<Department> data, File file);
     
-    public Subgroup(String name, int index, int number) {
-        super(name, number);
-        this.index = index;
-    }
-    
-    public int getIndex() {
-        return index;
-    }
-    
-    public void setIndex(int index) {
-        this.index = index;
-    }
+    List<Department> deserialize(File file) throws IOException;
 }

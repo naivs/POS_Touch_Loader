@@ -16,6 +16,8 @@
  */
 package utils;
 
+import data.Group;
+import data.Product;
 import data.Subgroup;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -41,16 +43,18 @@ public class RefGenerator {
         // getting all subgroups per day
         ArrayList<Subgroup> subgroups = new ArrayList();
 
-        for (int c = 0; c < day.getGroupCount(); c++) {
-            for (int d = 0; d < day.getGroup(c).getSubgroupCount(); d++) {
-                subgroups.add(day.getGroup(c).getSubgroup(d));
+        for (int c = 0; c < day.getComponentsCount(); c++) {
+            Group group = (Group) day.getComponent(c);
+            for (int d = 0; d < group.getComponentsCount(); d++) {
+                Subgroup subgroup = (Subgroup) group.getComponent(d);
+                subgroups.add(subgroup);
             }
         }
 
         // sorting subgroups by index
         for (int i = 0; i < subgroups.size(); i++) {
             for (int j = subgroups.size() - 1; j > i; j--) {
-                if (Integer.parseInt(subgroups.get(i).getIndex()) > Integer.parseInt(subgroups.get(j).getIndex())) {
+                if (subgroups.get(i).getIndex() > subgroups.get(j).getIndex()) {
                     Collections.swap(subgroups, i, j);
                 }
             }
@@ -69,24 +73,24 @@ public class RefGenerator {
         String number; //must be len 2;
         String plu; //must be len = 16
 
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < subgroup.getComponentsCount(); i++) {
 
             number = String.valueOf(i + 1);
             if (number.length() == 1) {
                 number = "0" + number;
             }
 
-            if (subgroup.getProduct(i) != null) {
-                plu = subgroup.getProduct(i).getPlu();
+//            if (subgroup.getProduct(i) != null) {
+                plu = String.valueOf(((Product) subgroup.getComponent(i)).getPlu());
 
                 while (plu.length() < 16) {
                     plu = " " + plu;
                 }
 
                 out[i] += "*" + subgroup.getIndex() + ":  " + number + ":" + plu + ":0000:                    ";
-            } else {
-                out[i] += "*" + subgroup.getIndex() + ":  " + number + ":                :0000:                    ";
-            }
+//            } else {
+//                out[i] += "*" + subgroup.getIndex() + ":  " + number + ":                :0000:                    ";
+//            }
         }
 
         return out;

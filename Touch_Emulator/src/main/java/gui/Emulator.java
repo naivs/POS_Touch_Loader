@@ -36,6 +36,11 @@ public class Emulator extends javax.swing.JFrame {
     public static final int LOCK_STATE = 1;
 
     private final JToggleButton[] touch = new JToggleButton[8];
+    /*
+    "level" variable may take two statements:
+        2 - group buttons layout level (default)
+        1 - subgroups buttons layout level
+     */
     private int level = 2;
 
     private final ButtonGroup dayButtonsGroup;
@@ -92,36 +97,41 @@ public class Emulator extends javax.swing.JFrame {
             jLabel3.setText("День: " + selectedDay.toString());
             jLabel4.setText("");
             List<Component> groups = selectedDay.getComponents();
-            for (int i = 0; i < touch.length; i++) {
-                touch[i].setText("<html>" + groups.get(i).getName().replaceAll("::", "<br>") + "</html>");
+            for (int i = 0; i < 8; i++) {
+                if (i < groups.size()) {
+                    touch[i].setText("<html>" + groups.get(i).getName().replaceAll("::", "<br>") + "</html>");
+                } else {
+                    touch[i].setText("");
+                }
             }
         } else {
             List<Component> subgroups = selectedGroup.getComponents();
-            for (int i = 0; i < subgroups.size(); i++) {
-                touch[i].setText("<html>" + subgroups.get(i).getName().replaceAll("::", "<br>") + "</html>");
+            for (int i = 0; i < 8; i++) {
+                if (i < subgroups.size()) {
+                    touch[i].setText("<html>" + subgroups.get(i).getName().replaceAll("::", "<br>") + "</html>");
+                } else {
+                    touch[i].setText("");
+                }
             }
         }
     }
 
     private void touchAction(int button) {
         if (level == 2) {
-            level = 1;
-            selectedGroup = (Group) selectedDay.getComponent(button - 1);
-            setButtonsLabels();
-            jLabel4.setText("Гуппа: " + selectedGroup.getName().replace("::", " "));
-            jToggleButton1.doClick();
+            if (button <= selectedDay.getComponentsCount()) {
+                level = 1;
+                selectedGroup = (Group) selectedDay.getComponent(button - 1);
+                setButtonsLabels();
+                jLabel4.setText("Гуппа: " + selectedGroup.getName().replace("::", " "));
+                jToggleButton1.doClick();
+            }
         } else if (level == 1) {
-            Subgroup subgroup = (Subgroup) selectedGroup.getComponent(button - 1);
-            ((PictureDrawer) jPanel2).show(subgroup.getComponents());
-//jPanel2.getGraphics().drawImage(pictureDrawer.draw(subgroup.getProducts()), 0, 0, null);
-
-//            System.out.println("\n====================");
-//            for (Product product : subgroup.getProducts()) {
-//                if (product != null) {
-//                    System.out.println(product.getName() + " - " + product.getPlu());
-//                }
-//            }
-//            System.out.println("====================");
+            if (button <= selectedGroup.getComponentsCount()) {
+                Subgroup subgroup = (Subgroup) selectedGroup.getComponent(button - 1);
+                ((PictureDrawer) jPanel2).show(subgroup.getComponents());
+            } else {
+                ((PictureDrawer) jPanel2).clear();
+            }
         }
     }
 

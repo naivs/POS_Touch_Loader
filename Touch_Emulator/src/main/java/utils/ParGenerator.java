@@ -16,13 +16,16 @@
  */
 package utils;
 
+import data.Component;
 import data.Group;
+import data.Subgroup;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -36,10 +39,10 @@ public class ParGenerator {
         data = new ArrayList();
         
         for (int a = 0; a < day.getComponentsCount(); a++) {
-            generateSubgroupBlock(day.getGroup(a), a);
+            generateSubgroupBlock((Group) day.getComponent(a), a);
         }
 
-        generateGroupBlock(day.getGroupsAsStringArray());
+        generateGroupBlock(day.getComponents());
     }
 
     private void generateSubgroupBlock(Group group, int groupNumber) {
@@ -49,7 +52,7 @@ public class ParGenerator {
             subgroupString = new StringBuilder("PD0__:LIST:            *___:                  ");
             String name1, name2, index;
 
-            String[] names = group.getSubgroup(i).getName().split("::");
+            String[] names = ((Subgroup) group.getComponent(i)).getName().split("::");
             if (names.length == 1) {
                 name1 = names[0];
                 name2 = "";
@@ -58,7 +61,7 @@ public class ParGenerator {
                 name2 = names[1];
             }
 
-            index = group.getSubgroup(i).getIndex();
+            index = String.valueOf(((Subgroup) group.getComponent(i)).getIndex());
 
             subgroupString.replace(3, 4, String.valueOf(groupNumber + 1));
             subgroupString.replace(4, 5, String.valueOf(i));
@@ -70,14 +73,14 @@ public class ParGenerator {
         }
     }
 
-    private void generateGroupBlock(String[] groups) {
+    private void generateGroupBlock(List<Component> groups) {
         StringBuilder groupString;
 
-        for (int i = 0; i < groups.length; i++) {
+        for (int i = 0; i < groups.size(); i++) {
             groupString = new StringBuilder("PRES_:DYNA:              0_:                  ");
             String name1, name2;
 
-            String[] names = groups[i].split("::");
+            String[] names = groups.get(i).getName().split("::");
             switch (names.length) {
                 case 0:
                     name1 = "";

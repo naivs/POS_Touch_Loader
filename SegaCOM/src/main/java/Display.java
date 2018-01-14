@@ -18,12 +18,12 @@ public class Display extends JPanel {
         "img/l_x.gif",
         "img/l_y.gif",
         "img/l_z.gif",
-        "img/l_mode.gif",
-        "img/l_start.gif",
         "img/l_up.gif",
         "img/l_down.gif",
         "img/l_left.gif",
         "img/l_right.gif",
+        "img/l_start.gif",
+        "img/l_mode.gif"
     }, {
         "img/r_a.gif",
         "img/r_b.gif",
@@ -31,12 +31,12 @@ public class Display extends JPanel {
         "img/r_x.gif",
         "img/r_y.gif",
         "img/r_z.gif",
-        "img/r_mode.gif",
-        "img/r_start.gif",
         "img/r_up.gif",
         "img/r_down.gif",
         "img/r_left.gif",
         "img/r_right.gif",
+        "img/r_start.gif",
+        "img/r_mode.gif"
     }};
     private Graphics graphic;
     private final boolean[][] keyStates = new boolean[2][12];
@@ -47,6 +47,10 @@ public class Display extends JPanel {
     
     public void release(int pad, int key) {
         keyStates[pad][key] = false;
+    }
+    
+    public boolean isPressed(int pad, int key) {
+        return keyStates[pad][key];
     }
     
     @Override

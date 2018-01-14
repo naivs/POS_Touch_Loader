@@ -1,6 +1,5 @@
 import java.awt.AWTException;
 import java.awt.Robot;
-import java.awt.event.KeyEvent;
 import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
@@ -11,6 +10,8 @@ import jssc.SerialPortException;
  */
 public class GUI extends javax.swing.JFrame {
     
+    private final KeyMapManager keyMapManager;
+    private int[][] currentKeyMap;
     private static final int[] CODE = {
         1,
         2,
@@ -25,41 +26,19 @@ public class GUI extends javax.swing.JFrame {
         1024,
         2048
     };
-
-    private static final int[][] KEY = {{
-        KeyEvent.VK_A,
-        KeyEvent.VK_B,
-        KeyEvent.VK_C,
-        KeyEvent.VK_X,
-        KeyEvent.VK_Y,
-        KeyEvent.VK_Z,
-        KeyEvent.VK_TAB,
-        KeyEvent.VK_ENTER,
-        KeyEvent.VK_UP,
-        KeyEvent.VK_DOWN,
-        KeyEvent.VK_LEFT,
-        KeyEvent.VK_RIGHT
-    }, {
-        KeyEvent.VK_A,
-        KeyEvent.VK_B,
-        KeyEvent.VK_C,
-        KeyEvent.VK_X,
-        KeyEvent.VK_Y,
-        KeyEvent.VK_Z,
-        KeyEvent.VK_TAB,
-        KeyEvent.VK_ENTER,
-        KeyEvent.VK_UP,
-        KeyEvent.VK_DOWN,
-        KeyEvent.VK_LEFT,
-        KeyEvent.VK_RIGHT
-    }};
-
     private static Robot robot;
     /**
      * Creates new form GUI
      */
     public GUI() {
         initComponents();
+        try {
+            robot = new Robot();
+        } catch (AWTException e) {
+            System.err.println("Can't create robot.\n" + e.getMessage());
+        }
+        keyMapManager = new KeyMapManager();
+        currentKeyMap = keyMapManager.getLayout("Default");
     }
 
     /**
@@ -76,11 +55,12 @@ public class GUI extends javax.swing.JFrame {
         jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Sega controls");
         setResizable(false);
 
         jPanel1.setFocusable(false);
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "ttyUSB0", "ttyUSB1", "ttyUSB2", "ttyUSB3", "ttyUSB4", "ttyUSB5", "ttyUSB6", "ttyUSB7", "ttyUSB8", "ttyUSB9", "ttyUSB10" }));
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "      ---", "ttyUSB0", "ttyUSB1", "ttyUSB2", "ttyUSB3", "ttyUSB4", "ttyUSB5", "ttyUSB6", "ttyUSB7", "ttyUSB8", "ttyUSB9", "ttyUSB10" }));
         jComboBox1.setFocusable(false);
         jComboBox1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -133,66 +113,66 @@ public class GUI extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
-        try {
-            robot = new Robot();
-        } catch (AWTException e) {
-            System.err.println("Can't create robot.\n" + e.getMessage());
-        }
+        if (jComboBox1.getSelectedIndex() != 0) {
+            try {
+                COMConnection connection = new COMConnection("/dev/" + jComboBox1.getSelectedItem());
+                connection.addEventListener(new SerialPortEventListener() {
+                    String buf;
+                    String[] raw;
+                    int code_1, code_2;
+                    int i;
 
-        try {
-            COMConnection connection = new COMConnection("/dev/" + jComboBox1.getSelectedItem());
-            connection.addEventListener(new SerialPortEventListener() {
-                String buf;
-                String[] raw;
-                int code_1, code_2;
-                int i;
+                    @Override
+                    public void serialEvent(SerialPortEvent serialPortEvent) {
+                        try {
+                            if ((buf = connection.readString()) != null) {
+                                if (buf.contains(" ")) {
+                                    raw = buf.split(" ");
 
-                @Override
-                public void serialEvent(SerialPortEvent serialPortEvent) {
-                    try {
-                        if ((buf = connection.readString()) != null) {
-                            if(buf.contains(" ")) {
-                                //System.out.print(buf);
-                                raw = buf.split(" ");
-                                
-                                code_1 = raw[0].isEmpty() ? 0 : Integer.parseInt(raw[0]);
-                                code_2 = raw[1].isEmpty() ? 0 : Integer.parseInt(raw[1].trim());
-                                //System.out.print(code_2);
-                                for (i = 0; i < CODE.length; i++) {
-                                    if ((code_1 & CODE[i]) == CODE[i]) {
-                                        robot.keyPress(KEY[0][i]);
-                                        ((Display) jPanel1).press(0, i);
-                                    } else {
-                                        robot.keyRelease(KEY[0][i]);
-                                        ((Display) jPanel1).release(0, i);
+                                    code_1 = raw[0].isEmpty() ? 0 : Integer.parseInt(raw[0]);
+                                    code_2 = raw[1].isEmpty() ? 0 : Integer.parseInt(raw[1].trim());
+
+                                    for (i = 0; i < CODE.length; i++) {
+                                        if ((code_1 & CODE[i]) == CODE[i]) {
+                                            robot.keyPress(currentKeyMap[i][0]);
+                                            System.out.println("Joy 1: press-" + currentKeyMap[i][0]);
+                                            ((Display) jPanel1).press(0, i);
+                                        } else if (((Display) jPanel1).isPressed(0, i)) {
+                                            robot.keyRelease(currentKeyMap[i][0]);
+                                            System.out.println("Joy 1: release-" + currentKeyMap[i][0]);
+                                            ((Display) jPanel1).release(0, i);
+                                        }
+
+                                        if ((code_2 & CODE[i]) == CODE[i]) {
+                                            robot.keyPress(currentKeyMap[i][1]);
+                                            System.out.println("Joy 2: press-" + currentKeyMap[i][1]);
+                                            ((Display) jPanel1).press(1, i);
+                                        } else if (((Display) jPanel1).isPressed(1, i)) {
+                                            robot.keyRelease(currentKeyMap[i][1]);
+                                            System.out.println("Joy 2: release-" + currentKeyMap[i][1]);
+                                            ((Display) jPanel1).release(1, i);
+                                        }
                                     }
-                                    
-                                    if ((code_2 & CODE[i]) == CODE[i]) {
-                                        robot.keyPress(KEY[1][i]);
-                                        ((Display) jPanel1).press(1, i);
-                                    } else {
-                                        robot.keyRelease(KEY[1][i]);
-                                        ((Display) jPanel1).release(1, i);
-                                    }
+                                    jPanel1.repaint();
                                 }
-                                jPanel1.repaint();
                             }
+                        } catch (NumberFormatException ex) {
+                            System.out.println(ex);
+                        } catch (SerialPortException ex) {
+                            System.out.println(ex);
                         }
-                    } catch (NumberFormatException ex) {
-                        System.out.println(ex);
-                    } catch (SerialPortException ex) {
-                        System.out.println(ex);
                     }
-                }
-            });
+                });
 
-        } catch (SerialPortException ex) {
-            System.out.println(ex);
+            } catch (SerialPortException ex) {
+                System.out.println(ex);
+            }
         }
     }//GEN-LAST:event_jComboBox1ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        System.out.println("set buttons");
+        KeyConfigurator keyConfigurator = new KeyConfigurator(this, currentKeyMap);
+        keyConfigurator.setVisible(true);
     }//GEN-LAST:event_jButton1ActionPerformed
 
     /**

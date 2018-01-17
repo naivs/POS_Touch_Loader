@@ -1,15 +1,25 @@
+
+import keyboard.KeyConfigurator;
+import keyboard.KeyMapManager;
 import java.awt.AWTException;
 import java.awt.Robot;
-import jssc.SerialPortEvent;
-import jssc.SerialPortEventListener;
+import java.util.Arrays;
+import java.util.Observable;
+import java.util.Observer;
 import jssc.SerialPortException;
+import jssc.SerialPortList;
+import serial.Connection;
+import serial.PortFinder;
 
 /**
  *
  * @author ivan
  */
-public class GUI extends javax.swing.JFrame {
-    
+public class GUI extends javax.swing.JFrame implements Observer {
+
+    private PortFinder portFinder;
+    private Connection connection;
+
     private final KeyMapManager keyMapManager;
     private int[][] currentKeyMap;
     private static final int[] CODE = {
@@ -27,11 +37,29 @@ public class GUI extends javax.swing.JFrame {
         2048
     };
     private static Robot robot;
+
     /**
      * Creates new form GUI
      */
     public GUI() {
         initComponents();
+
+        System.out.println("Available ports: " + Arrays.toString(SerialPortList.getPortNames("/dev/")));
+        String portName = "/dev/ttyUSB0";
+        connection = new Connection(portName);
+        connection.addObserver(this);
+        try {
+            connection.open();
+        } catch (SerialPortException ex) {
+            System.err.println("Can't open port.\n" + ex.getMessage());
+        }
+        
+//        portFinder = new PortFinder();
+//        portFinder.addObserver(this);
+        
+        Thread scannerThread = new Thread(portFinder);
+        scannerThread.start();
+
         try {
             robot = new Robot();
         } catch (AWTException e) {
@@ -51,28 +79,32 @@ public class GUI extends javax.swing.JFrame {
     private void initComponents() {
 
         jPanel1 = new Display();
-        jComboBox1 = new javax.swing.JComboBox<>();
         jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Sega controls");
         setResizable(false);
-
-        jPanel1.setFocusable(false);
-
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "      ---", "ttyUSB0", "ttyUSB1", "ttyUSB2", "ttyUSB3", "ttyUSB4", "ttyUSB5", "ttyUSB6", "ttyUSB7", "ttyUSB8", "ttyUSB9", "ttyUSB10" }));
-        jComboBox1.setFocusable(false);
-        jComboBox1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jComboBox1ActionPerformed(evt);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
             }
         });
+
+        jPanel1.setFocusable(false);
 
         jButton1.setText("Set keys");
         jButton1.setFocusable(false);
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
+            }
+        });
+
+        jButton2.setText("Connect");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
             }
         });
 
@@ -83,18 +115,18 @@ public class GUI extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1))
-                .addContainerGap(777, Short.MAX_VALUE))
+                    .addComponent(jButton1)
+                    .addComponent(jButton2))
+                .addContainerGap(780, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(37, 37, 37)
                 .addComponent(jButton1)
-                .addContainerGap(332, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton2)
+                .addContainerGap(295, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -112,68 +144,32 @@ public class GUI extends javax.swing.JFrame {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
-        if (jComboBox1.getSelectedIndex() != 0) {
-            try {
-                COMConnection connection = new COMConnection("/dev/" + jComboBox1.getSelectedItem());
-                connection.addEventListener(new SerialPortEventListener() {
-                    String buf;
-                    String[] raw;
-                    int code_1, code_2;
-                    int i;
-
-                    @Override
-                    public void serialEvent(SerialPortEvent serialPortEvent) {
-                        try {
-                            if ((buf = connection.readString()) != null) {
-                                if (buf.contains(" ")) {
-                                    raw = buf.split(" ");
-
-                                    code_1 = raw[0].isEmpty() ? 0 : Integer.parseInt(raw[0]);
-                                    code_2 = raw[1].isEmpty() ? 0 : Integer.parseInt(raw[1].trim());
-
-                                    for (i = 0; i < CODE.length; i++) {
-                                        if ((code_1 & CODE[i]) == CODE[i]) {
-                                            robot.keyPress(currentKeyMap[i][0]);
-                                            System.out.println("Joy 1: press-" + currentKeyMap[i][0]);
-                                            ((Display) jPanel1).press(0, i);
-                                        } else if (((Display) jPanel1).isPressed(0, i)) {
-                                            robot.keyRelease(currentKeyMap[i][0]);
-                                            System.out.println("Joy 1: release-" + currentKeyMap[i][0]);
-                                            ((Display) jPanel1).release(0, i);
-                                        }
-
-                                        if ((code_2 & CODE[i]) == CODE[i]) {
-                                            robot.keyPress(currentKeyMap[i][1]);
-                                            System.out.println("Joy 2: press-" + currentKeyMap[i][1]);
-                                            ((Display) jPanel1).press(1, i);
-                                        } else if (((Display) jPanel1).isPressed(1, i)) {
-                                            robot.keyRelease(currentKeyMap[i][1]);
-                                            System.out.println("Joy 2: release-" + currentKeyMap[i][1]);
-                                            ((Display) jPanel1).release(1, i);
-                                        }
-                                    }
-                                    jPanel1.repaint();
-                                }
-                            }
-                        } catch (NumberFormatException ex) {
-                            System.out.println(ex);
-                        } catch (SerialPortException ex) {
-                            System.out.println(ex);
-                        }
-                    }
-                });
-
-            } catch (SerialPortException ex) {
-                System.out.println(ex);
-            }
-        }
-    }//GEN-LAST:event_jComboBox1ActionPerformed
-
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         KeyConfigurator keyConfigurator = new KeyConfigurator(this, currentKeyMap);
         keyConfigurator.setVisible(true);
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        System.out.println("Exit...");
+        if (portFinder != null) {
+            portFinder.stop();
+        }
+    }//GEN-LAST:event_formWindowClosing
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        connection.send("222");
+    }//GEN-LAST:event_jButton2ActionPerformed
+
+    @Override
+    public void update(Observable o, Object arg) {
+        String className = o.getClass().getName();
+        if (className.equals(Connection.class.getName()) &&
+                arg.equals(Connection.STAT)) {
+//            connection = (Connection) arg;
+//            connection.addObserver(this);
+            System.out.println("Gamepad connected!");
+        }
+    }
 
     /**
      * @param args the command line arguments
@@ -202,7 +198,7 @@ public class GUI extends javax.swing.JFrame {
         }
         //</editor-fold>
 
-        /* Create and display the form */
+//        /* Create and display the form */
         java.awt.EventQueue.invokeLater(() -> {
             new GUI().setVisible(true);
         });
@@ -210,7 +206,7 @@ public class GUI extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
-    private javax.swing.JComboBox<String> jComboBox1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JPanel jPanel1;
     // End of variables declaration//GEN-END:variables
 }

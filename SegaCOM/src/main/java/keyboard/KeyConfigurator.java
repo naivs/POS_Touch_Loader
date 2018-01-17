@@ -1,3 +1,6 @@
+package keyboard;
+
+import keyboard.KeyConfiguratorTableModel;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import javax.swing.DefaultComboBoxModel;

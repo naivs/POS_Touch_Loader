@@ -32,7 +32,7 @@ public class Connection extends Observable {
 
     private SerialPort serialPort;
     private boolean isConnected;
-    
+
     public Connection(String portName) {
         serialPort = new SerialPort(portName);
     }
@@ -49,68 +49,17 @@ public class Connection extends Observable {
         serialPort.addEventListener(new SerialPortEventListener() {
             @Override
             public void serialEvent(SerialPortEvent serialPortEvent) {
-                System.out.println("Serial event occured!");
+                //System.out.println("Serial event occured!");
                 String data;
                 try {
                     if ((data = serialPort.readString()) != null) {
-                        System.out.println("Port response: " + data);
-                        if (data.equals(STAT)) {
-                            setChanged();
-                            notifyObservers(data);
-                        } else if (data.equals(STARTED)) {
-                            System.out.println("Started: " + data);
-                        } else if (data.equals(STOPPED)) {
-                            System.out.println("Stopped: " + data);
-                        } else {
-                            //gamepads data
-                            System.out.println("Respose: " + data);
-//                    String buf;
-//                    String[] raw;
-//                    int code_1, code_2;
-//                    int i;
-
-//                        try {
-//                            if ((buf = connection.readString()) != null) {
-//                                if (buf.contains(" ")) {
-//                                    raw = buf.split(" ");
-//
-//                                    code_1 = raw[0].isEmpty() ? 0 : Integer.parseInt(raw[0]);
-//                                    code_2 = raw[1].isEmpty() ? 0 : Integer.parseInt(raw[1].trim());
-//
-//                                    for (i = 0; i < CODE.length; i++) {
-//                                        if ((code_1 & CODE[i]) == CODE[i]) {
-//                                            robot.keyPress(currentKeyMap[i][0]);
-//                                            System.out.println("Joy 1: press-" + currentKeyMap[i][0]);
-//                                            ((Display) jPanel1).press(0, i);
-//                                        } else if (((Display) jPanel1).isPressed(0, i)) {
-//                                            robot.keyRelease(currentKeyMap[i][0]);
-//                                            System.out.println("Joy 1: release-" + currentKeyMap[i][0]);
-//                                            ((Display) jPanel1).release(0, i);
-//                                        }
-//
-//                                        if ((code_2 & CODE[i]) == CODE[i]) {
-//                                            robot.keyPress(currentKeyMap[i][1]);
-//                                            System.out.println("Joy 2: press-" + currentKeyMap[i][1]);
-//                                            ((Display) jPanel1).press(1, i);
-//                                        } else if (((Display) jPanel1).isPressed(1, i)) {
-//                                            robot.keyRelease(currentKeyMap[i][1]);
-//                                            System.out.println("Joy 2: release-" + currentKeyMap[i][1]);
-//                                            ((Display) jPanel1).release(1, i);
-//                                        }
-//                                    }
-//                                    jPanel1.repaint();
-//                                }
-//                            }
-//                        } catch (NumberFormatException ex) {
-//                            System.out.println(ex);
-//                        } catch (SerialPortException ex) {
-//                            System.out.println(ex);
-//                        }
-                        }
+                        //System.out.print("Respose: " + data);
+                        setChanged();
+                        notifyObservers(data);
                     }
                 } catch (SerialPortException ex) {
                     //can't read string from stream
-                    System.err.println("Read from stream error!\n" + ex.getMessage());
+                    System.err.println("Error in SerialPortEvent!\n" + ex.getMessage());
                 }
             }
         }, SerialPort.MASK_RXCHAR);
@@ -128,15 +77,15 @@ public class Connection extends Observable {
             ex.printStackTrace();
         }
     }
-    
+
     public boolean isOpened() {
         return serialPort.isOpened();
     }
-    
+
     public void setObserver(Observer observer) {
         addObserver(observer);
     }
-    
+
     public void send(String code) {
         try {
             serialPort.writeString(code);

@@ -47,7 +47,6 @@ public class GUI extends javax.swing.JFrame implements Observer {
         System.out.println("Available ports: " + Arrays.toString(SerialPortList.getPortNames("/dev/")));
         String portName = "/dev/ttyUSB0";
         connection = new Connection(portName);
-        connection.addObserver(this);
 
 //        portFinder = new PortFinder();
 //        portFinder.addObserver(this);
@@ -78,6 +77,8 @@ public class GUI extends javax.swing.JFrame implements Observer {
         jButton3 = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
         jButton5 = new javax.swing.JButton();
+        jToggleButton1 = new javax.swing.JToggleButton();
+        jToggleButton2 = new javax.swing.JToggleButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Sega controls");
@@ -126,6 +127,10 @@ public class GUI extends javax.swing.JFrame implements Observer {
             }
         });
 
+        jToggleButton1.setText("Gamepad 1");
+
+        jToggleButton2.setText("Gamepad 2");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -138,7 +143,11 @@ public class GUI extends javax.swing.JFrame implements Observer {
                     .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(763, Short.MAX_VALUE))
+                .addGap(50, 50, 50)
+                .addComponent(jToggleButton1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 392, Short.MAX_VALUE)
+                .addComponent(jToggleButton2)
+                .addGap(127, 127, 127))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -152,19 +161,24 @@ public class GUI extends javax.swing.JFrame implements Observer {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton4)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton5)
-                .addContainerGap(215, Short.MAX_VALUE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton5)
+                    .addComponent(jToggleButton1)
+                    .addComponent(jToggleButton2))
+                .addContainerGap(232, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
 
         pack();
@@ -185,20 +199,22 @@ public class GUI extends javax.swing.JFrame implements Observer {
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         try {
-            connection.open();
+            if (!connection.isOpened()) {
+                connection.addObserver(this);
+                connection.open();
+            }
+            //connection.send(Connection.RQ_STAT);
         } catch (SerialPortException ex) {
             System.err.println("Can't open port.\n" + ex.getMessage());
         }
-        
-        connection.send("222");
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        connection.send("444");
+        connection.send(Connection.RQ_START);
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-        connection.send("666");
+        connection.send(Connection.RQ_STOP);
     }//GEN-LAST:event_jButton4ActionPerformed
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
@@ -210,13 +226,13 @@ public class GUI extends javax.swing.JFrame implements Observer {
         String className = o.getClass().getName();
         if (className.equals(Connection.class.getName())) {
 
-            if (arg.equals(Connection.STAT)) {
+            if (arg.equals(Connection.RPL_STAT)) {
 //            connection = (Connection) arg;
 //            connection.addObserver(this);
                 System.out.print("Gamepad connected! Response: " + arg);
-            } else if (arg.equals(Connection.STARTED)) {
+            } else if (arg.equals(Connection.RPL_START)) {
                 System.out.print("Handle started! Response: " + arg);
-            } else if (arg.equals(Connection.STOPPED)) {
+            } else if (arg.equals(Connection.RPL_STOP)) {
                 System.out.print("Handle stopped! Response: " + arg);
             } else {
                 System.out.print("Button data! Response: " + arg);
@@ -229,8 +245,17 @@ public class GUI extends javax.swing.JFrame implements Observer {
                     if (arg.toString().contains(" ")) {
                         raw = arg.toString().split(" ");
 
-                        code_1 = raw[0].isEmpty() ? 0 : Integer.parseInt(raw[0]);
-                        code_2 = raw[1].isEmpty() ? 0 : Integer.parseInt(raw[1].trim());
+                        if (jToggleButton1.isSelected()) {
+                            code_1 = raw[0].isEmpty() ? 0 : Integer.parseInt(raw[0]);
+                        } else {
+                            code_1 = 0;
+                        }
+                        
+                        if (jToggleButton2.isSelected()) {
+                            code_2 = raw[1].isEmpty() ? 0 : Integer.parseInt(raw[1].trim());
+                        } else {
+                            code_2 = 0;
+                        }
 
                         for (i = 0; i < CODE.length; i++) {
                             if ((code_1 & CODE[i]) == CODE[i]) {
@@ -302,5 +327,7 @@ public class GUI extends javax.swing.JFrame implements Observer {
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JToggleButton jToggleButton1;
+    private javax.swing.JToggleButton jToggleButton2;
     // End of variables declaration//GEN-END:variables
 }

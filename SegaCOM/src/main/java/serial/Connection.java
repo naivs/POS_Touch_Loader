@@ -22,16 +22,15 @@ public class Connection extends Observable {
     3. > 666 - stop handle gamepad buttons 
         expected response: > stopped
      */
-    private static final int STATUS = 222;
-    private static final int START = 444;
-    private static final int STOP = 666;
+    public static final String RQ_STAT = "222";
+    public static final String RQ_START = "444";
+    public static final String RQ_STOP = "666";
 
-    public static final String STAT = "sega_ready\r\n";
-    public static final String STARTED = "started\r\n";
-    public static final String STOPPED = "stopped\r\n";
+    public static final String RPL_STAT = "sega_ready\r\n";
+    public static final String RPL_START = "started\r\n";
+    public static final String RPL_STOP = "stopped\r\n";
 
-    private SerialPort serialPort;
-    private boolean isConnected;
+    private final SerialPort serialPort;
 
     public Connection(String portName) {
         serialPort = new SerialPort(portName);
@@ -49,22 +48,22 @@ public class Connection extends Observable {
         serialPort.addEventListener(new SerialPortEventListener() {
             @Override
             public void serialEvent(SerialPortEvent serialPortEvent) {
-                //System.out.println("Serial event occured!");
                 String data;
                 try {
                     if ((data = serialPort.readString()) != null) {
-                        //System.out.print("Respose: " + data);
+                        //if (!data.equals(RQ_STAT)) {
                         setChanged();
                         notifyObservers(data);
+                        //} else {
+                        //System.err.println("In event: " + data);
+                        //}
                     }
                 } catch (SerialPortException ex) {
-                    //can't read string from stream
                     System.err.println("Error in SerialPortEvent!\n" + ex.getMessage());
                 }
             }
         }, SerialPort.MASK_RXCHAR);
-        //send beacon request
-        //serialPort.writeInt(STATUS);
+        //validate();
     }
 
     @SuppressWarnings("CallToPrintStackTrace")

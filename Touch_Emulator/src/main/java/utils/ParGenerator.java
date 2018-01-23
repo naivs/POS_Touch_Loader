@@ -50,13 +50,13 @@ public class ParGenerator {
 
         for (int i = 0; i < group.getComponentsCount(); i++) {
             subgroupString = new StringBuilder("PD0__:LIST:            *___:                  ");
-            String name1, name2, index;
+            String name1 = "", name2 = "", index;
 
             String[] names = ((Subgroup) group.getComponent(i)).getName().split("::");
             if (names.length == 1) {
                 name1 = names[0];
                 name2 = "";
-            } else {
+            } else if (names.length == 2) {
                 name1 = names[0];
                 name2 = names[1];
             }

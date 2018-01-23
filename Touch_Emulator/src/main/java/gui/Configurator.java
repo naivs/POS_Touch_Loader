@@ -608,7 +608,7 @@ public class Configurator extends javax.swing.JFrame implements Observer {
                             // creation day dirs
                             // saving all into it
                             File anotherDay;
-                            if (department.getComponentsCount() > 1) {
+                            if (department.getComponentsCount() == 1) {
                                 //Calendar calendar = Calendar.getInstance();
                                 //calendar.setTime(new Date());
                                 //anotherDay = new File(dataFolder.getPath() + "/day" + (calendar.get(Calendar.DAY_OF_WEEK) - 1));

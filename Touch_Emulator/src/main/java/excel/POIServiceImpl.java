@@ -91,7 +91,7 @@ public class POIServiceImpl implements XLSXService {
     @Override
     public String[] getDayNames() {
         int count = workbook.getNumberOfSheets();
-        String[] names = (count > 1 && count < 7) ? new String[1] : new String[7];
+        String[] names = (count >= 1 && count < 7) ? new String[1] : new String[7];
 
         for (int i = 0; i < names.length; i++) {
             names[i] = workbook.getSheetAt(i).getSheetName();

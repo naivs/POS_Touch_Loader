@@ -68,7 +68,7 @@ public class RefGenerator {
 
     private String[] generateBlock(Subgroup subgroup) {
 
-        String[] out = new String[20];
+        String[] out = new String[subgroup.getComponentsCount()];
         Arrays.fill(out, "");
         String number; //must be len 2;
         String plu; //must be len = 16

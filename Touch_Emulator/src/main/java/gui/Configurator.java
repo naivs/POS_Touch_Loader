@@ -37,6 +37,7 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Observable;
@@ -83,8 +84,12 @@ public class Configurator extends javax.swing.JFrame implements Observer {
 
     private final IndexDispatcher idisp = new IndexDispatcher();
 
+    private final boolean[] isUpdated = new boolean[10];
+
     public Configurator() {
         initComponents();
+
+        Arrays.fill(isUpdated, false);
 
         try {
             departments = new ConfigurationReader().read();
@@ -295,15 +300,23 @@ public class Configurator extends javax.swing.JFrame implements Observer {
             fileChooser.setFileFilter(new FileNameExtensionFilter("Файлы Microsoft Excel 2007*", "xlsx"));
 
             if (fileChooser.showDialog(this, "Открыть файл Excel...") == JFileChooser.APPROVE_OPTION) {
-
+                if (isUpdated[jTable1.getSelectedRow()]) {
+                    JOptionPane.showMessageDialog(this,
+                            "Для очередного обновления отдела,\nпожалуйста, перезагрузите программу!",
+                            "Внимание",
+                            JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                }
                 ProgressMonitor preparingProgress = new ProgressMonitor(this, "Разбор таблиц...", 100);
                 Thread thread = new Thread() {
                     @Override
                     public void run() {
                         File file = new File(fileChooser.getSelectedFile().getAbsolutePath());
                         try {
+                            //mark department as updated
+                            isUpdated[jTable1.getSelectedRow()] = true;
+                            //parsing
                             Parser parser = new Parser(file);
-
                             // reading all products
                             Day[] days = departments.get(jTable1.getSelectedRow()).getDaysOfWeek();
 
@@ -346,7 +359,7 @@ public class Configurator extends javax.swing.JFrame implements Observer {
                                     for (Subgroup sgrp : subgroups) {
                                         groups[j].addSubgroup(sgrp);
                                     }
-                                    
+
                                     //updating progress bar
                                     preparingProgress.set(((i + 1) * (j + 1) * 100) / (days.length * groups.length));
                                 }
@@ -372,7 +385,7 @@ public class Configurator extends javax.swing.JFrame implements Observer {
                         }
                     }
                 };
-                
+
                 thread.start();
                 preparingProgress.setVisible(true);
             }
@@ -729,10 +742,9 @@ public class Configurator extends javax.swing.JFrame implements Observer {
         }
         //</editor-fold>
         //</editor-fold>
-        
-        //</editor-fold>
-        //</editor-fold>
 
+        //</editor-fold>
+        //</editor-fold>
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("touchLoader.conf")))) {
             Properties properties = new Properties();
             properties.load(reader);

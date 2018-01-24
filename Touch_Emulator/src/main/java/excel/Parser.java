@@ -82,7 +82,7 @@ public class Parser {
                     buf = String.valueOf(plu) + "::" + mySheet.getRow(i).getCell(group * 4 + 2 + 1).getStringCellValue().replace("\n", "").trim();
                 }
                 products.add(buf);
-            } catch (IllegalStateException ex) {
+            } catch (Exception ex) {
                 System.err.println(String.format("Day: %d; Group: %d; Product: %d", day+1, group+1, i-2));
                 throw ex;
             }

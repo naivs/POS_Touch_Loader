@@ -108,12 +108,12 @@ public class POIServiceImpl implements XLSXService {
             Cell cellFirst = workbook.getSheetAt(day).getRow(yGroup).getCell(xGroup + i * dx);
             Cell cellSecond = workbook.getSheetAt(day).getRow(yGroup).getCell(xGroup + i * dx + 1);
 
-            if (cellFirst.getCellTypeEnum() == CellType.STRING
+            if (cellFirst == null || cellFirst.getCellTypeEnum() == CellType.STRING
                     || cellFirst.getCellTypeEnum() == CellType.BLANK) {
                 names[i] = cellFirst.getStringCellValue().trim();
             }
 
-            if (cellSecond.getCellTypeEnum() == CellType.STRING
+            if (cellSecond == null || cellSecond.getCellTypeEnum() == CellType.STRING
                     || cellFirst.getCellTypeEnum() == CellType.BLANK) {
                 names[i] += "::" + cellSecond.getStringCellValue().trim();
             }
@@ -131,12 +131,12 @@ public class POIServiceImpl implements XLSXService {
             Cell cellFirst = workbook.getSheetAt(day).getRow(ySubgroup + i * dy).getCell(xSubgroup + group * dx);
             Cell cellSecond = workbook.getSheetAt(day).getRow(ySubgroup + i * dy + 10).getCell(xSubgroup + group * dx);
 
-            if (cellFirst.getCellTypeEnum() == CellType.STRING
+            if (cellFirst == null || cellFirst.getCellTypeEnum() == CellType.STRING
                     || cellFirst.getCellTypeEnum() == CellType.BLANK) {
                 names[i] = cellFirst.getStringCellValue().trim();
             }
 
-            if (cellSecond.getCellTypeEnum() == CellType.STRING
+            if (cellSecond == null || cellSecond.getCellTypeEnum() == CellType.STRING
                     || cellFirst.getCellTypeEnum() == CellType.BLANK) {
                 names[i] += "::" + cellSecond.getStringCellValue().trim();
             }
@@ -164,29 +164,45 @@ public class POIServiceImpl implements XLSXService {
 
     @Override
     public String readProductName(int day, int group, int subgroup, int product) {
-        int dx = 4;
-        int dy = 20;
+        try {
+            int dx = 4;
+            int dy = 20;
 
-        Cell cell = workbook.getSheetAt(day).getRow(yProdName + subgroup * dy + product).getCell(xProdName + group * dx);
-        if (cell.getCellTypeEnum() != CellType.STRING
-                || cell.getCellTypeEnum() == CellType.BLANK) {
-            return "";
-        } else {
-            return cell.getStringCellValue().trim();
+            Cell cell = workbook.getSheetAt(day).getRow(yProdName + subgroup * dy + product).getCell(xProdName + group * dx);
+            if (cell == null || cell.getCellTypeEnum() != CellType.STRING
+                    || cell.getCellTypeEnum() == CellType.BLANK) {
+                return "";
+            } else {
+                return cell.getStringCellValue().trim();
+            }
+        } catch (Exception ex) {
+            System.err.println(
+                    String.format(
+                            "Cell failure: day=%d group=%d subgroup=%d product=%d", day + 1, group + 1, subgroup + 1, product + 1)
+            );
+            throw ex;
         }
     }
 
     @Override
     public int readProductPlu(int day, int group, int subgroup, int product) {
-        int dx = 4;
-        int dy = 20;
-        
-        Cell cell = workbook.getSheetAt(day).getRow(yProdPlu + subgroup * dy + product).getCell(xProdPlu + group * dx);
-        if (cell.getCellTypeEnum() != CellType.NUMERIC
-                || cell.getCellTypeEnum() == CellType.BLANK) {
-            return 0;
-        } else {
-            return (int) cell.getNumericCellValue();
+        try {
+            int dx = 4;
+            int dy = 20;
+
+            Cell cell = workbook.getSheetAt(day).getRow(yProdPlu + subgroup * dy + product).getCell(xProdPlu + group * dx);
+            if (cell == null || cell.getCellTypeEnum() != CellType.NUMERIC
+                    || cell.getCellTypeEnum() == CellType.BLANK) {
+                return 0;
+            } else {
+                return (int) cell.getNumericCellValue();
+            }
+        } catch (Exception ex) {
+            System.err.println(
+                    String.format(
+                            "Cell failure: day=%d group=%d subgroup=%d product=%d", day + 1, group + 1, subgroup + 1, product + 1)
+            );
+            throw ex;
         }
     }
 

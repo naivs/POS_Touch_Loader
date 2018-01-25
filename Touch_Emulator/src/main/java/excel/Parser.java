@@ -22,6 +22,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -43,10 +44,19 @@ public class Parser {
         Sheet mySheet = wb.getSheetAt(0);
         int k = 1;
         for (int i = 0; i < groupNames.length; i++) {
-            String buf = mySheet.getRow(0).getCell(k).getStringCellValue().replace("\n", "").trim();
-            buf = buf.length() > 14 ? buf.substring(0, 14) : buf;
-            String buf2 = mySheet.getRow(0).getCell(k + 1).getStringCellValue().replace("\n", "").trim();
-            buf2 = buf2.length() > 18 ? buf2.substring(0, 18) : buf2;
+            Cell cell_1 = mySheet.getRow(0).getCell(k);
+            String buf = "";
+            if (cell_1 != null) {
+                buf = cell_1.getStringCellValue().replace("\n", "").trim();
+                buf = buf.length() > 14 ? buf.substring(0, 14) : buf;
+            }
+            
+            Cell cell_2 = mySheet.getRow(0).getCell(k + 1);
+            String buf2 = "";
+            if (cell_2 != null) {
+                buf2 = cell_2.getStringCellValue().replace("\n", "").trim();
+                buf2 = buf2.length() > 18 ? buf2.substring(0, 18) : buf2;
+            }
             groupNames[i] = buf + "::" + buf2;
             k += 4;
         }
@@ -58,10 +68,19 @@ public class Parser {
         Sheet mySheet = wb.getSheetAt(day);
         int k = 2;
         for (int i = 0; i < subgroupNames.length; i++) {
-            String buf = mySheet.getRow(k).getCell(group * 4).getStringCellValue().replace("\n", "").trim();
-            buf = buf.length() > 12 ? buf.substring(0, 12) : buf;
-            String buf2 = mySheet.getRow(k + 10).getCell(group * 4).getStringCellValue();
-            buf2 = buf2.length() > 18 ? buf2.substring(0, 18) : buf2;
+            Cell cell_1 = mySheet.getRow(k).getCell(group * 4);
+            String buf = "";
+            if (cell_1 != null) {
+                buf = cell_1.getStringCellValue().replace("\n", "").trim();
+                buf = buf.length() > 12 ? buf.substring(0, 12) : buf;
+            }
+            
+            Cell cell_2 = mySheet.getRow(k + 10).getCell(group * 4);
+            String buf2 = "";
+            if (cell_2 != null) {
+                buf2 = cell_2.getStringCellValue();
+                buf2 = buf2.length() > 18 ? buf2.substring(0, 18) : buf2;
+            }
             subgroupNames[i] = buf.isEmpty() ? (i + 1) + ":: " : buf + "::" + buf2;
             k += 20;
         }
@@ -76,10 +95,22 @@ public class Parser {
         
         for (int i = 2; i < 162; i++) {
             try {
-                plu = new Double(mySheet.getRow(i).getCell(group * 4 + 2).getNumericCellValue()).longValue();
+                Cell cell = mySheet.getRow(i).getCell(group * 4 + 2);
+                if (cell == null) {
+                    plu = 0;
+                } else {
+                    plu = new Double(cell.getNumericCellValue()).longValue();
+                }
+                
                 buf = " :: ";
+                
                 if(plu != 0) {
-                    buf = String.valueOf(plu) + "::" + mySheet.getRow(i).getCell(group * 4 + 2 + 1).getStringCellValue().replace("\n", "").trim();
+                    Cell cellText = mySheet.getRow(i).getCell(group * 4 + 2 + 1);
+                    String text = " ";
+                    if (cellText != null) {
+                        text = cellText.getStringCellValue().replace("\n", "").trim();
+                    }
+                    buf = String.valueOf(plu) + "::" + text;
                 }
                 products.add(buf);
             } catch (Exception ex) {

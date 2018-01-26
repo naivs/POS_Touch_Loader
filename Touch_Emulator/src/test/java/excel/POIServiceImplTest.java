@@ -40,15 +40,33 @@ import static org.junit.Assert.*;
 public class POIServiceImplTest {
 
     private static File tableFile;
+    private static POISerializer poiSerializer;
     private XLSXService instance;
 
-    private static final String sheetName = "Понедельник";
+    private static final String[] dayNames = {
+        "Понедельник",
+        "Вторник",
+        "Среда",
+        "Четверг",
+        "Пятница",
+        "Суббота",
+        "Воскресенье"
+    };
     /*
         the first part must be have max 14 symbols
         the second part must be have max 18 symbols
         divides by "::"
      */
-    private static final String groupName = "Завтраки БлиныFFF::Вареники Пельмени FFF";
+    private static final String[] groupNames = {
+        "Завтраки Блины::Вареники Пельмени",
+        "Напитки::Акции",
+        "Ланч Салат Суп::Гарнир Горячее",
+        "Горячие::блюда",
+        "Гриль::WOK",
+        "Выпечка::Десерты Маффины",
+        "Дополнительное::меню",
+        "::"
+    };
     /*
         the first part must be have max 12 symbols
         the second part must be have max 18 symbols
@@ -60,16 +78,6 @@ public class POIServiceImplTest {
     //for EAN-13 test
     private static final long ean_13Plu = 1234567891234L;
 
-    @SuppressWarnings("CallToPrintStackTrace")
-    private XLSXService getServiceInstance() {
-        try {
-            instance = new POIServiceImpl(tableFile);
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-        return instance;
-    }
-
     @BeforeClass
     @SuppressWarnings("CallToPrintStackTrace")
     public static void setUpClass() {
@@ -77,35 +85,7 @@ public class POIServiceImplTest {
 
         try {
             tableFile.createNewFile();
-            Workbook workbook = new XSSFWorkbook();
-            Cell cell1;
-            Cell cell2;
-            //create sheet
-            workbook.createSheet(sheetName);
-            Sheet sheet = workbook.getSheetAt(0);
-            //create groups
-            cell1 = sheet.createRow(0).createCell(1, CellType.STRING);
-            cell2 = sheet.createRow(0).createCell(2, CellType.STRING);
-            cell1.setCellValue(groupName.split("::")[0]);
-            cell1.setCellValue(groupName.split("::")[1]);
-            cell1 = sheet.createRow(0).createCell(29, CellType.STRING);
-            cell2 = sheet.createRow(0).createCell(30, CellType.STRING);
-            cell1.setCellValue(groupName.split("::")[0]);
-            cell1.setCellValue(groupName.split("::")[1]);
-            //create subgroups
-            cell1 = sheet.createRow(2).createCell(0, CellType.STRING);
-            cell2 = sheet.createRow(3).createCell(0, CellType.STRING);
-            cell1.setCellValue(subgroupName.split("::")[0]);
-            cell1.setCellValue(subgroupName.split("::")[1]);
-            cell1 = sheet.createRow(16).createCell(28, CellType.STRING);
-            cell2 = sheet.createRow(17).createCell(28, CellType.STRING);
-            cell1.setCellValue(subgroupName.split("::")[0]);
-            cell1.setCellValue(subgroupName.split("::")[1]);
-            //create products
-            cell1 = sheet.createRow(2).createCell(0, CellType.NUMERIC);
-            cell2 = sheet.createRow(3).createCell(0, CellType.STRING);
-            
-            workbook.write(new FileOutputStream(tableFile));
+            poiSerializer = new POISerializer(tableFile);
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -114,161 +94,185 @@ public class POIServiceImplTest {
     @AfterClass
     @SuppressWarnings("CallToPrintStackTrace")
     public static void tearDownClass() {
-        System.out.print("test file delete...          ");
-        String result = tableFile.delete() ? "[OK]" : "[fail]";
-        System.out.println(result);
-    }
+//        System.out.print("test file delete...          ");
+//        String result = tableFile.delete() ? "[OK]" : "[fail]";
+//        System.out.println(result);
 
-    @Before
-    @SuppressWarnings("CallToPrintStackTrace")
-    public void setUp() {
-        instance = getServiceInstance();
-    }
-
-    @After
-    public void tearDown() {
-        instance.close();
-    }
-
-    @Test
-    public void testIsStatic() {
-        System.out.println("isStatic");
-        boolean expResult = true;
-        boolean result = !(instance.getDayNames().length > 1);
-        assertEquals(expResult, result);
-    }
-
-    /**
-     * Test of isDayEmpty method, of class POIServiceImpl.
-     */
-    @Test
-    public void testIsDayEmpty() {
-        System.out.println("isDayEmpty");
-        int day = 0;
-        POIServiceImpl instance = null;
-        boolean expResult = false;
-        boolean result = instance.isDayEmpty(day);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of isGroupEmpty method, of class POIServiceImpl.
-     */
-    @Test
-    public void testIsGroupEmpty() {
-        System.out.println("isGroupEmpty");
-        int day = 0;
-        int group = 0;
-        POIServiceImpl instance = null;
-        boolean expResult = false;
-        boolean result = instance.isGroupEmpty(day, group);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        try {
+            poiSerializer.close();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
     }
 
     /**
      * Test of isSubgroupEmpty method, of class POIServiceImpl.
      */
     @Test
-    public void testIsSubgroupEmpty() {
-        System.out.println("isSubgroupEmpty");
-        int day = 0;
-        int group = 0;
-        int subgroup = 0;
-        POIServiceImpl instance = null;
-        boolean expResult = false;
-        boolean result = instance.isSubgroupEmpty(day, group, subgroup);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+    @SuppressWarnings("CallToPrintStackTrace")
+    public void testExcelSerialization() {
+        System.out.println("Serialization test started!");
+        poiSerializer.createDays(dayNames);
+        for (int i = 0; i < dayNames.length; i++) {
+            poiSerializer.createGroups(i, groupNames);
+        }
+
+        try {
+            poiSerializer.write();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
     }
 
-    /**
-     * Test of isProductEmpty method, of class POIServiceImpl.
-     */
-    @Test
-    public void testIsProductEmpty() {
-        System.out.println("isProductEmpty");
-        int day = 0;
-        int group = 0;
-        int subgroup = 0;
-        int product = 0;
-        POIServiceImpl instance = null;
-        boolean expResult = false;
-        boolean result = instance.isProductEmpty(day, group, subgroup, product);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of getGroupNames method, of class POIServiceImpl.
-     */
-    @Test
-    public void testGetGroupNames() {
-        System.out.println("getGroupNames");
-        int day = 0;
-        int group = 0;
-        POIServiceImpl instance = null;
-        String[] expResult = null;
-        String[] result = instance.getGroupNames(day, group);
-        assertArrayEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of getSubgroupNames method, of class POIServiceImpl.
-     */
-    @Test
-    public void testGetSubgroupNames() {
-        System.out.println("getSubgroupNames");
-        int day = 0;
-        int group = 0;
-        int subgroup = 0;
-        POIServiceImpl instance = null;
-        String[] expResult = null;
-        String[] result = instance.getSubgroupNames(day, group, subgroup);
-        assertArrayEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of getProductNames method, of class POIServiceImpl.
-     */
-    @Test
-    public void testGetProductNames() {
-        System.out.println("getProductNames");
-        int day = 0;
-        int group = 0;
-        int subgroup = 0;
-        POIServiceImpl instance = null;
-        String[] expResult = null;
-        String[] result = instance.getProductNames(day, group, subgroup);
-        assertArrayEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of getProductPlu method, of class POIServiceImpl.
-     */
-    @Test
-    public void testGetProductPlu() {
-        System.out.println("getProductPlu");
-        int day = 0;
-        int group = 0;
-        int subgroup = 0;
-        POIServiceImpl instance = null;
-        int[] expResult = null;
-        int[] result = instance.getProductPlu(day, group, subgroup);
-        assertArrayEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
+//    @Before
+//    @SuppressWarnings("CallToPrintStackTrace")
+//    public void setUp() {
+//        
+//    }
+//
+//    @After
+//    public void tearDown() {
+//        instance.close();
+//    }
+//
+//    @Test
+//    public void testIsStatic() {
+//        System.out.println("isStatic");
+//        boolean expResult = true;
+//        boolean result = !(instance.getDayNames().length > 1);
+//        assertEquals(expResult, result);
+//    }
+//
+//    /**
+//     * Test of isDayEmpty method, of class POIServiceImpl.
+//     */
+//    @Test
+//    public void testIsDayEmpty() {
+//        System.out.println("isDayEmpty");
+//        int day = 0;
+//        POIServiceImpl instance = null;
+//        boolean expResult = false;
+//        boolean result = instance.isDayEmpty(day);
+//        assertEquals(expResult, result);
+//        // TODO review the generated test code and remove the default call to fail.
+//        fail("The test case is a prototype.");
+//    }
+//
+//    /**
+//     * Test of isGroupEmpty method, of class POIServiceImpl.
+//     */
+//    @Test
+//    public void testIsGroupEmpty() {
+//        System.out.println("isGroupEmpty");
+//        int day = 0;
+//        int group = 0;
+//        POIServiceImpl instance = null;
+//        boolean expResult = false;
+//        boolean result = instance.isGroupEmpty(day, group);
+//        assertEquals(expResult, result);
+//        // TODO review the generated test code and remove the default call to fail.
+//        fail("The test case is a prototype.");
+//    }
+//
+//    /**
+//     * Test of isSubgroupEmpty method, of class POIServiceImpl.
+//     */
+//    @Test
+//    public void testIsSubgroupEmpty() {
+//        System.out.println("isSubgroupEmpty");
+//        int day = 0;
+//        int group = 0;
+//        int subgroup = 0;
+//        POIServiceImpl instance = null;
+//        boolean expResult = false;
+//        boolean result = instance.isSubgroupEmpty(day, group, subgroup);
+//        assertEquals(expResult, result);
+//        // TODO review the generated test code and remove the default call to fail.
+//        fail("The test case is a prototype.");
+//    }
+//
+//    /**
+//     * Test of isProductEmpty method, of class POIServiceImpl.
+//     */
+//    @Test
+//    public void testIsProductEmpty() {
+//        System.out.println("isProductEmpty");
+//        int day = 0;
+//        int group = 0;
+//        int subgroup = 0;
+//        int product = 0;
+//        POIServiceImpl instance = null;
+//        boolean expResult = false;
+//        boolean result = instance.isProductEmpty(day, group, subgroup, product);
+//        assertEquals(expResult, result);
+//        // TODO review the generated test code and remove the default call to fail.
+//        fail("The test case is a prototype.");
+//    }
+//
+//    /**
+//     * Test of getGroupNames method, of class POIServiceImpl.
+//     */
+//    @Test
+//    public void testGetGroupNames() {
+//        System.out.println("getGroupNames");
+//        int day = 0;
+//        int group = 0;
+//        POIServiceImpl instance = null;
+//        String[] expResult = null;
+//        String[] result = instance.getGroupNames(day, group);
+//        assertArrayEquals(expResult, result);
+//        // TODO review the generated test code and remove the default call to fail.
+//        fail("The test case is a prototype.");
+//    }
+//
+//    /**
+//     * Test of getSubgroupNames method, of class POIServiceImpl.
+//     */
+//    @Test
+//    public void testGetSubgroupNames() {
+//        System.out.println("getSubgroupNames");
+//        int day = 0;
+//        int group = 0;
+//        int subgroup = 0;
+//        POIServiceImpl instance = null;
+//        String[] expResult = null;
+//        String[] result = instance.getSubgroupNames(day, group, subgroup);
+//        assertArrayEquals(expResult, result);
+//        // TODO review the generated test code and remove the default call to fail.
+//        fail("The test case is a prototype.");
+//    }
+//
+//    /**
+//     * Test of getProductNames method, of class POIServiceImpl.
+//     */
+//    @Test
+//    public void testGetProductNames() {
+//        System.out.println("getProductNames");
+//        int day = 0;
+//        int group = 0;
+//        int subgroup = 0;
+//        POIServiceImpl instance = null;
+//        String[] expResult = null;
+//        String[] result = instance.getProductNames(day, group, subgroup);
+//        assertArrayEquals(expResult, result);
+//        // TODO review the generated test code and remove the default call to fail.
+//        fail("The test case is a prototype.");
+//    }
+//
+//    /**
+//     * Test of getProductPlu method, of class POIServiceImpl.
+//     */
+//    @Test
+//    public void testGetProductPlu() {
+//        System.out.println("getProductPlu");
+//        int day = 0;
+//        int group = 0;
+//        int subgroup = 0;
+//        POIServiceImpl instance = null;
+//        int[] expResult = null;
+//        int[] result = instance.getProductPlu(day, group, subgroup);
+//        assertArrayEquals(expResult, result);
+//        // TODO review the generated test code and remove the default call to fail.
+//        fail("The test case is a prototype.");
+//    }
 }

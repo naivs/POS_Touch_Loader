@@ -108,12 +108,12 @@ public class POIServiceImpl implements XLSXService {
             Cell cellFirst = workbook.getSheetAt(day).getRow(yGroup).getCell(xGroup + i * dx);
             Cell cellSecond = workbook.getSheetAt(day).getRow(yGroup).getCell(xGroup + i * dx + 1);
 
-            if (cellFirst == null || cellFirst.getCellTypeEnum() == CellType.STRING
+            if (cellFirst.getCellTypeEnum() == CellType.STRING
                     || cellFirst.getCellTypeEnum() == CellType.BLANK) {
                 names[i] = cellFirst.getStringCellValue().trim();
             }
 
-            if (cellSecond == null || cellSecond.getCellTypeEnum() == CellType.STRING
+            if (cellSecond.getCellTypeEnum() == CellType.STRING
                     || cellFirst.getCellTypeEnum() == CellType.BLANK) {
                 names[i] += "::" + cellSecond.getStringCellValue().trim();
             }
@@ -131,12 +131,12 @@ public class POIServiceImpl implements XLSXService {
             Cell cellFirst = workbook.getSheetAt(day).getRow(ySubgroup + i * dy).getCell(xSubgroup + group * dx);
             Cell cellSecond = workbook.getSheetAt(day).getRow(ySubgroup + i * dy + 10).getCell(xSubgroup + group * dx);
 
-            if (cellFirst == null || cellFirst.getCellTypeEnum() == CellType.STRING
+            if (cellFirst.getCellTypeEnum() == CellType.STRING
                     || cellFirst.getCellTypeEnum() == CellType.BLANK) {
                 names[i] = cellFirst.getStringCellValue().trim();
             }
 
-            if (cellSecond == null || cellSecond.getCellTypeEnum() == CellType.STRING
+            if (cellSecond.getCellTypeEnum() == CellType.STRING
                     || cellFirst.getCellTypeEnum() == CellType.BLANK) {
                 names[i] += "::" + cellSecond.getStringCellValue().trim();
             }

@@ -80,16 +80,16 @@ public class Configurator extends javax.swing.JFrame implements Observer {
     public static final int CRIT = 2;
 
     private List<Department> departments;
-    
+
     private SerializationService xmlSerializer;
 
     private final IndexDispatcher idisp = new IndexDispatcher();
 
     public Configurator() {
         initComponents();
-        
+
         xmlSerializer = new DOMService();
-        
+
         try {
             departments = xmlSerializer.deserialize(new File("resources/configuration.xml"));
             showMessage(CLIENT_MESSAGE, "Конфигурация открыта", PLAIN);
@@ -240,7 +240,7 @@ public class Configurator extends javax.swing.JFrame implements Observer {
 //            System.err.println("TransformerException occured while configuration saving! " + ex.getMessage());
 //            showMessage(CLIENT_MESSAGE, "Ошибка записи данных!", CRIT);
 //        }
-        
+
         xmlSerializer.serialize(departments, new File("resources/configuration.xml"));
     }
 
@@ -306,6 +306,16 @@ public class Configurator extends javax.swing.JFrame implements Observer {
                             XLSXService xlsxService = new POIServiceImpl(file);
                             Department department = departments.get(jTable1.getSelectedRow());
 
+                            //release indexes in indexDispatcher
+                            int startIndex = department.getIndex();
+                            int j = department.getComponentsCount() != 7 ? 0 : 6;
+
+                            for (; j >= 0; j--) {
+                                for (int i = 0; i < 64; i++) {
+                                    idisp.releaseIndex(j, startIndex + i);
+                                }
+                            }
+
                             //reading table
                             //recreate department
                             department = new Department(department.getName(),
@@ -320,7 +330,7 @@ public class Configurator extends javax.swing.JFrame implements Observer {
                                 if (!xlsxService.isDayEmpty(a)) {
                                     Day day = new Day(dayNames[a], a);
                                     department.addComponent(day);
-                                    
+
                                     //groups creation
                                     String[] groupNames = xlsxService.getGroupNames(a);
                                     for (int b = 0; b < groupNames.length; b++) {
@@ -328,25 +338,25 @@ public class Configurator extends javax.swing.JFrame implements Observer {
                                         if (!xlsxService.isGroupEmpty(a, b)) {
                                             Group group = new Group(groupNames[b], b);
                                             day.addComponent(group);
-                                            
+
                                             //subgroup creation
                                             String[] subgroupNames = xlsxService.getSubgroupNames(a, b);
-                                            for(int c = 0; c < subgroupNames.length; c++) {
+                                            for (int c = 0; c < subgroupNames.length; c++) {
                                                 //if subgroup is no empty
                                                 if (!xlsxService.isSubgroupEmpty(a, b, c)) {
                                                     int index = idisp.getNextFreeIndex(a, departments.get(jTable1.getSelectedRow()).getIndex());
                                                     Subgroup subgroup = new Subgroup(subgroupNames[c], index, c);
                                                     group.addComponent(subgroup);
-                                                    
+
                                                     //product creation
                                                     String[] productNames = xlsxService.getProductNames(a, b, c);
                                                     int[] productPlu = xlsxService.getProductPlu(a, b, c);
-                                                    for(int d = 0; d < productNames.length; d++) {
+                                                    for (int d = 0; d < productNames.length; d++) {
                                                         //if product is no empty
                                                         if (!xlsxService.isProductEmpty(a, b, c, d)) {
                                                             Product product = new Product(productNames[d], productPlu[d], d);
                                                             subgroup.addComponent(product);
-                                                            
+
                                                             //updating progress bar
                                                             int max = dayNames.length * groupNames.length * subgroupNames.length * productNames.length;
                                                             int current = (a + 1) * (b + 1) * (c + 1) * (d + 1);
@@ -733,9 +743,7 @@ public class Configurator extends javax.swing.JFrame implements Observer {
         }
         //</editor-fold>
         //</editor-fold>
-
-        //</editor-fold>
-        //</editor-fold>
+        
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("touchLoader.conf")))) {
             Properties properties = new Properties();
             properties.load(reader);

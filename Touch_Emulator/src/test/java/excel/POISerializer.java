@@ -25,6 +25,7 @@ import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
@@ -50,18 +51,35 @@ public class POISerializer {
         workbook = new XSSFWorkbook();
     }
 
+    public void applyPattern() {
+        int dx = 4;
+        int dy = 10;
+
+        for (int s = 0; s < workbook.getNumberOfSheets(); s++) {
+            for (int y = 2; y < 162;) {
+                for (int x = 0; x < 29;) {
+                    workbook.getSheetAt(s).addMergedRegion(new CellRangeAddress(y, y + 9, x, x));
+                    x += dx;
+                }
+                y += dy;
+            }
+        }
+    }
+
     public void createDays(String[] dayNames) {
         for (String day : dayNames) {
-            workbook.createSheet(day);
+            Sheet sheet = workbook.createSheet(day);
+            for (int i = 0; i < 162; i++) {
+                sheet.createRow(i);
+            }
         }
     }
 
     public void createGroups(int day, String[] groupNames) {
         Sheet sheet = workbook.getSheetAt(day);
-        Row row = sheet.createRow(yGroup);
+        Row row = sheet.getRow(yGroup);
         int dx = 4;
-        
-        
+
         for (int i = 0; i < groupNames.length; i++) {
             String[] name = groupNames[i].split("::");
             if (name.length > 0) {
@@ -72,15 +90,35 @@ public class POISerializer {
             }
         }
     }
-    
+
     public void createSubgroups(int day, int group, String[] subgroupNames) {
+        Sheet sheet = workbook.getSheetAt(day);
+        int dx = 4;
+        int dy = 20;
+
+        for (int i = 0; i < subgroupNames.length; i++) {
+            String[] name = subgroupNames[i].split("::");
+            if (name.length > 0) {
+                if (name.length == 2) {
+                    sheet.getRow(ySubgroup + i * dy + 10).createCell(xSubgroup + group * dx).setCellValue(name[1].trim());
+                }
+                sheet.getRow(ySubgroup + i * dy).createCell(xSubgroup + group * dx).setCellValue(name[0].trim());
+            }
+        }
+    }
+    
+    public void createProductNames(int day, int group, int subgroup, String[] productNames) {
+        
+    }
+    
+    public void createProductPlus(int day, int group, int subgroup, String[] productPlu) {
         
     }
 
     public void write() throws IOException {
         workbook.write(fos);
     }
-    
+
     public void close() throws IOException {
         workbook.close();
         fos.close();

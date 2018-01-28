@@ -72,7 +72,17 @@ public class POIServiceImplTest {
         the second part must be have max 18 symbols
         divides by "::"
      */
-    private static final String subgroupName = "СвежевыжатыеFFF::соки              FFF";
+    private static final String[] subgroupNames = {
+        "Завтрак1::Блины",
+        "Завтрак2::",
+        "Вареники::Пельмени",
+        "Бутерброды::Хлеб",
+        "Молочные::напитки",
+        "Напитки::Акции",
+        "Кола::Вода Фьюз",
+        "Свежевыжатые::соки"
+    };
+    
     private static final String productName = "Сливочный торт";
     private static final int productPlu = 112233;
     //for EAN-13 test
@@ -113,8 +123,12 @@ public class POIServiceImplTest {
     public void testExcelSerialization() {
         System.out.println("Serialization test started!");
         poiSerializer.createDays(dayNames);
+        poiSerializer.applyPattern();
         for (int i = 0; i < dayNames.length; i++) {
             poiSerializer.createGroups(i, groupNames);
+            for (int j = 0; j < groupNames.length; j++) {
+                poiSerializer.createSubgroups(i, j, subgroupNames);
+            }
         }
 
         try {

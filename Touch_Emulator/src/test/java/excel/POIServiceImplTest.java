@@ -17,15 +17,8 @@
 package excel;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -41,7 +34,9 @@ public class POIServiceImplTest {
 
     private static File tableFile;
     private static POISerializer poiSerializer;
-    private XLSXService instance;
+    private static XLSXService xlsxService;
+
+    private static ContentDispenser dispenser;
 
     private static final String[] dayNames = {
         "Понедельник",
@@ -52,102 +47,159 @@ public class POIServiceImplTest {
         "Суббота",
         "Воскресенье"
     };
-    /*
-        the first part must be have max 14 symbols
-        the second part must be have max 18 symbols
-        divides by "::"
-     */
-    private static final String[] groupNames = {
-        "Завтраки Блины::Вареники Пельмени",
-        "Напитки::Акции",
-        "Ланч Салат Суп::Гарнир Горячее",
-        "Горячие::блюда",
-        "Гриль::WOK",
-        "Выпечка::Десерты Маффины",
-        "Дополнительное::меню",
-        "::"
-    };
-    /*
-        the first part must be have max 12 symbols
-        the second part must be have max 18 symbols
-        divides by "::"
-     */
-    private static final String[] subgroupNames = {
-        "Завтрак1::Блины",
-        "Завтрак2::",
-        "Вареники::Пельмени",
-        "Бутерброды::Хлеб",
-        "Молочные::напитки",
-        "Напитки::Акции",
-        "Кола::Вода Фьюз",
-        "Свежевыжатые::соки"
-    };
-    
-    private static final String productName = "Сливочный торт";
-    private static final int productPlu = 112233;
+
     //for EAN-13 test
     private static final long ean_13Plu = 1234567891234L;
 
     @BeforeClass
     @SuppressWarnings("CallToPrintStackTrace")
     public static void setUpClass() {
-        tableFile = new File("test.xlsx");
 
-        try {
-            tableFile.createNewFile();
-            poiSerializer = new POISerializer(tableFile);
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
     }
 
     @AfterClass
     @SuppressWarnings("CallToPrintStackTrace")
     public static void tearDownClass() {
-//        System.out.print("test file delete...          ");
-//        String result = tableFile.delete() ? "[OK]" : "[fail]";
-//        System.out.println(result);
+
+    }
+
+    @Before
+    @SuppressWarnings("CallToPrintStackTrace")
+    public void setUp() {
+        tableFile = new File("test.xlsx");
 
         try {
-            poiSerializer.close();
+            tableFile.createNewFile();
+            poiSerializer = new POISerializer(tableFile);
+            dispenser = new ContentDispenser();
         } catch (IOException ex) {
             ex.printStackTrace();
+            fail();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            fail();
         }
     }
 
-    /**
-     * Test of isSubgroupEmpty method, of class POIServiceImpl.
-     */
+    @After
+    @SuppressWarnings("CallToPrintStackTrace")
+    public void tearDown() {
+        try {
+            poiSerializer.close();
+            xlsxService.close();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            fail();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            fail();
+        }
+
+        System.out.print("test file delete...          ");
+        String result = tableFile.delete() ? "[OK]" : "[fail]";
+        System.out.println(result);
+    }
+
     @Test
     @SuppressWarnings("CallToPrintStackTrace")
     public void testExcelSerialization() {
         System.out.println("Serialization test started!");
-        poiSerializer.createDays(dayNames);
-        poiSerializer.applyPattern();
-        for (int i = 0; i < dayNames.length; i++) {
-            poiSerializer.createGroups(i, groupNames);
-            for (int j = 0; j < groupNames.length; j++) {
-                poiSerializer.createSubgroups(i, j, subgroupNames);
-            }
-        }
 
         try {
+            poiSerializer.createDays(dayNames);
+            poiSerializer.applyPattern();
+            for (int i = 0; i < dayNames.length; i++) {
+                poiSerializer.createGroups(i, dispenser.getGroupNames());
+                for (int j = 0; j < 8; j++) {
+                    poiSerializer.createSubgroups(i, j, dispenser.getSubgroupNames());
+                    for (int p = 0; p < 8; p++) {
+                        poiSerializer.createProductNames(i, j, p, dispenser.getProductNames());
+                        poiSerializer.createProductPlus(i, j, p, dispenser.getProductPlus());
+                    }
+                }
+            }
+
             poiSerializer.write();
+            System.out.println("Test file created succecsfully!");
         } catch (IOException ex) {
             ex.printStackTrace();
+            fail();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            fail();
         }
     }
 
-//    @Before
-//    @SuppressWarnings("CallToPrintStackTrace")
-//    public void setUp() {
-//        
-//    }
-//
-//    @After
-//    public void tearDown() {
-//        instance.close();
-//    }
+    @Test
+    @SuppressWarnings("CallToPrintStackTrace")
+    public void testPOIService() {
+        System.out.println("POIService test started!");
+
+        String[] groups = new String[8];
+        String[] subGroups = new String[8];
+        String[] productNames = new String[20];
+        int[] productPlus = new int[20];
+
+        int day1 = 1, day2 = 5;
+        int group1 = 0, group2 = 4;
+        int subGroup1 = 4, subGroup2 = 6;
+
+        try {
+            groups = dispenser.getGroupNames();
+            subGroups = dispenser.getSubgroupNames();
+            productNames = dispenser.getProductNames();
+            productPlus = dispenser.getProductPlus();
+
+            poiSerializer.createDays(dayNames);
+            poiSerializer.applyPattern();
+
+            poiSerializer.createGroups(day1, groups);
+            poiSerializer.createGroups(day2, groups);
+
+            poiSerializer.createSubgroups(day1, group1, subGroups);
+            poiSerializer.createSubgroups(day2, group2, subGroups);
+
+            poiSerializer.createProductNames(day1, group1, subGroup1, productNames);
+            poiSerializer.createProductNames(day2, group2, subGroup2, productNames);
+
+            poiSerializer.createProductPlus(day1, group1, subGroup1, productPlus);
+            poiSerializer.createProductPlus(day2, group2, subGroup2, productPlus);
+
+            poiSerializer.write();
+            System.out.println("Test file created succecsfully!");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            fail();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            fail();
+        }
+
+        try {
+            xlsxService = new POIServiceImpl(tableFile);
+
+            assertArrayEquals(dayNames, xlsxService.getDayNames());
+
+            assertArrayEquals(groups, xlsxService.getGroupNames(day1));
+            assertArrayEquals(groups, xlsxService.getGroupNames(day2));
+
+            assertArrayEquals(subGroups, xlsxService.getSubgroupNames(day1, group1));
+            assertArrayEquals(subGroups, xlsxService.getSubgroupNames(day2, group2));
+
+            assertArrayEquals(productNames, xlsxService.getProductNames(day1, group1, subGroup1));
+            assertArrayEquals(productNames, xlsxService.getProductNames(day2, group2, subGroup2));
+
+            assertArrayEquals(productPlus, xlsxService.getProductPlu(day1, group1, subGroup1));
+            assertArrayEquals(productPlus, xlsxService.getProductPlu(day2, group2, subGroup2));
+        } catch (FileNotFoundException ex) {
+            ex.printStackTrace();
+            fail();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            fail();
+        }
+    }
+
 //
 //    @Test
 //    public void testIsStatic() {

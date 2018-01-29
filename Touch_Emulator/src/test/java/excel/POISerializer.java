@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -108,11 +107,25 @@ public class POISerializer {
     }
     
     public void createProductNames(int day, int group, int subgroup, String[] productNames) {
+        Sheet sheet = workbook.getSheetAt(day);
+        int dx = 4;
+        int dy = 20;
         
+        for (int i = 0; i < productNames.length; i++) {
+            sheet.getRow(yProdName + subgroup * dy + i).
+                    createCell(xProdName + group * dx, CellType.STRING).setCellValue(productNames[i]);
+        }
     }
     
-    public void createProductPlus(int day, int group, int subgroup, String[] productPlu) {
+    public void createProductPlus(int day, int group, int subgroup, int[] productPlu) {
+        Sheet sheet = workbook.getSheetAt(day);
+        int dx = 4;
+        int dy = 20;
         
+        for (int i = 0; i < productPlu.length; i++) {
+            sheet.getRow(yProdPlu + subgroup * dy + i).
+                    createCell(xProdPlu + group * dx, CellType.NUMERIC).setCellValue(productPlu[i]);
+        }
     }
 
     public void write() throws IOException {

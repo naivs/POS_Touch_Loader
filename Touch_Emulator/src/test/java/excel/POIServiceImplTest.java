@@ -51,18 +51,21 @@ public class POIServiceImplTest {
     //for EAN-13 test
     private static final long ean_13Plu = 1234567891234L;
 
-    @BeforeClass
-    @SuppressWarnings("CallToPrintStackTrace")
-    public static void setUpClass() {
+    private final int day1 = 1, day2 = 5;
+    private final int group1 = 0, group2 = 4;
+    private final int subGroup1 = 4, subGroup2 = 6;
 
-    }
-
-    @AfterClass
-    @SuppressWarnings("CallToPrintStackTrace")
-    public static void tearDownClass() {
-
-    }
-
+//    @BeforeClass
+//    @SuppressWarnings("CallToPrintStackTrace")
+//    public static void setUpClass() {
+//
+//    }
+//
+//    @AfterClass
+//    @SuppressWarnings("CallToPrintStackTrace")
+//    public static void tearDownClass() {
+//
+//    }
     @Before
     @SuppressWarnings("CallToPrintStackTrace")
     public void setUp() {
@@ -72,6 +75,13 @@ public class POIServiceImplTest {
             tableFile.createNewFile();
             poiSerializer = new POISerializer(tableFile);
             dispenser = new ContentDispenser();
+
+            poiSerializer.createDays(dayNames);
+            poiSerializer.applyPattern();
+            xlsxService = new POIServiceImpl(tableFile);
+        } catch (FileNotFoundException ex) {
+            ex.printStackTrace();
+            fail();
         } catch (IOException ex) {
             ex.printStackTrace();
             fail();
@@ -100,114 +110,44 @@ public class POIServiceImplTest {
         System.out.println(result);
     }
 
-    @Test
-    @SuppressWarnings("CallToPrintStackTrace")
-    public void testExcelSerialization() {
-        System.out.println("Serialization test started!");
-
-        try {
-            poiSerializer.createDays(dayNames);
-            poiSerializer.applyPattern();
-            for (int i = 0; i < dayNames.length; i++) {
-                poiSerializer.createGroups(i, dispenser.getGroupNames());
-                for (int j = 0; j < 8; j++) {
-                    poiSerializer.createSubgroups(i, j, dispenser.getSubgroupNames());
-                    for (int p = 0; p < 8; p++) {
-                        poiSerializer.createProductNames(i, j, p, dispenser.getProductNames());
-                        poiSerializer.createProductPlus(i, j, p, dispenser.getProductPlus());
-                    }
-                }
-            }
-
-            poiSerializer.write();
-            System.out.println("Test file created succecsfully!");
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            fail();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            fail();
-        }
-    }
-
-    @Test
-    @SuppressWarnings("CallToPrintStackTrace")
-    public void testPOIService() {
-        System.out.println("POIService test started!");
-
-        String[] groups = new String[8];
-        String[] subGroups = new String[8];
-        String[] productNames = new String[20];
-        int[] productPlus = new int[20];
-
-        int day1 = 1, day2 = 5;
-        int group1 = 0, group2 = 4;
-        int subGroup1 = 4, subGroup2 = 6;
-
-        try {
-            groups = dispenser.getGroupNames();
-            subGroups = dispenser.getSubgroupNames();
-            productNames = dispenser.getProductNames();
-            productPlus = dispenser.getProductPlus();
-
-            poiSerializer.createDays(dayNames);
-            poiSerializer.applyPattern();
-
-            poiSerializer.createGroups(day1, groups);
-            poiSerializer.createGroups(day2, groups);
-
-            poiSerializer.createSubgroups(day1, group1, subGroups);
-            poiSerializer.createSubgroups(day2, group2, subGroups);
-
-            poiSerializer.createProductNames(day1, group1, subGroup1, productNames);
-            poiSerializer.createProductNames(day2, group2, subGroup2, productNames);
-
-            poiSerializer.createProductPlus(day1, group1, subGroup1, productPlus);
-            poiSerializer.createProductPlus(day2, group2, subGroup2, productPlus);
-
-            poiSerializer.write();
-            System.out.println("Test file created succecsfully!");
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            fail();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            fail();
-        }
-
-        try {
-            xlsxService = new POIServiceImpl(tableFile);
-
-            assertArrayEquals(dayNames, xlsxService.getDayNames());
-
-            assertArrayEquals(groups, xlsxService.getGroupNames(day1));
-            assertArrayEquals(groups, xlsxService.getGroupNames(day2));
-
-            assertArrayEquals(subGroups, xlsxService.getSubgroupNames(day1, group1));
-            assertArrayEquals(subGroups, xlsxService.getSubgroupNames(day2, group2));
-
-            assertArrayEquals(productNames, xlsxService.getProductNames(day1, group1, subGroup1));
-            assertArrayEquals(productNames, xlsxService.getProductNames(day2, group2, subGroup2));
-
-            assertArrayEquals(productPlus, xlsxService.getProductPlu(day1, group1, subGroup1));
-            assertArrayEquals(productPlus, xlsxService.getProductPlu(day2, group2, subGroup2));
-        } catch (FileNotFoundException ex) {
-            ex.printStackTrace();
-            fail();
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            fail();
-        }
-    }
-
-//
 //    @Test
-//    public void testIsStatic() {
-//        System.out.println("isStatic");
-//        boolean expResult = true;
-//        boolean result = !(instance.getDayNames().length > 1);
-//        assertEquals(expResult, result);
+//    @SuppressWarnings("CallToPrintStackTrace")
+//    public void testExcelSerialization() {
+//        System.out.println("excelSerialization");
+//
+//        try {
+//            poiSerializer.createDays(dayNames);
+//            poiSerializer.applyPattern();
+//            for (int i = 0; i < dayNames.length; i++) {
+//                poiSerializer.createGroups(i, dispenser.getGroupNames());
+//                for (int j = 0; j < 8; j++) {
+//                    poiSerializer.createSubgroups(i, j, dispenser.getSubgroupNames());
+//                    for (int p = 0; p < 8; p++) {
+//                        poiSerializer.createProductNames(i, j, p, dispenser.getProductNames());
+//                        poiSerializer.createProductPlus(i, j, p, dispenser.getProductPlus());
+//                    }
+//                }
+//            }
+//
+//            poiSerializer.write();
+//            System.out.println("Test file created succecsfully!");
+//        } catch (IOException ex) {
+//            ex.printStackTrace();
+//            fail();
+//        } catch (Exception ex) {
+//            ex.printStackTrace();
+//            fail();
+//        }
 //    }
+    @Test
+    public void testIsStatic() {
+        System.out.println("isStatic");
+        assertArrayEquals(dayNames, xlsxService.getDayNames());
+
+        boolean expResult = false;
+        boolean result = !(xlsxService.getDayNames().length >= 7);
+        assertEquals(expResult, result);
+    }
 //
 //    /**
 //     * Test of isDayEmpty method, of class POIServiceImpl.
@@ -275,70 +215,92 @@ public class POIServiceImplTest {
 //        fail("The test case is a prototype.");
 //    }
 //
-//    /**
-//     * Test of getGroupNames method, of class POIServiceImpl.
-//     */
-//    @Test
-//    public void testGetGroupNames() {
-//        System.out.println("getGroupNames");
-//        int day = 0;
-//        int group = 0;
-//        POIServiceImpl instance = null;
-//        String[] expResult = null;
-//        String[] result = instance.getGroupNames(day, group);
-//        assertArrayEquals(expResult, result);
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
-//    }
-//
-//    /**
-//     * Test of getSubgroupNames method, of class POIServiceImpl.
-//     */
-//    @Test
-//    public void testGetSubgroupNames() {
-//        System.out.println("getSubgroupNames");
-//        int day = 0;
-//        int group = 0;
-//        int subgroup = 0;
-//        POIServiceImpl instance = null;
-//        String[] expResult = null;
-//        String[] result = instance.getSubgroupNames(day, group, subgroup);
-//        assertArrayEquals(expResult, result);
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
-//    }
-//
-//    /**
-//     * Test of getProductNames method, of class POIServiceImpl.
-//     */
-//    @Test
-//    public void testGetProductNames() {
-//        System.out.println("getProductNames");
-//        int day = 0;
-//        int group = 0;
-//        int subgroup = 0;
-//        POIServiceImpl instance = null;
-//        String[] expResult = null;
-//        String[] result = instance.getProductNames(day, group, subgroup);
-//        assertArrayEquals(expResult, result);
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
-//    }
-//
-//    /**
-//     * Test of getProductPlu method, of class POIServiceImpl.
-//     */
-//    @Test
-//    public void testGetProductPlu() {
-//        System.out.println("getProductPlu");
-//        int day = 0;
-//        int group = 0;
-//        int subgroup = 0;
-//        POIServiceImpl instance = null;
-//        int[] expResult = null;
-//        int[] result = instance.getProductPlu(day, group, subgroup);
-//        assertArrayEquals(expResult, result);
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
-//    }
+
+    /**
+     * Test of getGroupNames method, of class POIServiceImpl.
+     */
+    @Test
+    @SuppressWarnings("CallToPrintStackTrace")
+    public void testGetGroupNames() {
+        System.out.println("getGroupNames");
+        String[] groups = dispenser.getGroupNames();
+
+        try {
+            poiSerializer.createGroups(day1, groups);
+            poiSerializer.createGroups(day2, groups);
+            poiSerializer.write();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            fail();
+        }
+
+        assertArrayEquals(groups, xlsxService.getGroupNames(day1));
+        assertArrayEquals(groups, xlsxService.getGroupNames(day2));
+    }
+
+    /**
+     * Test of getSubgroupNames method, of class POIServiceImpl.
+     */
+    @Test
+    @SuppressWarnings("CallToPrintStackTrace")
+    public void testGetSubgroupNames() {
+        System.out.println("getSubgroupNames");
+        String[] subGroups = dispenser.getSubgroupNames();
+
+        try {
+            poiSerializer.createSubgroups(day1, group1, subGroups);
+            poiSerializer.createSubgroups(day2, group2, subGroups);
+            poiSerializer.write();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            fail();
+        }
+
+        assertArrayEquals(subGroups, xlsxService.getSubgroupNames(day1, group1));
+        assertArrayEquals(subGroups, xlsxService.getSubgroupNames(day2, group2));
+    }
+
+    /**
+     * Test of getProductNames method, of class POIServiceImpl.
+     */
+    @Test
+    @SuppressWarnings("CallToPrintStackTrace")
+    public void testGetProductNames() {
+        System.out.println("getProductNames");
+        String[] productNames = dispenser.getProductNames();
+
+        try {
+            poiSerializer.createProductNames(day1, group1, subGroup1, productNames);
+            poiSerializer.createProductNames(day2, group2, subGroup2, productNames);
+            poiSerializer.write();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            fail();
+        }
+
+        assertArrayEquals(productNames, xlsxService.getProductNames(day1, group1, subGroup1));
+        assertArrayEquals(productNames, xlsxService.getProductNames(day2, group2, subGroup2));
+    }
+
+    /**
+     * Test of getProductPlu method, of class POIServiceImpl.
+     */
+    @Test
+    @SuppressWarnings("CallToPrintStackTrace")
+    public void testGetProductPlu() {
+        System.out.println("getProductPlu");
+        int[] productPlus = dispenser.getProductPlus();
+
+        try {
+            poiSerializer.createProductPlus(day1, group1, subGroup1, productPlus);
+            poiSerializer.createProductPlus(day2, group2, subGroup2, productPlus);
+            poiSerializer.write();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            fail();
+        }
+
+        assertArrayEquals(productPlus, xlsxService.getProductPlu(day1, group1, subGroup1));
+        assertArrayEquals(productPlus, xlsxService.getProductPlu(day2, group2, subGroup2));
+    }
 }

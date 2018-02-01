@@ -78,7 +78,6 @@ public class POIServiceImplTest {
 
             poiSerializer.createDays(dayNames);
             poiSerializer.applyPattern();
-            xlsxService = new POIServiceImpl(tableFile);
         } catch (FileNotFoundException ex) {
             ex.printStackTrace();
             fail();
@@ -229,6 +228,7 @@ public class POIServiceImplTest {
             poiSerializer.createGroups(day1, groups);
             poiSerializer.createGroups(day2, groups);
             poiSerializer.write();
+            xlsxService = new POIServiceImpl(tableFile);
         } catch (IOException ex) {
             ex.printStackTrace();
             fail();
@@ -251,6 +251,7 @@ public class POIServiceImplTest {
             poiSerializer.createSubgroups(day1, group1, subGroups);
             poiSerializer.createSubgroups(day2, group2, subGroups);
             poiSerializer.write();
+            xlsxService = new POIServiceImpl(tableFile);
         } catch (IOException ex) {
             ex.printStackTrace();
             fail();
@@ -273,6 +274,7 @@ public class POIServiceImplTest {
             poiSerializer.createProductNames(day1, group1, subGroup1, productNames);
             poiSerializer.createProductNames(day2, group2, subGroup2, productNames);
             poiSerializer.write();
+            xlsxService = new POIServiceImpl(tableFile);
         } catch (IOException ex) {
             ex.printStackTrace();
             fail();
@@ -295,6 +297,7 @@ public class POIServiceImplTest {
             poiSerializer.createProductPlus(day1, group1, subGroup1, productPlus);
             poiSerializer.createProductPlus(day2, group2, subGroup2, productPlus);
             poiSerializer.write();
+            xlsxService = new POIServiceImpl(tableFile);
         } catch (IOException ex) {
             ex.printStackTrace();
             fail();

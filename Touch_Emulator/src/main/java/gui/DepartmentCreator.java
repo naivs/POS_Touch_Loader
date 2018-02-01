@@ -93,7 +93,7 @@ public class DepartmentCreator extends javax.swing.JDialog {
 
         jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { " ---", "001", "101", "201", "301", "401", "501", "601" }));
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { " ---", "001", "101", "201", "301", "401", "501", "601", "701", "801", "901" }));
         jComboBox1.setFocusable(false);
 
         jLabel1.setText("Название");

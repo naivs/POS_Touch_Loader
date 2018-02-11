@@ -73,7 +73,7 @@ public class GUI extends javax.swing.JFrame implements Observer {
 
         jPanel1 = new Display();
         jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
+        buttonConnect = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
         jButton5 = new javax.swing.JButton();
@@ -90,6 +90,7 @@ public class GUI extends javax.swing.JFrame implements Observer {
         });
 
         jPanel1.setFocusable(false);
+        jPanel1.setMaximumSize(new java.awt.Dimension(1920, 1080));
 
         jButton1.setText("Set keys");
         jButton1.setFocusable(false);
@@ -99,10 +100,10 @@ public class GUI extends javax.swing.JFrame implements Observer {
             }
         });
 
-        jButton2.setText("Connect");
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        buttonConnect.setText("Connect");
+        buttonConnect.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                buttonConnectActionPerformed(evt);
             }
         });
 
@@ -141,7 +142,7 @@ public class GUI extends javax.swing.JFrame implements Observer {
                     .addComponent(jButton5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jButton4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(buttonConnect, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(50, 50, 50)
                 .addComponent(jToggleButton1)
@@ -155,7 +156,7 @@ public class GUI extends javax.swing.JFrame implements Observer {
                 .addContainerGap()
                 .addComponent(jButton1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton2)
+                .addComponent(buttonConnect)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton3)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -197,7 +198,7 @@ public class GUI extends javax.swing.JFrame implements Observer {
         }
     }//GEN-LAST:event_formWindowClosing
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+    private void buttonConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonConnectActionPerformed
         try {
             if (!connection.isOpened()) {
                 connection.addObserver(this);
@@ -207,7 +208,7 @@ public class GUI extends javax.swing.JFrame implements Observer {
         } catch (SerialPortException ex) {
             System.err.println("Can't open port.\n" + ex.getMessage());
         }
-    }//GEN-LAST:event_jButton2ActionPerformed
+    }//GEN-LAST:event_buttonConnectActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         connection.send(Connection.RQ_START);
@@ -321,8 +322,8 @@ public class GUI extends javax.swing.JFrame implements Observer {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton buttonConnect;
     private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;

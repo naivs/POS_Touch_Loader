@@ -53,6 +53,10 @@ public class Display extends JPanel {
         return keyStates[pad][key];
     }
     
+    public void log(String message) {
+        
+    }
+    
     @Override
     protected void paintComponent(Graphics g) {
         graphic = g;

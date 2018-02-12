@@ -19,7 +19,7 @@ public class PortFinder extends Observable implements Runnable, Observer {
 
     private boolean isRunning;
     private String[] systemPorts;
-    private Connection connection;
+    private ConnectionImpl connection;
 
     @Override
     @SuppressWarnings("CallToPrintStackTrace")
@@ -31,11 +31,11 @@ public class PortFinder extends Observable implements Runnable, Observer {
             System.out.println("Available ports: " + Arrays.toString(systemPorts));
             for (String portName : systemPorts) {
                 if (connection == null) {
-                    connection = new Connection(portName);
-                    connection.setObserver(this);
+                    connection = new ConnectionImpl(portName);
+                    connection.addObserver(this);
                 }
 
-                if (!connection.isOpened()) {
+                if (!connection.isOpen()) {
                     try {
                         connection.open();
                         connection.send("222");
@@ -65,7 +65,7 @@ public class PortFinder extends Observable implements Runnable, Observer {
 
     @Override
     public void update(Observable o, Object arg) {
-        if (o.getClass().getName().equals(Connection.class.getName())) {
+        if (o.getClass().getName().equals(ConnectionImpl.class.getName())) {
             isRunning = false;
         }
     }

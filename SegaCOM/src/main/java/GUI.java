@@ -9,6 +9,8 @@ import java.util.Observer;
 import jssc.SerialPortException;
 import jssc.SerialPortList;
 import serial.Connection;
+import serial.ConnectionFake;
+import serial.ConnectionImpl;
 import serial.PortFinder;
 
 /**
@@ -21,7 +23,7 @@ public class GUI extends javax.swing.JFrame implements Observer {
     private Connection connection;
 
     private final KeyMapManager keyMapManager;
-    private int[][] currentKeyMap;
+    private final int[][] currentKeyMap;
     private static final int[] CODE = {
         1,
         2,
@@ -46,7 +48,8 @@ public class GUI extends javax.swing.JFrame implements Observer {
 
         System.out.println("Available ports: " + Arrays.toString(SerialPortList.getPortNames("/dev/")));
         String portName = "/dev/ttyUSB0";
-        connection = new Connection(portName);
+        //connection = new ConnectionImpl(portName);
+        connection = new ConnectionFake(portName);
 
 //        portFinder = new PortFinder();
 //        portFinder.addObserver(this);
@@ -72,13 +75,11 @@ public class GUI extends javax.swing.JFrame implements Observer {
     private void initComponents() {
 
         jPanel1 = new Display();
-        jButton1 = new javax.swing.JButton();
+        buttonSetKeys = new javax.swing.JButton();
         buttonConnect = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
-        jButton4 = new javax.swing.JButton();
-        jButton5 = new javax.swing.JButton();
-        jToggleButton1 = new javax.swing.JToggleButton();
-        jToggleButton2 = new javax.swing.JToggleButton();
+        buttonStart = new javax.swing.JButton();
+        tButtonPad1 = new javax.swing.JToggleButton();
+        tButtonPad2 = new javax.swing.JToggleButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Sega controls");
@@ -92,11 +93,11 @@ public class GUI extends javax.swing.JFrame implements Observer {
         jPanel1.setFocusable(false);
         jPanel1.setMaximumSize(new java.awt.Dimension(1920, 1080));
 
-        jButton1.setText("Set keys");
-        jButton1.setFocusable(false);
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        buttonSetKeys.setText("Set keys");
+        buttonSetKeys.setFocusable(false);
+        buttonSetKeys.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                buttonSetKeysActionPerformed(evt);
             }
         });
 
@@ -107,30 +108,16 @@ public class GUI extends javax.swing.JFrame implements Observer {
             }
         });
 
-        jButton3.setText("Start");
-        jButton3.addActionListener(new java.awt.event.ActionListener() {
+        buttonStart.setText("Start");
+        buttonStart.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton3ActionPerformed(evt);
+                buttonStartActionPerformed(evt);
             }
         });
 
-        jButton4.setText("Stop");
-        jButton4.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton4ActionPerformed(evt);
-            }
-        });
+        tButtonPad1.setText("Gamepad 1");
 
-        jButton5.setText("Disconnect");
-        jButton5.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton5ActionPerformed(evt);
-            }
-        });
-
-        jToggleButton1.setText("Gamepad 1");
-
-        jToggleButton2.setText("Gamepad 2");
+        tButtonPad2.setText("Gamepad 2");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -139,33 +126,28 @@ public class GUI extends javax.swing.JFrame implements Observer {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jButton5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jButton4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(buttonStart, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(buttonConnect, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(buttonSetKeys, javax.swing.GroupLayout.DEFAULT_SIZE, 108, Short.MAX_VALUE))
                 .addGap(50, 50, 50)
-                .addComponent(jToggleButton1)
+                .addComponent(tButtonPad1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 392, Short.MAX_VALUE)
-                .addComponent(jToggleButton2)
+                .addComponent(tButtonPad2)
                 .addGap(127, 127, 127))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jButton1)
+                .addComponent(buttonSetKeys)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(buttonConnect)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton3)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton4)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(buttonStart)
+                .addGap(43, 43, 43)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton5)
-                    .addComponent(jToggleButton1)
-                    .addComponent(jToggleButton2))
+                    .addComponent(tButtonPad1)
+                    .addComponent(tButtonPad2))
                 .addContainerGap(232, Short.MAX_VALUE))
         );
 
@@ -186,13 +168,16 @@ public class GUI extends javax.swing.JFrame implements Observer {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void buttonSetKeysActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSetKeysActionPerformed
         KeyConfigurator keyConfigurator = new KeyConfigurator(this, currentKeyMap);
         keyConfigurator.setVisible(true);
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_buttonSetKeysActionPerformed
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
         System.out.println("Exit...");
+        if (connection != null) {
+            connection.close();
+        }
         if (portFinder != null) {
             portFinder.stop();
         }
@@ -200,7 +185,7 @@ public class GUI extends javax.swing.JFrame implements Observer {
 
     private void buttonConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonConnectActionPerformed
         try {
-            if (!connection.isOpened()) {
+            if (!connection.isOpen()) {
                 connection.addObserver(this);
                 connection.open();
             }
@@ -210,22 +195,14 @@ public class GUI extends javax.swing.JFrame implements Observer {
         }
     }//GEN-LAST:event_buttonConnectActionPerformed
 
-    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        connection.send(Connection.RQ_START);
-    }//GEN-LAST:event_jButton3ActionPerformed
-
-    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-        connection.send(Connection.RQ_STOP);
-    }//GEN-LAST:event_jButton4ActionPerformed
-
-    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
-        connection.close();
-    }//GEN-LAST:event_jButton5ActionPerformed
+    private void buttonStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonStartActionPerformed
+        connection.send(ConnectionImpl.RQ_START);
+    }//GEN-LAST:event_buttonStartActionPerformed
 
     @Override
     public void update(Observable o, Object arg) {
         String className = o.getClass().getName();
-        if (className.equals(Connection.class.getName())) {
+        if (className.equals(ConnectionFake.class.getName())) {
 
             if (arg.equals(Connection.RPL_STAT)) {
 //            connection = (Connection) arg;
@@ -233,10 +210,8 @@ public class GUI extends javax.swing.JFrame implements Observer {
                 System.out.print("Gamepad connected! Response: " + arg);
             } else if (arg.equals(Connection.RPL_START)) {
                 System.out.print("Handle started! Response: " + arg);
-            } else if (arg.equals(Connection.RPL_STOP)) {
-                System.out.print("Handle stopped! Response: " + arg);
             } else {
-                System.out.print("Button data! Response: " + arg);
+                //System.out.print("Button data! Response: " + arg);
 
                 String[] raw;
                 int code_1, code_2;
@@ -246,13 +221,13 @@ public class GUI extends javax.swing.JFrame implements Observer {
                     if (arg.toString().contains(" ")) {
                         raw = arg.toString().split(" ");
 
-                        if (jToggleButton1.isSelected()) {
+                        if (tButtonPad1.isSelected()) {
                             code_1 = raw[0].isEmpty() ? 0 : Integer.parseInt(raw[0]);
                         } else {
                             code_1 = 0;
                         }
                         
-                        if (jToggleButton2.isSelected()) {
+                        if (tButtonPad2.isSelected()) {
                             code_2 = raw[1].isEmpty() ? 0 : Integer.parseInt(raw[1].trim());
                         } else {
                             code_2 = 0;
@@ -304,15 +279,11 @@ public class GUI extends javax.swing.JFrame implements Observer {
                     break;
                 }
             }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(GUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(GUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(GUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(GUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
+        
         //</editor-fold>
 
 //        /* Create and display the form */
@@ -323,12 +294,10 @@ public class GUI extends javax.swing.JFrame implements Observer {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton buttonConnect;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton4;
-    private javax.swing.JButton jButton5;
+    private javax.swing.JButton buttonSetKeys;
+    private javax.swing.JButton buttonStart;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JToggleButton jToggleButton1;
-    private javax.swing.JToggleButton jToggleButton2;
+    private javax.swing.JToggleButton tButtonPad1;
+    private javax.swing.JToggleButton tButtonPad2;
     // End of variables declaration//GEN-END:variables
 }

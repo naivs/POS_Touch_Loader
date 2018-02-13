@@ -12,7 +12,7 @@ public class KeyConfiguratorTableModel extends AbstractTableModel {
     private final String[] columnNames = {"", "Gamepad 1", "Gamepad 2"};
     private final String[][] data = new String[12][3];
     
-    public KeyConfiguratorTableModel(int[][] keyCodes) {
+    public KeyConfiguratorTableModel(KeyMap keyMap) {
         super();
         data[0][0] = "A";
         data[1][0] = "B";
@@ -29,7 +29,7 @@ public class KeyConfiguratorTableModel extends AbstractTableModel {
         
         for(int i = 0; i < data.length; i++) {
             for (int j = 1; j < data[i].length; j++) {
-                data[i][j] = keyCodes[i][j - 1] == 0 ? "-" : KeyEvent.getKeyText(keyCodes[i][j - 1]);
+                data[i][j] = keyMap.getKey(i, j - 1) == 0 ? "-" : KeyEvent.getKeyText(keyMap.getKey(i, j - 1));
             }
         }
     }

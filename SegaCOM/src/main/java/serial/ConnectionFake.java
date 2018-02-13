@@ -13,7 +13,8 @@ import jssc.SerialPortException;
  */
 public class ConnectionFake extends Connection {
 
-    private String data = "000111 001100";
+    private String data_press = "000111 001100";
+    private String data_release = "000000 000000";
     private String code = "";
 
     private final String portName;
@@ -23,11 +24,11 @@ public class ConnectionFake extends Connection {
 
     public ConnectionFake(String portName) {
         this.portName = portName;
-        
+
         com = new Thread(() -> {
             while (isOpen) {
                 setChanged();
-                
+
                 if (code != null && !code.equals("")) {
                     switch (code) {
                         case RQ_START:
@@ -41,7 +42,14 @@ public class ConnectionFake extends Connection {
                     }
                     code = "";
                 } else {
-                    notifyObservers(data);
+                    notifyObservers(data_press);
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException ex) {
+
+                    }
+                    notifyObservers(data_release);
+
                 }
             }
         });
@@ -60,7 +68,7 @@ public class ConnectionFake extends Connection {
     @Override
     public void send(String code) {
         this.code = code;
-        
+
         if (code.equals(RQ_START)) {
             com.start();
         }

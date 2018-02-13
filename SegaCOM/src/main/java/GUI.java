@@ -1,6 +1,5 @@
 
 import keyboard.KeyConfigurator;
-import keyboard.KeyMapManager;
 import java.awt.AWTException;
 import java.awt.Robot;
 import java.util.Arrays;
@@ -22,8 +21,7 @@ public class GUI extends javax.swing.JFrame implements Observer {
     private PortFinder portFinder;
     private Connection connection;
 
-    private final KeyMapManager keyMapManager;
-    private final int[][] currentKeyMap;
+    private final KeyConfigurator keyConfigurator;
     private static final int[] CODE = {
         1,
         2,
@@ -61,8 +59,7 @@ public class GUI extends javax.swing.JFrame implements Observer {
         } catch (AWTException e) {
             System.err.println("Can't create robot.\n" + e.getMessage());
         }
-        keyMapManager = new KeyMapManager();
-        currentKeyMap = keyMapManager.getLayout("Default");
+        keyConfigurator = new KeyConfigurator(this);
     }
 
     /**
@@ -94,6 +91,7 @@ public class GUI extends javax.swing.JFrame implements Observer {
         jPanel1.setMaximumSize(new java.awt.Dimension(1920, 1080));
 
         buttonSetKeys.setText("Set keys");
+        buttonSetKeys.setFocusPainted(false);
         buttonSetKeys.setFocusable(false);
         buttonSetKeys.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -102,6 +100,7 @@ public class GUI extends javax.swing.JFrame implements Observer {
         });
 
         buttonConnect.setText("Connect");
+        buttonConnect.setFocusPainted(false);
         buttonConnect.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 buttonConnectActionPerformed(evt);
@@ -109,6 +108,7 @@ public class GUI extends javax.swing.JFrame implements Observer {
         });
 
         buttonStart.setText("Start");
+        buttonStart.setFocusPainted(false);
         buttonStart.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 buttonStartActionPerformed(evt);
@@ -116,8 +116,10 @@ public class GUI extends javax.swing.JFrame implements Observer {
         });
 
         tButtonPad1.setText("Gamepad 1");
+        tButtonPad1.setFocusPainted(false);
 
         tButtonPad2.setText("Gamepad 2");
+        tButtonPad2.setFocusPainted(false);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -169,7 +171,6 @@ public class GUI extends javax.swing.JFrame implements Observer {
     }// </editor-fold>//GEN-END:initComponents
 
     private void buttonSetKeysActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSetKeysActionPerformed
-        KeyConfigurator keyConfigurator = new KeyConfigurator(this, currentKeyMap);
         keyConfigurator.setVisible(true);
     }//GEN-LAST:event_buttonSetKeysActionPerformed
 
@@ -235,22 +236,22 @@ public class GUI extends javax.swing.JFrame implements Observer {
 
                         for (i = 0; i < CODE.length; i++) {
                             if ((code_1 & CODE[i]) == CODE[i]) {
-                                robot.keyPress(currentKeyMap[i][0]);
-                                System.out.println("Joy 1: press-" + currentKeyMap[i][0]);
+                                robot.keyPress(keyConfigurator.getMap().getKey(i, 0));
+                                System.out.println("Joy 1: press-" + keyConfigurator.getMap().getKey(i, 0));
                                 ((Display) jPanel1).press(0, i);
                             } else if (((Display) jPanel1).isPressed(0, i)) {
-                                robot.keyRelease(currentKeyMap[i][0]);
-                                System.out.println("Joy 1: release-" + currentKeyMap[i][0]);
+                                robot.keyRelease(keyConfigurator.getMap().getKey(i, 0));
+                                System.out.println("Joy 1: release-" + keyConfigurator.getMap().getKey(i, 0));
                                 ((Display) jPanel1).release(0, i);
                             }
 
                             if ((code_2 & CODE[i]) == CODE[i]) {
-                                robot.keyPress(currentKeyMap[i][1]);
-                                System.out.println("Joy 2: press-" + currentKeyMap[i][1]);
+                                robot.keyPress(keyConfigurator.getMap().getKey(i, 1));
+                                System.out.println("Joy 2: press-" + keyConfigurator.getMap().getKey(i, 1));
                                 ((Display) jPanel1).press(1, i);
                             } else if (((Display) jPanel1).isPressed(1, i)) {
-                                robot.keyRelease(currentKeyMap[i][1]);
-                                System.out.println("Joy 2: release-" + currentKeyMap[i][1]);
+                                robot.keyRelease(keyConfigurator.getMap().getKey(i, 1));
+                                System.out.println("Joy 2: release-" + keyConfigurator.getMap().getKey(i, 1));
                                 ((Display) jPanel1).release(1, i);
                             }
                         }

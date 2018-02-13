@@ -93,6 +93,7 @@
         <Component class="javax.swing.JButton" name="buttonSetKeys">
           <Properties>
             <Property name="text" type="java.lang.String" value="Set keys"/>
+            <Property name="focusPainted" type="boolean" value="false"/>
             <Property name="focusable" type="boolean" value="false"/>
           </Properties>
           <Events>
@@ -102,6 +103,7 @@
         <Component class="javax.swing.JButton" name="buttonConnect">
           <Properties>
             <Property name="text" type="java.lang.String" value="Connect"/>
+            <Property name="focusPainted" type="boolean" value="false"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="buttonConnectActionPerformed"/>
@@ -110,6 +112,7 @@
         <Component class="javax.swing.JButton" name="buttonStart">
           <Properties>
             <Property name="text" type="java.lang.String" value="Start"/>
+            <Property name="focusPainted" type="boolean" value="false"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="buttonStartActionPerformed"/>
@@ -118,11 +121,13 @@
         <Component class="javax.swing.JToggleButton" name="tButtonPad1">
           <Properties>
             <Property name="text" type="java.lang.String" value="Gamepad 1"/>
+            <Property name="focusPainted" type="boolean" value="false"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JToggleButton" name="tButtonPad2">
           <Properties>
             <Property name="text" type="java.lang.String" value="Gamepad 2"/>
+            <Property name="focusPainted" type="boolean" value="false"/>
           </Properties>
         </Component>
       </SubComponents>

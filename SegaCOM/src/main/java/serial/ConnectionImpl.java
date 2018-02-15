@@ -63,6 +63,7 @@ public class ConnectionImpl extends Connection {
     public void close() {
         try {
             if (serialPort.isOpened()) {
+                serialPort.writeString(RQ_STOP);
                 serialPort.closePort();
             }
         } catch (SerialPortException ex) {

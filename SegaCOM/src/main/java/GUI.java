@@ -47,8 +47,8 @@ public class GUI extends javax.swing.JFrame implements Observer {
         System.out.println("Available ports: " + Arrays.toString(SerialPortList.getPortNames("/dev/")));
         String portName = "/dev/ttyUSB0";
         ((Display) jPanel1).log("Port name: " + portName);
-        //connection = new ConnectionImpl(portName);
-        connection = new ConnectionFake(portName);
+        connection = new ConnectionImpl(portName);
+//        connection = new ConnectionFake(portName);
 
 //        portFinder = new PortFinder();
 //        portFinder.addObserver(this);
@@ -171,7 +171,7 @@ public class GUI extends javax.swing.JFrame implements Observer {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -189,6 +189,7 @@ public class GUI extends javax.swing.JFrame implements Observer {
     }//GEN-LAST:event_buttonSetKeysActionPerformed
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        ((Display) jPanel1).log("Exit...");
         System.out.println("Exit...");
         if (connection != null) {
             connection.close();
@@ -203,6 +204,9 @@ public class GUI extends javax.swing.JFrame implements Observer {
             if (!connection.isOpen()) {
                 connection.addObserver(this);
                 connection.open();
+                ((Display) jPanel1).log("Connected");
+            } else {
+                ((Display) jPanel1).log("Already connected");
             }
             //connection.send(Connection.RQ_STAT);
         } catch (SerialPortException ex) {
@@ -223,7 +227,7 @@ public class GUI extends javax.swing.JFrame implements Observer {
     }//GEN-LAST:event_tButtonPad1ActionPerformed
 
     private void tButtonPad2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tButtonPad2ActionPerformed
-                if (tButtonPad1.isSelected()) {
+        if (tButtonPad2.isSelected()) {
             ((Display) jPanel1).log("Gamepad #2 enabled");
         } else {
             ((Display) jPanel1).log("Gamepad #2 disabled");
@@ -233,14 +237,14 @@ public class GUI extends javax.swing.JFrame implements Observer {
     @Override
     public void update(Observable o, Object arg) {
         String className = o.getClass().getName();
-        if (className.equals(ConnectionFake.class.getName())) {
+        if (className.equals(ConnectionImpl.class.getName())) {
 
             if (arg.equals(Connection.RPL_STAT)) {
 //            connection = (Connection) arg;
 //            connection.addObserver(this);
-                ((Display) jPanel1).log("Gamepad connected! Response: " + arg);
+                ((Display) jPanel1).log("Gamepad connected");
             } else if (arg.equals(Connection.RPL_START)) {
-                ((Display) jPanel1).log("Handle started! Response: " + arg);
+                ((Display) jPanel1).log("Handle started");
             } else {
                 //System.out.print("Button data! Response: " + arg);
 

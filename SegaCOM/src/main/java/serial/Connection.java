@@ -25,6 +25,7 @@ public abstract class Connection extends Observable {
      */
     public static final String RQ_STAT = "222";
     public static final String RQ_START = "444";
+    public static final String RQ_STOP = "666";
 
     public static final String RPL_STAT = "sega_ready\r\n";
     public static final String RPL_START = "started\r\n";

@@ -46,6 +46,7 @@ public class GUI extends javax.swing.JFrame implements Observer {
 
         System.out.println("Available ports: " + Arrays.toString(SerialPortList.getPortNames("/dev/")));
         String portName = "/dev/ttyUSB0";
+        ((Display) jPanel1).log("Port name: " + portName);
         //connection = new ConnectionImpl(portName);
         connection = new ConnectionFake(portName);
 
@@ -53,7 +54,6 @@ public class GUI extends javax.swing.JFrame implements Observer {
 //        portFinder.addObserver(this);
 //        Thread scannerThread = new Thread(portFinder);
 //        scannerThread.start();
-
         try {
             robot = new Robot();
         } catch (AWTException e) {
@@ -117,9 +117,19 @@ public class GUI extends javax.swing.JFrame implements Observer {
 
         tButtonPad1.setText("Gamepad 1");
         tButtonPad1.setFocusPainted(false);
+        tButtonPad1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                tButtonPad1ActionPerformed(evt);
+            }
+        });
 
         tButtonPad2.setText("Gamepad 2");
         tButtonPad2.setFocusPainted(false);
+        tButtonPad2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                tButtonPad2ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -127,15 +137,19 @@ public class GUI extends javax.swing.JFrame implements Observer {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(buttonStart, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(buttonConnect, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(buttonSetKeys, javax.swing.GroupLayout.DEFAULT_SIZE, 108, Short.MAX_VALUE))
-                .addGap(50, 50, 50)
-                .addComponent(tButtonPad1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 392, Short.MAX_VALUE)
-                .addComponent(tButtonPad2)
-                .addGap(127, 127, 127))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(buttonStart, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(buttonConnect, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(buttonSetKeys, javax.swing.GroupLayout.DEFAULT_SIZE, 108, Short.MAX_VALUE))
+                        .addContainerGap(787, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addGap(171, 171, 171)
+                        .addComponent(tButtonPad1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(tButtonPad2)
+                        .addGap(171, 171, 171))))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -146,11 +160,11 @@ public class GUI extends javax.swing.JFrame implements Observer {
                 .addComponent(buttonConnect)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(buttonStart)
-                .addGap(43, 43, 43)
+                .addGap(37, 37, 37)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(tButtonPad1)
                     .addComponent(tButtonPad2))
-                .addContainerGap(232, Short.MAX_VALUE))
+                .addContainerGap(238, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -200,6 +214,22 @@ public class GUI extends javax.swing.JFrame implements Observer {
         connection.send(ConnectionImpl.RQ_START);
     }//GEN-LAST:event_buttonStartActionPerformed
 
+    private void tButtonPad1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tButtonPad1ActionPerformed
+        if (tButtonPad1.isSelected()) {
+            ((Display) jPanel1).log("Gamepad #1 enabled");
+        } else {
+            ((Display) jPanel1).log("Gamepad #1 disabled");
+        }
+    }//GEN-LAST:event_tButtonPad1ActionPerformed
+
+    private void tButtonPad2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tButtonPad2ActionPerformed
+                if (tButtonPad1.isSelected()) {
+            ((Display) jPanel1).log("Gamepad #2 enabled");
+        } else {
+            ((Display) jPanel1).log("Gamepad #2 disabled");
+        }
+    }//GEN-LAST:event_tButtonPad2ActionPerformed
+
     @Override
     public void update(Observable o, Object arg) {
         String className = o.getClass().getName();
@@ -208,9 +238,9 @@ public class GUI extends javax.swing.JFrame implements Observer {
             if (arg.equals(Connection.RPL_STAT)) {
 //            connection = (Connection) arg;
 //            connection.addObserver(this);
-                System.out.print("Gamepad connected! Response: " + arg);
+                ((Display) jPanel1).log("Gamepad connected! Response: " + arg);
             } else if (arg.equals(Connection.RPL_START)) {
-                System.out.print("Handle started! Response: " + arg);
+                ((Display) jPanel1).log("Handle started! Response: " + arg);
             } else {
                 //System.out.print("Button data! Response: " + arg);
 
@@ -227,7 +257,7 @@ public class GUI extends javax.swing.JFrame implements Observer {
                         } else {
                             code_1 = 0;
                         }
-                        
+
                         if (tButtonPad2.isSelected()) {
                             code_2 = raw[1].isEmpty() ? 0 : Integer.parseInt(raw[1].trim());
                         } else {
@@ -238,20 +268,24 @@ public class GUI extends javax.swing.JFrame implements Observer {
                             if ((code_1 & CODE[i]) == CODE[i]) {
                                 robot.keyPress(keyConfigurator.getMap().getKey(i, 0));
                                 System.out.println("Joy 1: press-" + keyConfigurator.getMap().getKey(i, 0));
+//                                ((Display) jPanel1).log("Joy 1: press-" + keyConfigurator.getMap().getKey(i, 0));
                                 ((Display) jPanel1).press(0, i);
                             } else if (((Display) jPanel1).isPressed(0, i)) {
                                 robot.keyRelease(keyConfigurator.getMap().getKey(i, 0));
                                 System.out.println("Joy 1: release-" + keyConfigurator.getMap().getKey(i, 0));
+//                                ((Display) jPanel1).log("Joy 1: press-" + keyConfigurator.getMap().getKey(i, 0));
                                 ((Display) jPanel1).release(0, i);
                             }
 
                             if ((code_2 & CODE[i]) == CODE[i]) {
                                 robot.keyPress(keyConfigurator.getMap().getKey(i, 1));
                                 System.out.println("Joy 2: press-" + keyConfigurator.getMap().getKey(i, 1));
+//                                ((Display) jPanel1).log("Joy 2: press-" + keyConfigurator.getMap().getKey(i, 1));
                                 ((Display) jPanel1).press(1, i);
                             } else if (((Display) jPanel1).isPressed(1, i)) {
                                 robot.keyRelease(keyConfigurator.getMap().getKey(i, 1));
                                 System.out.println("Joy 2: release-" + keyConfigurator.getMap().getKey(i, 1));
+//                                ((Display) jPanel1).log("Joy 2: press-" + keyConfigurator.getMap().getKey(i, 1));
                                 ((Display) jPanel1).release(1, i);
                             }
                         }
@@ -284,9 +318,8 @@ public class GUI extends javax.swing.JFrame implements Observer {
             java.util.logging.Logger.getLogger(GUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
-        
-        //</editor-fold>
 
+        //</editor-fold>
 //        /* Create and display the form */
         java.awt.EventQueue.invokeLater(() -> {
             new GUI().setVisible(true);

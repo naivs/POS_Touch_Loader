@@ -18,6 +18,7 @@ import javax.swing.DefaultComboBoxModel;
  */
 public class KeyConfigurator extends javax.swing.JDialog {
 
+    private static KeyConfiguratorTableModel tableModel;
     private static DefaultComboBoxModel comboBoxModel;
 
     private Map<String, KeyMap> layouts;
@@ -48,8 +49,15 @@ public class KeyConfigurator extends javax.swing.JDialog {
             save();
         }
 
+        tableModel = new KeyConfiguratorTableModel(layouts.get(currentMap));
         comboBoxModel = new DefaultComboBoxModel();
         layouts.keySet().stream().sorted().forEach((s) -> comboBoxModel.addElement(s));
+
+//        tableModel.addTableModelListener((e) -> {
+//            System.out.println(String.format("Data in table model was changed.\n "
+//                    + "Column: %s Row: %s", e.getColumn(), e.getFirstRow()));
+//        });
+
         initComponents();
     }
 
@@ -85,7 +93,7 @@ public class KeyConfigurator extends javax.swing.JDialog {
         setTitle("Key layouts");
         setResizable(false);
 
-        jTable1.setModel(new KeyConfiguratorTableModel(layouts.get(currentMap)));
+        jTable1.setModel(tableModel);
         jTable1.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
         jTable1.setCursor(new java.awt.Cursor(java.awt.Cursor.CROSSHAIR_CURSOR));
         jTable1.setRowSelectionAllowed(false);
@@ -168,7 +176,7 @@ public class KeyConfigurator extends javax.swing.JDialog {
 
         Arrays.asList(jTable1.getKeyListeners()).forEach((l) -> jTable1.removeKeyListener(l));
         messageLabel.setVisible(false);
-        
+
         if (xSelected > 0) {
             messageLabel.setVisible(true);
             jTable1.addKeyListener(new KeyAdapter() {
@@ -177,7 +185,8 @@ public class KeyConfigurator extends javax.swing.JDialog {
 //                    System.out.println("Value: " + model.getValueAt(ySelected, xSelected));
 //                    System.out.println("Pressed: " + KeyEvent.getKeyText(e.getKeyCode()));
                     layouts.get(currentMap).setKey(ySelected, xSelected - 1, e.getKeyCode());
-                    jTable1.setModel(new KeyConfiguratorTableModel(layouts.get(currentMap)));
+                    tableModel.setValues(layouts.get(currentMap));
+                    //jTable1.setModel(new KeyConfiguratorTableModel(layouts.get(currentMap)));
                     messageLabel.setVisible(false);
                 }
 
@@ -192,7 +201,8 @@ public class KeyConfigurator extends javax.swing.JDialog {
     private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
         if (!currentMap.equals(jComboBox1.getSelectedItem().toString())) {
             currentMap = jComboBox1.getSelectedItem().toString();
-            jTable1.setModel(new KeyConfiguratorTableModel(layouts.get(currentMap)));
+//            jTable1.setModel(new KeyConfiguratorTableModel(layouts.get(currentMap)));
+            tableModel.setValues(layouts.get(currentMap));
             save();
         }
     }//GEN-LAST:event_jComboBox1ActionPerformed

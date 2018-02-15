@@ -19,6 +19,7 @@ import javax.swing.DefaultComboBoxModel;
 public class KeyConfigurator extends javax.swing.JDialog {
 
     private static KeyConfiguratorTableModel tableModel;
+    private static TableSelectionModel tableSelectionModel;
     private static DefaultComboBoxModel comboBoxModel;
 
     private Map<String, KeyMap> layouts;
@@ -50,6 +51,7 @@ public class KeyConfigurator extends javax.swing.JDialog {
         }
 
         tableModel = new KeyConfiguratorTableModel(layouts.get(currentMap));
+        tableSelectionModel = new TableSelectionModel();
         comboBoxModel = new DefaultComboBoxModel();
         layouts.keySet().stream().sorted().forEach((s) -> comboBoxModel.addElement(s));
 
@@ -97,7 +99,7 @@ public class KeyConfigurator extends javax.swing.JDialog {
         jTable1.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
         jTable1.setCursor(new java.awt.Cursor(java.awt.Cursor.CROSSHAIR_CURSOR));
         jTable1.setRowSelectionAllowed(false);
-        jTable1.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        jTable1.setSelectionModel(tableSelectionModel);
         jTable1.setSurrendersFocusOnKeystroke(true);
         jTable1.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {

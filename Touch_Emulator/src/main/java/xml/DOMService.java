@@ -200,7 +200,7 @@ public class DOMService implements SerializationService {
                             Element productElement = (Element) productList.item(e);
                             Product product = new Product(
                                     productElement.getAttribute(Attributes.name.name()),
-                                    Integer.parseInt(productElement.getAttribute(Attributes.plu.name())),
+                                    Long.parseLong(productElement.getAttribute(Attributes.plu.name())),
                                     Integer.parseInt(productElement.getAttribute(Attributes.number.name()))
                             );
                             subgroup.addComponent(product);

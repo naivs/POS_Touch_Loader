@@ -117,7 +117,7 @@ public class POISerializer {
         }
     }
     
-    public void createProductPlus(int day, int group, int subgroup, int[] productPlu) {
+    public void createProductPlus(int day, int group, int subgroup, long[] productPlu) {
         Sheet sheet = workbook.getSheetAt(day);
         int dx = 4;
         int dy = 20;

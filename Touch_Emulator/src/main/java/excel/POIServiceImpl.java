@@ -154,8 +154,8 @@ public class POIServiceImpl implements XLSXService {
     }
 
     @Override
-    public int[] getProductPlu(int day, int group, int subgroup) {
-        int[] plus = new int[20];
+    public long[] getProductPlu(int day, int group, int subgroup) {
+        long[] plus = new long[20];
         for (int i = 0; i < plus.length; i++) {
             plus[i] = readProductPlu(day, group, subgroup, i);
         }
@@ -185,7 +185,7 @@ public class POIServiceImpl implements XLSXService {
     }
 
     @Override
-    public int readProductPlu(int day, int group, int subgroup, int product) {
+    public long readProductPlu(int day, int group, int subgroup, int product) {
         try {
             int dx = 4;
             int dy = 20;
@@ -193,9 +193,9 @@ public class POIServiceImpl implements XLSXService {
             Cell cell = workbook.getSheetAt(day).getRow(yProdPlu + subgroup * dy + product).getCell(xProdPlu + group * dx);
             if (cell == null || cell.getCellTypeEnum() != CellType.NUMERIC
                     || cell.getCellTypeEnum() == CellType.BLANK) {
-                return 0;
+                return 0L;
             } else {
-                return (int) cell.getNumericCellValue();
+                return (long) cell.getNumericCellValue();
             }
         } catch (Exception ex) {
             System.err.println(

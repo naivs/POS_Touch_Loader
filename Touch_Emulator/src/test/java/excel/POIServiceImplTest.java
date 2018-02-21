@@ -291,7 +291,7 @@ public class POIServiceImplTest {
     @SuppressWarnings("CallToPrintStackTrace")
     public void testGetProductPlu() {
         System.out.println("getProductPlu");
-        int[] productPlus = dispenser.getProductPlus();
+        long[] productPlus = dispenser.getProductPlus();
 
         try {
             poiSerializer.createProductPlus(day1, group1, subGroup1, productPlus);

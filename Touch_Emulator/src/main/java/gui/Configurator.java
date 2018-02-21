@@ -350,7 +350,7 @@ public class Configurator extends javax.swing.JFrame implements Observer {
 
                                                     //product creation
                                                     String[] productNames = xlsxService.getProductNames(a, b, c);
-                                                    int[] productPlu = xlsxService.getProductPlu(a, b, c);
+                                                    long[] productPlu = xlsxService.getProductPlu(a, b, c);
                                                     for (int d = 0; d < productNames.length; d++) {
                                                         //if product is no empty
                                                         if (!xlsxService.isProductEmpty(a, b, c, d)) {

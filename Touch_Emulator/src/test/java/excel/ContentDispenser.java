@@ -139,8 +139,8 @@ public class ContentDispenser {
         return names;
     }
 
-    public int[] getProductPlus() {
-        int[] plus = new int[20];
+    public long[] getProductPlus() {
+        long[] plus = new long[20];
         for (int i = 0; i < plus.length; i++) {
             plus[i] = random.nextInt(999999);
         }

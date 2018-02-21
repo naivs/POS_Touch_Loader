@@ -23,18 +23,18 @@ package data;
  */
 public class Product extends Component {
 
-    private int plu;
+    private long plu;
 
-    public Product(String name, int plu, int number) {
+    public Product(String name, long plu, int number) {
         super(name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase(), number);
         this.plu = plu;
     }
 
-    public int getPlu() {
+    public long getPlu() {
         return plu;
     }
 
-    public void setPlu(int plu) {
+    public void setPlu(long plu) {
         this.plu = plu;
     }
 }

@@ -82,7 +82,8 @@ public class DOMService implements SerializationService {
             Department department = (Department) container;
             departmentElement.setAttribute(Attributes.name.name(), department.getName());
             departmentElement.setAttribute(Attributes.terminals.name(), department.getTerminalsAsString());
-            departmentElement.setAttribute(Attributes.index.name(), String.valueOf(department.getIndex()));
+            departmentElement.setAttribute(Attributes.index.name(), 
+                    department.getIndex() < 10 ? "00" + String.valueOf(department.getIndex()) : String.valueOf(department.getIndex()));
             departmentElement.setAttribute(Attributes.modified.name(), department.getModified());
             departmentElement.setAttribute(Attributes.number.name(), String.valueOf(department.getNumber()));
 
@@ -111,7 +112,8 @@ public class DOMService implements SerializationService {
 
                         Subgroup subgroup = (Subgroup) group.getComponent(d);
                         subgroupElement.setAttribute(Attributes.name.name(), subgroup.getName());
-                        subgroupElement.setAttribute(Attributes.index.name(), String.valueOf(subgroup.getIndex()));
+                        subgroupElement.setAttribute(Attributes.index.name(), 
+                                subgroup.getIndex() < 10 ? "00" + String.valueOf(subgroup.getIndex()) : String.valueOf(subgroup.getIndex()));
                         subgroupElement.setAttribute(Attributes.number.name(), String.valueOf(subgroup.getNumber()));
 
                         //products

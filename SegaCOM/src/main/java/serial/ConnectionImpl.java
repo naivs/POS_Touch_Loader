@@ -26,7 +26,7 @@ public class ConnectionImpl extends Connection {
                 SerialPort.STOPBITS_1,
                 SerialPort.PARITY_NONE);
         //Назначаем слушателя события
-        serialPort.addEventListener((SerialPortEvent serialPortEvent) -> {
+        serialPort.addEventListener(event -> {
             String data;
             try {
                 if ((data = serialPort.readString()) != null) {

@@ -11,7 +11,7 @@ import javax.swing.JPanel;
  * @author ivan
  */
 public class Display extends JPanel {
-    
+
     private static final String GROUND = "img/back.gif";
     private static final String CAGE = "img/cage.gif";
     private static final String L_GAMEPAD = "img/gamepad_l.gif";
@@ -45,27 +45,28 @@ public class Display extends JPanel {
     }};
     private Graphics graphic;
     private final boolean[][] keyStates;
-    private final LogPull logPull;
-    
+    private final LogPul logPul;
+
     public Display() {
         keyStates = new boolean[2][12];
-        logPull = new LogPull(7);
+        logPul = new LogPul(7);
     }
-    
+
     public void press(int pad, int key) {
         keyStates[pad][key] = true;
     }
-    
+
     public void release(int pad, int key) {
         keyStates[pad][key] = false;
     }
-    
+
     public boolean isPressed(int pad, int key) {
         return keyStates[pad][key];
     }
-    
+
     public void log(String message) {
-        logPull.addLine(message);
+        logPul.addLine(message);
+        updateUI();
     }
     
     @Override
@@ -77,54 +78,54 @@ public class Display extends JPanel {
         graphic.drawImage(new ImageIcon(L_GAMEPAD).getImage(), 0, 0, this);
         graphic.drawImage(new ImageIcon(R_GAMEPAD).getImage(), 0, 0, this);
         graphic.drawImage(new ImageIcon(CAGE).getImage(), 0, 0, this);
-        
+
         for(int i = 0; i < 2; i++) {
             for(int j = 0; j < 12; j++) {
                 if(keyStates[i][j])
                     graphic.drawImage(new ImageIcon(BUTTONS[i][j]).getImage(), 0, 0, this);
             }
         }
-        
+
         graphic.setColor(Color.GREEN);
         Font font = new Font("Arial", Font.PLAIN, 12);
         graphic.setFont(font);
         
         int xPos = 350, yPos = 40;
-        for (int i = 0; i < logPull.size(); i++) {
-            graphic.drawString(logPull.get(i), xPos, yPos + (graphic.getFontMetrics().getHeight() * i + 4));
+        for (int i = 0; i < logPul.size(); i++) {
+            graphic.drawString(logPul.get(i), xPos, yPos + (graphic.getFontMetrics().getHeight() * i + 4));
         }
     }
-    
-    private class LogPull {
-        
-        private final List<String> logPull;
+
+    private class LogPul {
+
+        private final List<String> logPul;
         private final int size;
-        
-        public LogPull(int size) {
-            logPull = new ArrayList<>(size);
+
+        public LogPul(int size) {
+            logPul = new ArrayList<>(size);
             this.size = size;
         }
-        
+
         public void addLine(String line) {
-            if (logPull.size() == size) {
-                logPull.remove(0);
+            if (logPul.size() == size) {
+                logPul.remove(0);
             }
-            logPull.add(line);
+            logPul.add(line);
         }
-        
+
         public String get(int index) {
-            return logPull.get(index);
+            return logPul.get(index);
         }
-        
+
         @Override
         public String toString() {
             String out = "";
-            out = logPull.stream().map((s) -> s + "\n").reduce(out, String::concat);
+            out = logPul.stream().map((s) -> s + "\n").reduce(out, String::concat);
             return out;
         }
-        
+
         public int size() {
-            return logPull.size();
+            return logPul.size();
         }
     }
 }
